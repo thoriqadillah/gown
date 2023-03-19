@@ -80,6 +80,7 @@ func (w *worker) Stop() {
 	w.stop.Do(func() {
 		log.Println("Stopping worker")
 		close(w.quit)
+		close(w.jobs)
 	})
 }
 
