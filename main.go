@@ -1,31 +1,43 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"sync"
 
-	"github.com/thoriqadillah/gown/http/api"
-	"github.com/thoriqadillah/gown/http/service"
-	"github.com/thoriqadillah/gown/worker"
+	"github.com/thoriqadillah/gown/http"
+	pool "github.com/thoriqadillah/gown/worker"
 )
 
 func main() {
-	worker, err := worker.New(8, 1)
+	const TOTAL_WORKER = 8
+	const TOTAL_POOL = 1
+
+	worker, err := pool.New(TOTAL_WORKER, TOTAL_POOL)
 	if err != nil {
-		panic(err)
+		log.Fatal("Error creating worker")
 	}
 	worker.Start()
 	defer worker.Stop()
 
-	url := "https://data.gov.sg/api/action/datastore_search?resource_id=eb8b932c-503c-41e7-b513-114cffbe2338"
-	years := []string{"2013", "2012", "2011", "2010", "2009", "2008", "2007", "2001"}
-	api := api.New(url)
-
 	var wg sync.WaitGroup
-	for i := range years {
-		wg.Add(1)
-		job := service.NewGraduation(api, years[i], &wg)
-		worker.Add(job)
+
+	response, err := http.Fetch("https://get.jenkins.io/war-stable/2.332.3/jenkins.war")
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	downloads := make([]pool.Job, response.Parts())
+	for part := range downloads {
+		downloads[part] = http.Download(response, part, &wg)
+	}
+
+	for i := 0; i < response.Parts(); i++ {
+		wg.Add(1)
+		worker.Add(downloads[i])
+	}
+
+	fmt.Println(response)
 
 	wg.Wait()
 }
