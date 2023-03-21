@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"sync"
 
@@ -27,17 +26,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	downloads := make([]pool.Job, response.Parts())
-	for part := range downloads {
-		downloads[part] = http.Download(response, part, &wg)
+	downloadjob := make([]pool.Job, response.Parts())
+	for part := range downloadjob {
+		downloadjob[part] = http.Download(response, part, &wg)
 	}
 
-	for i := 0; i < response.Parts(); i++ {
+	for _, job := range downloadjob {
 		wg.Add(1)
-		worker.Add(downloads[i])
+		worker.Add(job)
 	}
-
-	fmt.Println(response)
 
 	wg.Wait()
 }

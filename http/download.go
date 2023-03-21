@@ -6,7 +6,7 @@ import (
 	"github.com/thoriqadillah/gown/worker"
 )
 
-type Partition struct {
+type download struct {
 	wg *sync.WaitGroup
 	chunk
 }
@@ -18,9 +18,10 @@ type chunk struct {
 
 func Download(file *response, index int, wg *sync.WaitGroup) worker.Job {
 	// get the part size that we want to download
-	partsize := file.size / int64(file.totalpart)
+	totalpart := int64(file.totalpart)
+	partsize := file.size / totalpart
 	if index == file.totalpart {
-		partsize = file.size - (7 * file.size / 8)
+		partsize = file.size - ((totalpart - 1) * file.size / totalpart) // size of the last index of the chunk is the remaining bytes
 	}
 
 	chuck := chunk{
@@ -28,18 +29,20 @@ func Download(file *response, index int, wg *sync.WaitGroup) worker.Job {
 		data:  make([]byte, partsize),
 	}
 
-	return &Partition{
+	return &download{
 		wg:    wg,
 		chunk: chuck,
 	}
 }
 
-func (d *Partition) Execute() error {
+func (d *download) Execute() error {
 	defer d.wg.Done()
+
+	// TODO: implement ranged download
 
 	return nil
 }
 
-func (d *Partition) HandleError(err error) {
-
+func (d *download) HandleError(err error) {
+	// TODO: handle error
 }
