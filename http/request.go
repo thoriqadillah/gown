@@ -7,21 +7,28 @@ import (
 )
 
 type response struct {
-	url       string
-	filename  string
-	size      int64
-	ranged    bool
-	totalpart int
+	url         string
+	filename    string
+	size        int64
+	contentType string
+	cansplit    bool
+	totalpart   int
 }
 
-func Fetch(url string) (*response, error) {
+func Fetch(url string, splitnum int) (*response, error) {
 	// get the redirected url
 	res, err := http.Head(url)
 	if err != nil {
 		log.Printf("Error fetching url %v", err)
 		return nil, err
 	}
-	url = res.Request.URL.String()
+
+	newurl := res.Request.URL.String()
+	if url != newurl {
+		log.Printf("Following link to %s", newurl)
+	}
+
+	url = newurl
 
 	// get content-length (size in bytes) of a file
 	res, err = http.Head(url)
@@ -29,27 +36,33 @@ func Fetch(url string) (*response, error) {
 		log.Printf("Error fetching file url %v", err)
 		return nil, err
 	}
+
 	size := res.ContentLength
 
-	// get file name
+	contentType := res.Header.Get("Content-Type")
+
 	split := strings.Split(url, "/")
 	filename := split[len(split)-1]
 
-	// check if the file support ranged download
-	ranged := res.Header.Get("Accept-Ranges") == "bytes"
+	// check if the file support cansplit download
+	cansplit := res.Header.Get("Accept-Ranges") == "bytes"
+	if !cansplit {
+		log.Println("Does not support split download. Downloading the file entirely")
+	}
 
-	// total part is 8 if ranged is true
+	// total part is 8 if cansplit is true
 	totalpart := 1
-	if ranged {
-		totalpart = 8
+	if cansplit {
+		totalpart = splitnum
 	}
 
 	response := &response{
-		url:       url,
-		filename:  filename,
-		size:      size,
-		ranged:    ranged,
-		totalpart: totalpart,
+		url:         url,
+		filename:    filename,
+		size:        size,
+		contentType: contentType,
+		cansplit:    cansplit,
+		totalpart:   totalpart,
 	}
 
 	return response, nil
@@ -57,4 +70,19 @@ func Fetch(url string) (*response, error) {
 
 func (r *response) Parts() int {
 	return r.totalpart
+}
+
+func (r *response) Size() int64 {
+	return r.size
+}
+
+func (r *response) Filename() string {
+	return r.filename
+}
+
+func (r *response) Type() string {
+	split := strings.Split(r.contentType, "/")
+	contentType := split[len(split)-1]
+
+	return "." + contentType
 }
