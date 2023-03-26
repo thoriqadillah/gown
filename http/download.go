@@ -54,7 +54,6 @@ func Download(res *response, index int, wg *sync.WaitGroup, callback func(data [
 }
 
 func (d *Partition) Execute() error {
-	start := time.Now()
 	defer d.wg.Done()
 
 	httpclient := &http.Client{}
@@ -72,6 +71,7 @@ func (d *Partition) Execute() error {
 		return err
 	}
 
+	start := time.Now()
 	req.Header.Add("Range", part)
 	res, err := httpclient.Do(req)
 	if err != nil {
@@ -79,6 +79,11 @@ func (d *Partition) Execute() error {
 	}
 
 	defer res.Body.Close()
+
+	elapsed := time.Since(start)
+	log.Printf("Downloading done for worker with id %d in %v s\n", d.index, elapsed.Seconds())
+
+	log.Printf("Reading from downloaded part %d", d.index+1)
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
@@ -86,8 +91,9 @@ func (d *Partition) Execute() error {
 
 	// callback to combine the file
 	d.callback(data, d.index)
-	elapsed := time.Since(start)
-	fmt.Printf("Worker with id %d done in %v s\n", d.index, elapsed.Seconds())
+
+	elapsed = time.Since(start)
+	log.Printf("Saving the response done for worker with id %d in %v s\n", d.index, elapsed.Seconds())
 	return nil
 }
 

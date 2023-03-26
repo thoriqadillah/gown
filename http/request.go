@@ -25,7 +25,7 @@ func Fetch(url string, splitnum int) (*response, error) {
 
 	newurl := res.Request.URL.String()
 	if url != newurl {
-		log.Printf("Following link to %s", newurl)
+		log.Printf("Following link to %s", newurl[:20]+"...")
 	}
 
 	url = newurl

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -13,7 +12,7 @@ import (
 
 func main() {
 	start := time.Now()
-	const TOTAL_WORKER = 8
+	const TOTAL_WORKER = 1
 	const TOTAL_POOL = 2
 
 	worker, err := pool.New(TOTAL_WORKER, TOTAL_POOL)
@@ -38,8 +37,8 @@ func main() {
 
 	for _, job := range downloadjobs {
 		wg.Add(1)
-		// job.Execute()
-		worker.Add(job)
+		job.Execute()
+		// worker.Add(job)
 	}
 
 	wg.Wait()
@@ -50,5 +49,5 @@ func main() {
 	}
 
 	elapsed := time.Since(start)
-	fmt.Printf("Took %v s to download %s\n", elapsed.Seconds(), filename)
+	log.Printf("Took %v s to download %s\n", elapsed.Seconds(), filename)
 }
