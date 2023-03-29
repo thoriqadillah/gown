@@ -15,6 +15,7 @@ type Pool interface {
 type Job interface {
 	Execute() error
 	HandleError(error)
+	Struct() interface{}
 }
 
 type worker struct {

@@ -3,30 +3,30 @@ package fs
 import (
 	"os"
 	"path/filepath"
-	"sync"
+
+	"github.com/thoriqadillah/gown/config"
+	"github.com/thoriqadillah/gown/http"
 )
 
 type File struct {
-	Data  [][]byte
-	mutex *sync.Mutex
+	Data [][]byte
+	*config.Config
 }
 
-func New(size int64) *File {
+func New(size int64, config *config.Config) *File {
 	return &File{
-		Data:  make([][]byte, size),
-		mutex: &sync.Mutex{},
+		Data:   make([][]byte, size),
+		Config: config,
 	}
 }
 
-func (f *File) Combine(data []byte, index int) {
-	f.mutex.Lock()
-	defer f.mutex.Unlock()
-	f.Data[index] = data
+func (f *File) Combine(chunk *http.Chunk, index int) {
+	f.Data[index] = chunk.Data
 }
 
-func (f *File) Save(path string, name string) error {
-	if _, err := os.Stat(path); err != nil {
-		if err := os.MkdirAll(path, os.ModePerm); err != nil {
+func (f *File) Save(name string) error {
+	if _, err := os.Stat(f.SaveLocation); err != nil {
+		if err := os.MkdirAll(f.SaveLocation, os.ModePerm); err != nil {
 			return err
 		}
 	}
@@ -36,5 +36,5 @@ func (f *File) Save(path string, name string) error {
 		combined = append(combined, f.Data[i]...)
 	}
 
-	return os.WriteFile(filepath.Join(path, name), combined, os.ModePerm)
+	return os.WriteFile(filepath.Join(f.SaveLocation, name), combined, os.ModePerm)
 }

@@ -4,18 +4,21 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/thoriqadillah/gown/config"
 )
 
 type response struct {
 	url         string
-	filename    string
+	Filename    string
 	size        int64
 	contentType string
 	cansplit    bool
-	totalpart   int
+	partition   int
+	*config.Config
 }
 
-func Fetch(url string, splitnum int) (*response, error) {
+func Fetch(url string, conf ...*config.Config) (*response, error) {
 	// get the redirected url
 	res, err := http.Head(url)
 	if err != nil {
@@ -25,7 +28,7 @@ func Fetch(url string, splitnum int) (*response, error) {
 
 	newurl := res.Request.URL.String()
 	if url != newurl {
-		log.Printf("Following link to %s", newurl[:20]+"...")
+		log.Printf("Following link to %s", newurl[:len(newurl)/2]+"...")
 	}
 
 	url = newurl
@@ -40,49 +43,38 @@ func Fetch(url string, splitnum int) (*response, error) {
 	size := res.ContentLength
 
 	contentType := res.Header.Get("Content-Type")
+	split := strings.Split(contentType, "/")
+	contentType = "." + split[len(split)-1]
 
-	split := strings.Split(url, "/")
+	split = strings.Split(url, "/")
 	filename := split[len(split)-1]
+	if len(filename) > 256 {
+		filename = "file" + contentType
+	}
 
 	// check if the file support cansplit download
 	cansplit := res.Header.Get("Accept-Ranges") == "bytes"
-	if !cansplit {
-		log.Println("Does not support split download. Downloading the file entirely")
+
+	config := config.Default()
+	if conf != nil {
+		config = conf[0]
 	}
 
-	// total part is 8 if cansplit is true
-	totalpart := 1
-	if cansplit {
-		totalpart = splitnum
-	}
+	partition := size / config.Partsize
 
 	response := &response{
 		url:         url,
-		filename:    filename,
+		Filename:    filename,
 		size:        size,
 		contentType: contentType,
 		cansplit:    cansplit,
-		totalpart:   totalpart,
+		partition:   int(partition),
+		Config:      config,
 	}
 
 	return response, nil
 }
 
-func (r *response) Parts() int {
-	return r.totalpart
-}
-
 func (r *response) Size() int64 {
 	return r.size
-}
-
-func (r *response) Filename() string {
-	return r.filename
-}
-
-func (r *response) Type() string {
-	split := strings.Split(r.contentType, "/")
-	contentType := split[len(split)-1]
-
-	return "." + contentType
 }

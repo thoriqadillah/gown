@@ -80,6 +80,10 @@ func (t *testJob) Execute() error {
 	return nil
 }
 
+func (t *testJob) Struct() interface{} {
+	return *t
+}
+
 func (t *testJob) HandleError(e error) {
 	t.mFailure.Lock()
 	defer t.mFailure.Unlock()
