@@ -1,11 +1,4 @@
 <script lang="ts" setup>
-import { useTheme } from './stores/theme'
-import { Theme } from '../wailsjs/go/main/App'
-
-const store = useTheme()
-Theme().then(theme => {
-  store.setTheme(theme)
-})
 
 </script>
 
