@@ -1,11 +1,21 @@
 <script lang="ts" setup>
+import { useTheme } from 'vuetify/lib/framework.mjs';
+
+const theme = useTheme()
+function toggleTheme() {
+  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
+}
 
 </script>
 
 <template>
-  <div class="flex w-full justify-center h-screen items-center">
-    <p>Center</p>
-  </div>
+  <v-app>
+    <v-theme-provider :theme="theme.global.name.value">
+      <div class="tw-flex tw-w-full tw-justify-center tw-h-screen tw-items-center">
+        <v-btn color="primary" @click="toggleTheme()">Singo</v-btn>
+      </div>
+    </v-theme-provider>
+  </v-app>
 </template>
 
 <style>
