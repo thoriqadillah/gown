@@ -1,7 +1,7 @@
 package main
 
 import (
-	"changeme/backend/setting"
+	"changeme/gown/setting"
 	"context"
 	"fmt"
 )
