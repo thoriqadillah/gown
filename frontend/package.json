@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mdi/font": "^7.2.96",
     "@vueuse/core": "^9.13.0",
     "pinia": "^2.0.33",
     "vite-plugin-vuetify": "^1.0.2",
