@@ -2,12 +2,17 @@
 import NewDownload from './NewDownload.vue';
 import { useTheme } from 'vuetify/lib/framework.mjs';
 import { ref } from 'vue';
+import { useWindowSize } from '@vueuse/core';
+import { useDrawerStore } from '../store/drawer';
+
+const RAIL_MIN_WIDTH_RATIO = 1280
+const ratio = useWindowSize()
 
 const theme = useTheme()
 const themeIcon = ref(theme.global.current.value.dark ? 'mdi-white-balance-sunny' : 'mdi-weather-night')
 const themeTooltip = ref(theme.global.current.value.dark ? 'Light Mode' : 'Dark Mode')
 function toggleTheme() {
-  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
+  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'customDark'
   themeIcon.value = theme.global.current.value.dark ? 'mdi-white-balance-sunny' : 'mdi-weather-night'
   themeTooltip.value = theme.global.current.value.dark ? 'Light Mode' : 'Dark Mode'
 }
@@ -25,19 +30,21 @@ function search() {
 
   input.value?.blur()
 }
+const store = useDrawerStore()
 
 </script>
 
 <template>
   <nav class="tw-mx-5 tw-my-5 tw-flex tw-justify-between tw-gap-10 tw-items-center">
-    <div class="tw-flex tw-gap-5">
-      <div class="tw-w-28 dark:tw-bg-neutral-700 tw-text-center tw-rounded-sm"></div>
-
-      <v-tooltip text="Setting" location="bottom">
+    <div class="tw-flex tw-gap-5 tw-items-center">
+      <v-tooltip v-if="ratio.width.value < RAIL_MIN_WIDTH_RATIO" text="Menu" location="bottom">
         <template v-slot:activator="{ props }">
-          <v-btn v-bind="props" density="compact" icon="mdi-cog-outline" variant="flat"/>
+          <v-btn v-bind="props" density="compact" icon="mdi-dots-vertical" variant="flat" @click="store.openDrawer()"/>
         </template>
       </v-tooltip>
+
+      <p class="text-button">GOWN</p>
+
       <v-tooltip :text="themeTooltip" location="bottom">
         <template v-slot:activator="{ props }">
           <v-btn v-bind="props" density="compact" :icon="themeIcon" @click="toggleTheme" variant="flat"/>

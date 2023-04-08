@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useTheme } from 'vuetify/lib/framework.mjs';
 import Navigation from './components/Navigation.vue'
+import Main from './components/Main.vue';
 
 const theme = useTheme()
 
@@ -9,7 +10,9 @@ const theme = useTheme()
 <template>
   <v-app>
     <v-theme-provider :theme="theme.global.name.value">
-      <Navigation/>
+      <Main>
+        <Navigation/>
+      </Main>
     </v-theme-provider>
   </v-app>
 </template>

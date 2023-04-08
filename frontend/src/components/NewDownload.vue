@@ -49,11 +49,11 @@ function prev() {
     <v-card>
       <v-text-field v-if="onURL || !loaded" :loading="loading" color="primary" type="input" hint="Click enter to fetch the file data from the URL you want to download" class="tw-p-3" density="compact" variant="outlined" label="URL" append-inner-icon="mdi-link" single-line v-on:keyup.enter="fetch" ref="input"/>
       <div v-else-if="onFile || !loaded" class="tw-flex tw-items-center">
-        <div class="tw-basis-5/6">
+        <div class="tw-basis-10/12">
           <v-text-field color="primary" label="File name" append-inner-icon="mdi-file-document-edit" class="tw-px-3 tw-pt-3 -tw-mb-4" single-line v-on:keyup.enter="fetch" density="compact" variant="outlined" ref="input"/>
           <v-text-field color="primary" label="Save location" append-inner-icon="mdi-folder" type="input" hint="Save location" class="tw-p-3" single-line v-on:keyup.enter="fetch" density="compact" variant="outlined" ref="input"/>
         </div>
-        <div class="tw-basis-1/6 tw-text-center tw-pr-2">
+        <div class="tw-basis-2/12 tw-text-center tw-pr-2 -tw-mt-5">
           <v-icon icon="mdi-file"></v-icon>
           <p class="text-body-1 tw-mt-5">40 MB</p>
         </div>
