@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NewDownload from './NewDownload.vue';
 import { useTheme } from 'vuetify/lib/framework.mjs';
 import { ref } from 'vue';
 
@@ -13,7 +14,8 @@ function toggleTheme() {
 
 let loading = ref(false)
 let loaded = ref(false)
-function onClick() {
+let input = ref<HTMLInputElement>()
+function search() {
   loading.value = true
 
   setTimeout(() => {
@@ -21,8 +23,9 @@ function onClick() {
     loaded.value = true
   }, 2000)
 
-  loaded.value = false
+  input.value?.blur()
 }
+
 </script>
 
 <template>
@@ -41,7 +44,7 @@ function onClick() {
         </template>
       </v-tooltip>
     </div>
-    <v-text-field :loading="loading" density="compact" variant="solo" label="Search" append-inner-icon="mdi-magnify" single-line hide-details @click:append-inner="onClick" v-on:keyup.enter="onClick"/>
+    <v-text-field :loading="loading" density="compact" variant="outlined" color="primary" label="Search" append-inner-icon="mdi-magnify" single-line hide-details @click:append-inner="search" v-on:keyup.enter="search" ref="input"/>
     <div class="tw-flex tw-gap-5">
       <v-tooltip text="Resume All" location="bottom">
         <template v-slot:activator="{ props }">
@@ -67,7 +70,10 @@ function onClick() {
       </v-tooltip>
       <v-tooltip text="New" location="bottom">
         <template v-slot:activator="{ props }">
-          <v-btn v-bind="props" density="compact" icon="mdi-plus" variant="flat"/>
+          <v-btn v-bind:="props" variant="flat" density="compact" icon>
+            <v-icon icon="mdi-plus"></v-icon>
+            <new-download/>
+          </v-btn>
         </template>
       </v-tooltip>
     </div>
