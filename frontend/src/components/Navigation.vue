@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import NewDownload from './NewDownload.vue';
+import DownloadDialog from './DownloadDialog.vue';
 import { useTheme } from 'vuetify/lib/framework.mjs';
 import { ref } from 'vue';
-import { useWindowSize } from '@vueuse/core';
 import { useDrawerStore } from '../store/drawer';
-
-const RAIL_MIN_WIDTH_RATIO = 1280
-const ratio = useWindowSize()
 
 const theme = useTheme()
 const themeIcon = ref(theme.global.current.value.dark ? 'mdi-white-balance-sunny' : 'mdi-weather-night')
@@ -79,7 +75,7 @@ const store = useDrawerStore()
         <template v-slot:activator="{ props }">
           <v-btn v-bind:="props" variant="flat" density="compact" icon>
             <v-icon icon="mdi-plus"></v-icon>
-            <new-download/>
+            <download-dialog/>
           </v-btn>
         </template>
       </v-tooltip>
