@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useTheme } from 'vuetify/lib/framework.mjs';
 import Navigation from './components/Navigation.vue'
+import DownloadList from './components/DownloadList.vue';
 import Main from './components/Main.vue';
 
 const theme = useTheme()
@@ -12,6 +13,7 @@ const theme = useTheme()
     <v-theme-provider :theme="theme.global.name.value">
       <Main>
         <Navigation/>
+        <DownloadList/>
       </Main>
     </v-theme-provider>
   </v-app>

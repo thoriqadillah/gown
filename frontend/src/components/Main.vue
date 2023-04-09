@@ -9,7 +9,7 @@ const store = useDrawerStore()
   <v-card>
     <v-layout >
       <v-navigation-drawer v-model="store.drawer" :elevation="0" expand-on-hover rail :border="0" location="right">
-        <v-list density="compact" nav class="tw-flex tw-flex-col tw-mt-20">
+        <v-list density="compact" nav class="tw-flex tw-flex-col tw-mt-12">
           <v-list-item active-color="primary" prepend-icon="mdi-home" title="Home" value="home"></v-list-item>
           <v-list-item active-color="primary" prepend-icon="mdi-alert-outline" title="Failed Download" value="failedDownload"></v-list-item>
           <v-list-item active-color="primary" prepend-icon="mdi-tray-full" title="Queued Download" value="queuedDownload"></v-list-item>
