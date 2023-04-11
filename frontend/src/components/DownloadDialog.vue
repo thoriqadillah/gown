@@ -30,6 +30,12 @@ function download() {
   activator.value = false
 }
 
+function cancel() {
+  onURL.value = true
+  onFile.value = false
+  activator.value = false
+}
+
 function next() {
   onFile.value = true
   onURL.value = false
@@ -45,7 +51,7 @@ function prev() {
 </script>
 
 <template>
-  <v-dialog v-model="activator" activator="parent" width="40%" transition="dialog-top-transition" persistent>
+  <v-dialog v-model="activator" activator="parent" max-width="450px" transition="dialog-top-transition" persistent>
     <v-card>
       <v-text-field v-if="onURL || !loaded" :loading="loading" color="primary" type="input" hint="Click enter to fetch the file data from the URL you want to download" class="tw-p-3" density="compact" variant="outlined" label="URL" append-inner-icon="mdi-link" single-line v-on:keyup.enter="fetch" ref="input"/>
       <div v-else-if="onFile || !loaded" class="tw-flex tw-items-center">
@@ -70,10 +76,10 @@ function prev() {
         </div>
         <div class="tw-flex tw-flex-row-reverse">
           <v-card-actions>
-            <v-btn color="primary" block @click="activator = false" :disabled="!loaded">Download</v-btn>
+            <v-btn color="primary" block @click="download()" :disabled="!loaded">Download</v-btn>
           </v-card-actions>
           <v-card-actions>
-            <v-btn variant="text" block @click="activator = false">Cancel</v-btn>
+            <v-btn variant="text" block @click="cancel()">Cancel</v-btn>
           </v-card-actions>
         </div>
       </div>
