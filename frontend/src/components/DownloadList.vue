@@ -4,106 +4,179 @@ const now = date.toLocaleDateString()
 
 const desserts = [
           {
-            status: "Success",
+            status: {
+              icon: "mdi-check-circle-outline",
+              color: 'success',
+            },
             name: 'Frozen Yogurt',
             timeElapsed: 159,
             size: 300,
-            date: now, 
+            date: now,
+            type: {
+              icon: 'mdi-music-box' ,
+              color: 'red-accent-2'
+            }
           },
           {
-            status: "Success",
+            status: {
+              icon: "mdi-alert-outline",
+              color: 'warning',
+            },
             name: 'Ice cream sandwich',
             timeElapsed: 237,
             size: 300,
-            date: now, 
+            date: now,
+            type: {
+              icon: 'mdi-file-document',
+              color: 'blue-accent-2'
+            }
           },
           {
-            status: "Success",
+            status: {
+              icon: "mdi-check-circle-outline",
+              color: 'success',
+            },
             name: 'Eclair',
             timeElapsed: 262,
             size: 300,
-            date: now, 
+            date: now,
+            type: {
+              icon: 'mdi-file-document',
+              color: 'blue-accent-2'
+            }
           },
           {
-            status: "Success",
+            status: {
+              icon: "mdi-check-circle-outline",
+              color: 'success',
+            },
             name: 'Cupcake',
             timeElapsed: 305,
             size: 300,
-            date: now, 
+            date: now,
+            type: {
+              icon: 'mdi-video',
+              color: 'red-accent-2'
+            }
           },
           {
-            status: "Success",
+            status: {
+              icon: "mdi-alert-outline",
+              color: 'warning',
+            },
             name: 'Gingerbread',
             timeElapsed: 356,
             size: 300,
-            date: now, 
+            date: now,
+            type: {
+              icon: 'mdi-image',
+              color: 'red-accent-2'
+            }
           },
           {
-            status: "Success",
+            status: {
+              icon: "mdi-check-circle-outline",
+              color: 'success',
+            },
             name: 'Jelly bean',
             timeElapsed: 375,
             size: 300,
-            date: now, 
+            date: now,
+            type: {
+              icon: 'mdi-zip-box',
+              color: 'yellow-accent-4'
+            }
           },
           {
-            status: "Success",
+            status: {
+              icon: "mdi-pause-circle-outline",
+              color: '',
+            },
             name: 'Lollipop',
             timeElapsed: 392,
             size: 300,
-            date: now, 
+            date: now,
+            type: {
+              icon: 'mdi-zip-box',
+              color: 'yellow-accent-4'
+            }
           },
           {
-            status: "Success",
+            status: {
+              icon: "mdi-pause-circle-outline",
+              color: '',
+            },
             name: 'Honeycomb',
             timeElapsed: 408,
             size: 300,
-            date: now, 
+            date: now,
+            type: {
+              icon: 'mdi-image',
+              color: 'red-accent-2'
+            }
           },
           {
-            status: "Success",
+            status: {
+              icon: "mdi-pause-circle-outline",
+              color: '',
+            },
             name: 'Donut',
             timeElapsed: 452,
             size: 300,
-            date: now, 
+            date: now,
+            type: {
+              icon: 'mdi-music-box',
+              color: 'red-accent-2'
+            }
           },
           {
-            status: "Success",
+            status: {
+              icon: "mdi-check-circle-outline",
+              color: 'success',
+            },
             name: 'KitKat',
             timeElapsed: 518,
             size: 300,
-            date: now, 
+            date: now,
+            type: {
+              icon: 'mdi-music-box',
+              color: 'red-accent-2'
+            }
           },
         ]
 </script>
 
 <template>
   <div class="tw-overflow-x-auto tw-mx-5 xl:tw-mx-0 xl:tw-ml-5">
-    <v-table density="compact">
+    <v-table density="comfortable">
     <thead>
       <tr>
-        <th class="text-left tw-cursor-pointer">
+        <th class="text-left">
           <div class="tw-flex tw-justify-between tw-items-center">
             <span>Name</span>
             <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
           </div>
         </th>
-        <th class="text-left tw-cursor-pointer">
+        <th class="text-left">
           <div class="tw-flex tw-justify-between tw-items-center">
             <span>Time Elapsed</span>
             <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
           </div>
         </th>
-        <th class="text-left tw-cursor-pointer">
+        <th class="text-left">
           <div class="tw-flex tw-justify-between tw-items-center">
             <span>Size</span>
             <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
           </div>
         </th>
-        <th class="text-left tw-cursor-pointer">
+        <th class="text-left">
           <div class="tw-flex tw-justify-between tw-items-center">
             <span>Date</span>
             <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
           </div>
+        </th>
+        <th class="tw-text-left">
+          <span>Status</span>
         </th>
       </tr>
     </thead>
@@ -113,12 +186,17 @@ const desserts = [
         :key="item.name"
       >
         <td class="tw-rounded-sm">
-          <v-icon icon="mdi-check-circle-outline" color="success" class="tw-text-sm tw-mr-2"></v-icon>
-          {{ item.name }}
+          <div class="tw-flex tw-justify-between">
+            <div>
+              <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
+              {{ item.name }}
+            </div>
+          </div>
         </td>
         <td class="tw-rounded-sm text-left">{{ item.timeElapsed }}</td>
         <td class="tw-rounded-sm text-left">{{ item.size }}</td>
         <td class="tw-rounded-sm text-left">{{ item.date }}</td>
+        <td class="tw-text-left"><v-icon :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90 tw-ml-3"></v-icon></td>
       </tr>
     </tbody>
   </v-table>
