@@ -5,20 +5,23 @@ const now = date.toLocaleDateString()
 const desserts = [
           {
             status: {
-              icon: "mdi-check-circle-outline",
-              color: 'success',
+              name: 'queued',
+              icon: "mdi-tray-full",
+              color: 'info',
             },
             name: 'Frozen Yogurt',
             timeElapsed: 159,
             size: 300,
             date: now,
             type: {
+              name: 'music',
               icon: 'mdi-music-box' ,
-              color: 'red-accent-2'
+              color: 'purple-accent-2'
             }
           },
           {
             status: {
+              name: 'failed',
               icon: "mdi-alert-outline",
               color: 'warning',
             },
@@ -27,12 +30,14 @@ const desserts = [
             size: 300,
             date: now,
             type: {
+              name: 'document',
               icon: 'mdi-file-document',
               color: 'blue-accent-2'
             }
           },
           {
             status: {
+              name: 'success',
               icon: "mdi-check-circle-outline",
               color: 'success',
             },
@@ -41,12 +46,14 @@ const desserts = [
             size: 300,
             date: now,
             type: {
+              name: 'document',
               icon: 'mdi-file-document',
               color: 'blue-accent-2'
             }
           },
           {
             status: {
+              name: 'success',
               icon: "mdi-check-circle-outline",
               color: 'success',
             },
@@ -55,12 +62,14 @@ const desserts = [
             size: 300,
             date: now,
             type: {
+              name: 'video',
               icon: 'mdi-video',
-              color: 'red-accent-2'
+              color: 'deep-orange-accent-2'
             }
           },
           {
             status: {
+              name: 'failed',
               icon: "mdi-alert-outline",
               color: 'warning',
             },
@@ -69,12 +78,14 @@ const desserts = [
             size: 300,
             date: now,
             type: {
+              name: 'image',
               icon: 'mdi-image',
               color: 'red-accent-2'
             }
           },
           {
             status: {
+              name: 'success',
               icon: "mdi-check-circle-outline",
               color: 'success',
             },
@@ -83,12 +94,14 @@ const desserts = [
             size: 300,
             date: now,
             type: {
+              name: 'compressed',
               icon: 'mdi-zip-box',
               color: 'yellow-accent-4'
             }
           },
           {
             status: {
+              name: 'paused',
               icon: "mdi-pause-circle-outline",
               color: '',
             },
@@ -97,12 +110,14 @@ const desserts = [
             size: 300,
             date: now,
             type: {
+              name: 'compressed',
               icon: 'mdi-zip-box',
               color: 'yellow-accent-4'
             }
           },
           {
             status: {
+              name: 'paused',
               icon: "mdi-pause-circle-outline",
               color: '',
             },
@@ -111,12 +126,14 @@ const desserts = [
             size: 300,
             date: now,
             type: {
+              name: 'image',
               icon: 'mdi-image',
               color: 'red-accent-2'
             }
           },
           {
             status: {
+              name: 'paused',
               icon: "mdi-pause-circle-outline",
               color: '',
             },
@@ -125,81 +142,89 @@ const desserts = [
             size: 300,
             date: now,
             type: {
+              name: 'music',
               icon: 'mdi-music-box',
-              color: 'red-accent-2'
+              color: 'purple-accent-2'
             }
           },
           {
             status: {
+              name: 'success',
               icon: "mdi-check-circle-outline",
               color: 'success',
             },
-            name: 'KitKat',
+            name: 'Lorem ipsum dolor sit amet consectetur adipisicing elit',
             timeElapsed: 518,
             size: 300,
             date: now,
             type: {
+              name: 'music',
               icon: 'mdi-music-box',
-              color: 'red-accent-2'
+              color: 'purple-accent-2'
             }
           },
         ]
 </script>
 
 <template>
-  <div class="tw-overflow-x-auto tw-mx-5 xl:tw-mx-0 xl:tw-ml-5">
-    <v-table density="comfortable">
-    <thead>
-      <tr>
-        <th class="text-left">
-          <div class="tw-flex tw-justify-between tw-items-center">
-            <span>Name</span>
-            <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
-          </div>
-        </th>
-        <th class="text-left">
-          <div class="tw-flex tw-justify-between tw-items-center">
-            <span>Time Elapsed</span>
-            <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
-          </div>
-        </th>
-        <th class="text-left">
-          <div class="tw-flex tw-justify-between tw-items-center">
-            <span>Size</span>
-            <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
-          </div>
-        </th>
-        <th class="text-left">
-          <div class="tw-flex tw-justify-between tw-items-center">
-            <span>Date</span>
-            <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
-          </div>
-        </th>
-        <th class="tw-text-left">
-          <span>Status</span>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        v-for="item in desserts"
-        :key="item.name"
-      >
-        <td class="tw-rounded-sm">
-          <div class="tw-flex tw-justify-between">
-            <div>
-              <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
-              {{ item.name }}
+  <div class="tw-mx-5 xl:tw-mx-0 xl:tw-ml-5">
+    <div class="tw-flex tw-gap-2 md:tw-gap-4 tw-mb-2">
+      <v-btn variant="outlined" prepend-icon="mdi-image" color="red-accent-2">IMAGE</v-btn>
+      <v-btn variant="outlined" prepend-icon="mdi-video" color="deep-orange-accent-2">VIDEO</v-btn>
+      <v-btn variant="outlined" prepend-icon="mdi-file-document" color="blue-accent-2">DOCS</v-btn>
+      <v-btn variant="outlined" prepend-icon="mdi-zip-box" color="yellow-accent-4">COMPRESSED</v-btn>
+      <v-btn variant="outlined" prepend-icon="mdi-music-box" color="purple-accent-2">MUSIC</v-btn>
+    </div>
+
+    <v-table density="compact">
+      <thead>
+        <tr>
+          <th class="text-left">
+            <div class="tw-flex tw-justify-between tw-items-center">
+              <span class="tw-text-sm">Name</span>
+              <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
-          </div>
-        </td>
-        <td class="tw-rounded-sm text-left">{{ item.timeElapsed }}</td>
-        <td class="tw-rounded-sm text-left">{{ item.size }}</td>
-        <td class="tw-rounded-sm text-left">{{ item.date }}</td>
-        <td class="tw-text-left"><v-icon :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90 tw-ml-3"></v-icon></td>
-      </tr>
-    </tbody>
-  </v-table>
+          </th>
+          <th class="text-left">
+            <div class="tw-flex tw-justify-between tw-items-center tw-w-max md:tw-w-full">
+              <span class="tw-text-sm tw-mr-3">Time Elapsed</span>
+              <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
+            </div>
+          </th>
+          <th class="text-left">
+            <div class="tw-flex tw-justify-between tw-items-center">
+              <span class="tw-text-sm tw-mr-3">Size</span>
+              <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
+            </div>
+          </th>
+          <th class="text-left">
+            <div class="tw-flex tw-justify-between tw-items-center">
+              <span class="tw-text-sm">Date</span>
+              <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
+            </div>
+          </th>
+          <th class="tw-text-left">
+            <span class="tw-text-sm">Status</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody >
+        <tr v-for="item in desserts" :key="item.name">
+          <td class="tw-rounded-sm">
+            <div class="tw-flex tw-justify-between">
+              <div class="tw-w-max">
+                <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
+                <span class="tw-text-sm">{{ item.name }}</span>
+              </div>
+            </div>
+          </td>
+          <td class="tw-text-sm tw-rounded-sm text-left">{{ item.timeElapsed }}</td>
+          <td class="tw-text-sm tw-rounded-sm text-left">{{ item.size }}</td>
+          <td class="tw-text-sm tw-rounded-sm text-left">{{ item.date }}</td>
+          <td class="tw-text-sm tw-text-left"><v-icon :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90 tw-ml-2"></v-icon></td>
+        </tr>
+      </tbody>
+    </v-table>
   </div>
 </template>
 
