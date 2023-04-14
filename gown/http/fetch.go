@@ -92,8 +92,8 @@ func filename(contentType string, url string) string {
 
 	split = strings.Split(filename, ".")
 	if len(split) != 0 {
-		return filename
+		return filename + type_
 	}
 
-	return filename + type_
+	return filename
 }

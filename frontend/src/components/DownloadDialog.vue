@@ -29,9 +29,11 @@ function fetch() {
     loaded.value = true
     onFile.value = true
     onURL.value = false
-  })
+  }).catch(err => {
+    loading.value = false
 
-  //TODO: save the download list into persisten file 
+    console.log(err);
+  })
 }
 
 // TODO: implement download
