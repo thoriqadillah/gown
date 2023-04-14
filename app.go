@@ -1,6 +1,7 @@
 package main
 
 import (
+	"changeme/gown/http"
 	"changeme/gown/setting"
 	"context"
 	"fmt"
@@ -32,4 +33,13 @@ func (a *App) Greet(name string) string {
 
 func (a *App) Theme() setting.Themes {
 	return a.Themes
+}
+
+func (a *App) Fetch(url string) (*http.Response, error) {
+	res, err := http.Fetch(url, &a.Settings)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }

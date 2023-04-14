@@ -1,26 +1,35 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { Fetch } from '../../wailsjs/go/main/App'
 
 const activator = ref(false)
 const loading = ref(false)
 const loaded = ref(false)
+const url = ref('')
+const filename = ref('')
+const size = ref()
+const saveLocation = ref('')
 
 // TODO: do a fetch of the link
 const input = ref<HTMLInputElement>()
 const onFile = ref(false)
 const onURL = ref(true)
-const slide = ref('slide-right')
 function fetch() {
+  input.value?.blur()
   loading.value = true
 
-  setTimeout(() => {
+  Fetch(url.value).then(res => {
+    const MB = 1024 * 1024
+    
+    filename.value = res.Filename
+    size.value = (res.Size / MB).toFixed(2)
+    saveLocation.value = res.SaveLocation
+
     loading.value = false
     loaded.value = true
-  }, 2000)
-
-  onFile.value = true
-  onURL.value = false
-  input.value?.blur()
+    onFile.value = true
+    onURL.value = false
+  })
 }
 
 // TODO: implement download
@@ -39,13 +48,11 @@ function cancel() {
 function next() {
   onFile.value = true
   onURL.value = false
-  slide.value = 'slide-left'
 }
 
 function prev() {
   onURL.value = true
   onFile.value = false
-  slide.value = 'slide-right'
 }
 
 </script>
@@ -53,15 +60,15 @@ function prev() {
 <template>
   <v-dialog v-model="activator" activator="parent" max-width="450px" transition="dialog-top-transition" persistent>
     <v-card>
-      <v-text-field v-if="onURL || !loaded" :loading="loading" color="primary" type="input" hint="Click enter to fetch the file data from the URL you want to download" class="tw-p-3" density="compact" variant="outlined" label="URL" append-inner-icon="mdi-link" single-line v-on:keyup.enter="fetch" ref="input"/>
+      <v-text-field v-if="onURL || !loaded" v-model="url" :loading="loading" color="primary" type="input" hint="Click enter to fetch the file data from the URL you want to download" class="tw-p-3" density="compact" variant="outlined" label="URL" append-inner-icon="mdi-link" single-line v-on:keyup.enter="fetch" ref="input"/>
       <div v-else-if="onFile || !loaded" class="tw-flex tw-items-center">
-        <div class="tw-basis-10/12">
-          <v-text-field color="primary" label="File name" append-inner-icon="mdi-file-document-edit" class="tw-px-3 tw-pt-3 -tw-mb-4" single-line v-on:keyup.enter="fetch" density="compact" variant="outlined" ref="input"/>
-          <v-text-field color="primary" label="Save location" append-inner-icon="mdi-folder" type="input" hint="Save location" class="tw-p-3" single-line v-on:keyup.enter="fetch" density="compact" variant="outlined" ref="input"/>
+        <div class="tw-basis-9/12">
+          <v-text-field color="primary" v-model="filename" label="File name" append-inner-icon="mdi-file-document-edit" class="tw-px-3 tw-pt-3 -tw-mb-4" single-line v-on:keyup.enter="fetch" density="compact" variant="outlined" ref="input"/>
+          <v-text-field color="primary" v-model="saveLocation" label="Save location" append-inner-icon="mdi-folder" type="input" hint="Save location" class="tw-p-3" single-line v-on:keyup.enter="fetch" density="compact" variant="outlined" ref="input"/>
         </div>
-        <div class="tw-basis-2/12 tw-text-center tw-pr-2 -tw-mt-5">
+        <div class="tw-basis-3/12 tw-text-center tw-pr-2 -tw-mt-5">
           <v-icon icon="mdi-file"></v-icon>
-          <p class="text-body-1 tw-mt-5">40 MB</p>
+          <p class="text-body-1 tw-mt-5">{{ size }} MB</p>
         </div>
       </div>
       
