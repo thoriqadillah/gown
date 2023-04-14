@@ -30,6 +30,8 @@ function fetch() {
     onFile.value = true
     onURL.value = false
   })
+
+  //TODO: save the download list into persisten file 
 }
 
 // TODO: implement download
