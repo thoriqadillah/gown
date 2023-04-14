@@ -11,11 +11,11 @@ const (
 
 type Settings struct {
 	Themes
-	Partsize        int64
-	Concurrency     int
-	Maxtries        int
-	SimmultanousNum int
-	SaveLocation    string
+	Partsize        int64  `json:"partsize"`
+	Concurrency     int    `json:"concurrency"`
+	Maxtries        int    `json:"maxtries"`
+	SimmultanousNum int    `json:"simmultanousNum"`
+	SaveLocation    string `json:"saveLocation"`
 }
 
 func New() Settings {

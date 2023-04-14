@@ -1,29 +1,35 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Fetch } from '../../wailsjs/go/main/App'
+import { http } from '../../wailsjs/go/models';
 
 const activator = ref(false)
 const loading = ref(false)
 const loaded = ref(false)
+const response = ref<http.Response>()
 const url = ref('')
 const filename = ref('')
-const size = ref()
+const size = ref('')
 const saveLocation = ref('')
 
 // TODO: do a fetch of the link
 const input = ref<HTMLInputElement>()
+input.value?.focus()
 const onFile = ref(false)
 const onURL = ref(true)
+
 function fetch() {
   input.value?.blur()
   loading.value = true
 
-  Fetch(url.value).then(res => {
+  Fetch(url.value).then((res: http.Response) => {
+    response.value = res
     const MB = 1024 * 1024
     
-    filename.value = res.Filename
-    size.value = (res.Size / MB).toFixed(2)
-    saveLocation.value = res.SaveLocation
+    filename.value = res.filename
+    size.value = (res.size / MB).toFixed(2)
+    response.value.size = parseFloat((res.size / MB).toFixed(2))
+    saveLocation.value = res.settings.saveLocation 
 
     loading.value = false
     loaded.value = true
@@ -31,8 +37,7 @@ function fetch() {
     onURL.value = false
   }).catch(err => {
     loading.value = false
-
-    console.log(err);
+    console.error(err.message);
   })
 }
 
@@ -72,7 +77,7 @@ function prev() {
         </div>
         <div class="tw-basis-3/12 tw-text-center tw-pr-2 -tw-mt-5">
           <v-icon icon="mdi-file"></v-icon>
-          <p class="text-body-1 tw-mt-5">{{ size }} MB</p>
+          <p class="text-body-1 tw-mt-5">{{ response?.size }} MB</p>
         </div>
       </div>
       
