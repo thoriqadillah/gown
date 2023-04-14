@@ -1,6 +1,7 @@
 <script setup lang="ts">
-let date = new Date()
-const now = date.toLocaleDateString()
+import moment from 'moment'
+
+const now = moment().format('LLL')
 
 const desserts = [
           {
@@ -153,7 +154,7 @@ const desserts = [
               icon: "mdi-check-circle-outline",
               color: 'success',
             },
-            name: 'Lorem ipsum dolor sit amet consectetur adipisicing elit',
+            name: 'Lorem',
             timeElapsed: 518,
             size: 300,
             date: now,
@@ -167,7 +168,7 @@ const desserts = [
 </script>
 
 <template>
-  <div class="tw-mx-5 xl:tw-mx-0 xl:tw-ml-5">
+  <div class="tw-px-5 xl:tw-px-0 xl:tw-pl-5">
     <div class="tw-flex tw-gap-2 md:tw-gap-4 tw-mb-2">
       <v-btn variant="outlined" prepend-icon="mdi-image" color="red-accent-2">IMAGE</v-btn>
       <v-btn variant="outlined" prepend-icon="mdi-video" color="deep-orange-accent-2">VIDEO</v-btn>
@@ -179,31 +180,31 @@ const desserts = [
     <v-table density="compact">
       <thead>
         <tr>
-          <th class="text-left">
+          <th class="text-left tw-cursor-pointer">
             <div class="tw-flex tw-justify-between tw-items-center">
               <span class="tw-text-sm">Name</span>
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
           </th>
-          <th class="text-left">
+          <th class="text-left tw-cursor-pointer">
             <div class="tw-flex tw-justify-between tw-items-center tw-w-max md:tw-w-full">
               <span class="tw-text-sm tw-mr-3">Time Elapsed</span>
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
           </th>
-          <th class="text-left">
+          <th class="text-left tw-cursor-pointer">
             <div class="tw-flex tw-justify-between tw-items-center">
               <span class="tw-text-sm tw-mr-3">Size</span>
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
           </th>
-          <th class="text-left">
+          <th class="text-left tw-cursor-pointer">
             <div class="tw-flex tw-justify-between tw-items-center">
               <span class="tw-text-sm">Date</span>
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
           </th>
-          <th class="tw-text-left">
+          <th class="tw-text tw-cursor-pointer-left">
             <span class="tw-text-sm">Status</span>
           </th>
         </tr>
@@ -220,7 +221,9 @@ const desserts = [
           </td>
           <td class="tw-text-sm tw-rounded-sm text-left">{{ item.timeElapsed }}</td>
           <td class="tw-text-sm tw-rounded-sm text-left">{{ item.size }}</td>
-          <td class="tw-text-sm tw-rounded-sm text-left">{{ item.date }}</td>
+          <div class="tw-w-max mt-2 tw-text-left">
+            <td class="tw-text-sm tw-rounded-sm text-left">{{ item.date }}</td>
+          </div>
           <td class="tw-text-sm tw-text-left"><v-icon :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90 tw-ml-2"></v-icon></td>
         </tr>
       </tbody>
