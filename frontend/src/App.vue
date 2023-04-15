@@ -21,7 +21,7 @@ const desserts: Download[] = [
     },
     name: 'Frozen Yogurt',
     timeElapsed: 159,
-    size: 300,
+    size: 301,
     date: now,
     type: {
       name: 'music',
@@ -37,7 +37,7 @@ const desserts: Download[] = [
     },
     name: 'Ice cream sandwich',
     timeElapsed: 237,
-    size: 300,
+    size: 310,
     date: now,
     type: {
       name: 'document',
@@ -53,7 +53,7 @@ const desserts: Download[] = [
     },
     name: 'Eclair',
     timeElapsed: 262,
-    size: 300,
+    size: 50,
     date: now,
     type: {
       name: 'document',
@@ -69,7 +69,7 @@ const desserts: Download[] = [
     },
     name: 'Cupcake',
     timeElapsed: 305,
-    size: 300,
+    size: 110,
     date: now,
     type: {
       name: 'video',
@@ -85,7 +85,7 @@ const desserts: Download[] = [
     },
     name: 'Gingerbread',
     timeElapsed: 356,
-    size: 300,
+    size: 110,
     date: now,
     type: {
       name: 'image',
@@ -101,7 +101,7 @@ const desserts: Download[] = [
     },
     name: 'Jelly bean',
     timeElapsed: 375,
-    size: 300,
+    size: 220,
     date: now,
     type: {
       name: 'compressed',
@@ -117,7 +117,7 @@ const desserts: Download[] = [
     },
     name: 'Lollipop',
     timeElapsed: 392,
-    size: 300,
+    size: 500,
     date: now,
     type: {
       name: 'compressed',
@@ -133,7 +133,7 @@ const desserts: Download[] = [
     },
     name: 'Honeycomb',
     timeElapsed: 408,
-    size: 300,
+    size: 323,
     date: now,
     type: {
       name: 'image',
@@ -149,7 +149,7 @@ const desserts: Download[] = [
     },
     name: 'Donut',
     timeElapsed: 452,
-    size: 300,
+    size: 520,
     date: now,
     type: {
       name: 'music',

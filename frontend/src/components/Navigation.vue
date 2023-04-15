@@ -4,7 +4,6 @@ import { useTheme } from 'vuetify/lib/framework.mjs';
 import { useDrawerStore } from '../store/drawer';
 import { useDownloads } from '../store/downloads';
 
-
 const downloads = useDownloads()
 const store = useDrawerStore()
 
@@ -25,7 +24,7 @@ const store = useDrawerStore()
     <p class="text-button">GOWN</p>
 
     <v-text-field v-model="downloads.search" density="compact" variant="outlined" color="primary" label="Search" append-inner-icon="mdi-magnify" single-line hide-details/>
-    
+
     <div class="tw-flex tw-gap-5">
       <!-- <v-tooltip :text="themeTooltip" location="bottom">
         <template v-slot:activator="{ props }">

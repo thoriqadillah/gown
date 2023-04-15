@@ -1,44 +1,48 @@
 <script setup lang="ts">
 import { Download } from '../types/download';
-import { defineProps } from 'vue';
+import { defineProps, computed, ref } from 'vue';
+import { useDownloads } from '../store/downloads';
 
+const downloads = useDownloads()
 const props = defineProps<{
   list: Download[]
 }>()
+
 </script>
 
 <template>
   <div class="tw-px-5 xl:tw-px-0 xl:tw-pl-5">
     <div class="tw-flex tw-gap-2 md:tw-gap-4 tw-mb-2">
-      <v-btn variant="outlined" prepend-icon="mdi-image" color="red-accent-2">IMAGE</v-btn>
-      <v-btn variant="outlined" prepend-icon="mdi-video" color="deep-orange-accent-2">VIDEO</v-btn>
-      <v-btn variant="outlined" prepend-icon="mdi-file-document" color="blue-accent-2">DOCS</v-btn>
-      <v-btn variant="outlined" prepend-icon="mdi-zip-box" color="yellow-accent-4">COMPRESSED</v-btn>
-      <v-btn variant="outlined" prepend-icon="mdi-music-box" color="purple-accent-2">MUSIC</v-btn>
+      <v-btn variant="outlined" @click="downloads.setDefault()" prepend-icon="mdi-select-all">ALL</v-btn>
+      <v-btn variant="outlined" @click="downloads.filterByImage()" prepend-icon="mdi-image" color="red-accent-2">IMAGE</v-btn>
+      <v-btn variant="outlined" @click="downloads.filterByVideo()" prepend-icon="mdi-video" color="deep-orange-accent-2">VIDEO</v-btn>
+      <v-btn variant="outlined" @click="downloads.filterByDocument()" prepend-icon="mdi-file-document" color="blue-accent-2">DOCUMENT</v-btn>
+      <v-btn variant="outlined" @click="downloads.filterByCompressed()" prepend-icon="mdi-zip-box" color="yellow-accent-4">COMPRESSED</v-btn>
+      <v-btn variant="outlined" @click="downloads.filterByMusic()" prepend-icon="mdi-music-box" color="purple-accent-2">MUSIC</v-btn>
     </div>
 
     <v-table density="compact">
       <thead>
         <tr>
-          <th class="text-left tw-cursor-pointer">
+          <th class="text-left tw-cursor-pointer" @click="downloads.sortByName()">
             <div class="tw-flex tw-justify-between tw-items-center">
               <span class="tw-text-sm">Name</span>
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
           </th>
-          <th class="text-left tw-cursor-pointer">
+          <th class="text-left tw-cursor-pointer" @click="downloads.sortByTimeElapsed()">
             <div class="tw-flex tw-justify-between tw-items-center tw-w-max md:tw-w-full">
               <span class="tw-text-sm tw-mr-3">Time Elapsed</span>
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
           </th>
-          <th class="text-left tw-cursor-pointer">
+          <th class="text-left tw-cursor-pointer" @click="downloads.sortBySize">
             <div class="tw-flex tw-justify-between tw-items-center">
               <span class="tw-text-sm tw-mr-3">Size</span>
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
           </th>
-          <th class="text-left tw-cursor-pointer">
+          <th class="text-left tw-cursor-pointer" @click="downloads.sortByDate()">
             <div class="tw-flex tw-justify-between tw-items-center">
               <span class="tw-text-sm">Date</span>
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
