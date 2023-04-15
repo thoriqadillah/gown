@@ -3,6 +3,7 @@ package main
 import (
 	"changeme/gown/http"
 	"changeme/gown/setting"
+	"changeme/gown/worker"
 	"context"
 	"fmt"
 )
@@ -11,12 +12,19 @@ import (
 type App struct {
 	ctx context.Context
 	setting.Settings
+	worker.Pool
+	err error
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
+	s := setting.New()
+	worker, err := worker.New(s.Concurrency, s.SimmultanousNum)
+
 	return &App{
-		Settings: setting.New(),
+		Settings: s,
+		Pool:     worker,
+		err:      err,
 	}
 }
 

@@ -3,9 +3,9 @@ package setting
 const (
 	mb                                   = 1024 * 1024
 	DEFAULT_PART_SIZE              int64 = 5 * mb // 5 MB
-	DEFAULT_CONCURRENCY                  = 10
+	DEFAULT_CONCURRENCY                  = 100
 	DEFAULT_MAX_TRIES                    = 3
-	DEFAULT_SIMMULATANOUS_DOWNLOAD       = 1
+	DEFAULT_SIMMULATANOUS_DOWNLOAD       = 4
 	DEFAULT_SAVE_LOCATION                = "~/Downloads/"
 )
 
