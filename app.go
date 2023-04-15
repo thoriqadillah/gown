@@ -2,18 +2,24 @@ package main
 
 import (
 	"changeme/gown/http"
+	"changeme/gown/http/chunk"
 	"changeme/gown/setting"
+	"changeme/gown/storage"
 	"changeme/gown/worker"
 	"context"
 	"fmt"
+	"log"
+	"sync"
+	"time"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
-	setting.Settings
-	worker.Pool
-	err error
+	ctx      context.Context
+	settings setting.Settings
+	pool     worker.Pool
+	wg       sync.WaitGroup
+	err      error
 }
 
 // NewApp creates a new App application struct
@@ -22,9 +28,10 @@ func NewApp() *App {
 	worker, err := worker.New(s.Concurrency, s.SimmultanousNum)
 
 	return &App{
-		Settings: s,
-		Pool:     worker,
+		settings: s,
+		pool:     worker,
 		err:      err,
+		wg:       sync.WaitGroup{},
 	}
 }
 
@@ -40,14 +47,57 @@ func (a *App) Greet(name string) string {
 }
 
 func (a *App) Theme() setting.Themes {
-	return a.Themes
+	return a.settings.Themes
 }
 
 func (a *App) Fetch(url string) (*http.Response, error) {
-	res, err := http.Fetch(url, &a.Settings)
+	res, err := http.Fetch(url, &a.settings)
 	if err != nil {
 		return nil, err
 	}
 
 	return res, nil
 }
+
+func (a *App) Download(res http.Response) error {
+	start := time.Now()
+
+	a.pool.Start()
+	defer a.pool.Stop()
+
+	storage := storage.New(res.Totalpart, &a.settings)
+	chunks := make([]*chunk.Chunk, res.Totalpart)
+	for part := range chunks {
+		chunks[part] = chunk.New(res, part, &a.wg)
+	}
+
+	for _, job := range chunks {
+		a.wg.Add(1)
+		a.pool.Add(job)
+	}
+
+	a.wg.Wait()
+
+	for part, chunk := range chunks {
+		storage.Combine(chunk.Data(), part)
+	}
+
+	if err := storage.Save(res.Filename); err != nil {
+		log.Printf("Error saving file: %v", err)
+		return err
+	}
+
+	elapsed := time.Since(start)
+	log.Printf("Took %v s to download %s\n", elapsed.Seconds(), res.Filename)
+
+	return nil
+}
+
+/*
+TODO:
+- implement progress bar
+- implement queue
+- implement theming
+- implement browser extension
+- implement simultanous download
+*/

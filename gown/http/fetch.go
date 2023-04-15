@@ -9,13 +9,13 @@ import (
 )
 
 type Response struct {
-	Url         string           `json:"url"`
-	Size        int64            `json:"size"`
-	ContentType string           `json:"contentType"`
-	Cansplit    bool             `json:"cansplit"`
-	Totalpart   int              `json:"totalpart"`
-	Filename    string           `json:"filename"`
-	Settings    setting.Settings `json:"settings"`
+	Url         string            `json:"url"`
+	Size        int64             `json:"size"`
+	ContentType string            `json:"contentType"`
+	Cansplit    bool              `json:"cansplit"`
+	Totalpart   int               `json:"totalpart"`
+	Filename    string            `json:"filename"`
+	Settings    *setting.Settings `json:"settings"`
 }
 
 func Fetch(url string, setting *setting.Settings) (*Response, error) {
@@ -63,7 +63,7 @@ func Fetch(url string, setting *setting.Settings) (*Response, error) {
 		Cansplit:    cansplit,
 		Totalpart:   totalpart,
 		Filename:    filename(contentType, url),
-		Settings:    *setting,
+		Settings:    setting,
 	}
 
 	return response, nil

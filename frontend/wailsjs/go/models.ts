@@ -7,7 +7,7 @@ export namespace http {
 	    cansplit: boolean;
 	    totalpart: number;
 	    filename: string;
-	    settings: setting.Settings;
+	    settings?: setting.Settings;
 	
 	    static createFrom(source: any = {}) {
 	        return new Response(source);

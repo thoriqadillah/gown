@@ -1,8 +1,6 @@
 import { http } from "../../wailsjs/go/models";
-import { Ref, ref } from "vue";
 import { Fetch } from "../../wailsjs/go/main/App";
-import Dialog from "./download-dialog";
-
+import { Download } from "../../wailsjs/go/main/App";
 
 export default class Downloader {
 
@@ -12,19 +10,19 @@ export default class Downloader {
 
   async fetch(url: string): Promise<http.Response | undefined> {
     const response = await Fetch(url)
-    response.size = this.parseSize(response.size)
 
     return response
   }
 
-  download() {
+  async download(res: http.Response): Promise<void> {
+    await Download(res)
   }
 
-  private parseSize(size: number): number {
-    if (size < this.KB) return parseFloat((size / this.KB).toFixed(2))    
-    if (size > this.KB && size < this.GB) return parseFloat((size / this.MB).toFixed(2))
-    if (size > this.GB) return parseFloat((size / this.GB).toFixed(2))
+  parseSize(size: number): string {
+    if (size < this.KB) return (size / this.KB).toFixed(2)
+    if (size > this.KB && size < this.GB) return (size / this.MB).toFixed(2)
+    if (size > this.GB) return (size / this.GB).toFixed(2)
 
-    return 0
+    return ''
   }
 }

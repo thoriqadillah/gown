@@ -11,6 +11,7 @@ const loaded = ref(false)
 const onFile = ref(false)
 const onURL = ref(true)
 const url = ref('')
+const size = ref('')
 
 const dialog = new Dialog({ activator, loaded, loading, onFile, onURL })
 const downloader = new Downloader()
@@ -20,6 +21,7 @@ async function fetch() {
   dialog.loading()
 
   response.value = await downloader.fetch(url.value)
+  size.value = downloader.parseSize(response.value.size)
 
   dialog.done()
   dialog.next()
@@ -27,6 +29,7 @@ async function fetch() {
 
 // TODO: implement download
 async function download() {
+  downloader.download(response.value)
   dialog.close()
 }
 </script>
@@ -42,7 +45,7 @@ async function download() {
         </div>
         <div class="tw-basis-3/12 tw-text-center tw-pr-2 -tw-mt-5">
           <v-icon icon="mdi-file"></v-icon>
-          <p class="text-body-1 tw-mt-5">{{ response.size }} MB</p>
+          <p class="text-body-1 tw-mt-5">{{ size }} MB</p>
         </div>
       </div>
       

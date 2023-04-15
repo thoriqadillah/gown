@@ -6,7 +6,7 @@ const (
 	DEFAULT_CONCURRENCY                  = 100
 	DEFAULT_MAX_TRIES                    = 3
 	DEFAULT_SIMMULATANOUS_DOWNLOAD       = 4
-	DEFAULT_SAVE_LOCATION                = "~/Downloads/"
+	DEFAULT_SAVE_LOCATION                = "/home/thoriqadillah/Downloads/"
 )
 
 type Settings struct {
