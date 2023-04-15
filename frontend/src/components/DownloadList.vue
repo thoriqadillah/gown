@@ -1,170 +1,10 @@
 <script setup lang="ts">
-import moment from 'moment'
+import { Download } from '../types/download';
+import { defineProps } from 'vue';
 
-const now = moment().format('LLL')
-
-const desserts = [
-          {
-            status: {
-              name: 'queued',
-              icon: "mdi-tray-full",
-              color: 'info',
-            },
-            name: 'Frozen Yogurt',
-            timeElapsed: 159,
-            size: 300,
-            date: now,
-            type: {
-              name: 'music',
-              icon: 'mdi-music-box' ,
-              color: 'purple-accent-2'
-            }
-          },
-          {
-            status: {
-              name: 'failed',
-              icon: "mdi-alert-outline",
-              color: 'warning',
-            },
-            name: 'Ice cream sandwich',
-            timeElapsed: 237,
-            size: 300,
-            date: now,
-            type: {
-              name: 'document',
-              icon: 'mdi-file-document',
-              color: 'blue-accent-2'
-            }
-          },
-          {
-            status: {
-              name: 'success',
-              icon: "mdi-check-circle-outline",
-              color: 'success',
-            },
-            name: 'Eclair',
-            timeElapsed: 262,
-            size: 300,
-            date: now,
-            type: {
-              name: 'document',
-              icon: 'mdi-file-document',
-              color: 'blue-accent-2'
-            }
-          },
-          {
-            status: {
-              name: 'success',
-              icon: "mdi-check-circle-outline",
-              color: 'success',
-            },
-            name: 'Cupcake',
-            timeElapsed: 305,
-            size: 300,
-            date: now,
-            type: {
-              name: 'video',
-              icon: 'mdi-video',
-              color: 'deep-orange-accent-2'
-            }
-          },
-          {
-            status: {
-              name: 'failed',
-              icon: "mdi-alert-outline",
-              color: 'warning',
-            },
-            name: 'Gingerbread',
-            timeElapsed: 356,
-            size: 300,
-            date: now,
-            type: {
-              name: 'image',
-              icon: 'mdi-image',
-              color: 'red-accent-2'
-            }
-          },
-          {
-            status: {
-              name: 'success',
-              icon: "mdi-check-circle-outline",
-              color: 'success',
-            },
-            name: 'Jelly bean',
-            timeElapsed: 375,
-            size: 300,
-            date: now,
-            type: {
-              name: 'compressed',
-              icon: 'mdi-zip-box',
-              color: 'yellow-accent-4'
-            }
-          },
-          {
-            status: {
-              name: 'paused',
-              icon: "mdi-pause-circle-outline",
-              color: '',
-            },
-            name: 'Lollipop',
-            timeElapsed: 392,
-            size: 300,
-            date: now,
-            type: {
-              name: 'compressed',
-              icon: 'mdi-zip-box',
-              color: 'yellow-accent-4'
-            }
-          },
-          {
-            status: {
-              name: 'paused',
-              icon: "mdi-pause-circle-outline",
-              color: '',
-            },
-            name: 'Honeycomb',
-            timeElapsed: 408,
-            size: 300,
-            date: now,
-            type: {
-              name: 'image',
-              icon: 'mdi-image',
-              color: 'red-accent-2'
-            }
-          },
-          {
-            status: {
-              name: 'paused',
-              icon: "mdi-pause-circle-outline",
-              color: '',
-            },
-            name: 'Donut',
-            timeElapsed: 452,
-            size: 300,
-            date: now,
-            type: {
-              name: 'music',
-              icon: 'mdi-music-box',
-              color: 'purple-accent-2'
-            }
-          },
-          {
-            status: {
-              name: 'success',
-              icon: "mdi-check-circle-outline",
-              color: 'success',
-            },
-            name: 'Lorem',
-            timeElapsed: 518,
-            size: 300,
-            date: now,
-            type: {
-              name: 'music',
-              icon: 'mdi-music-box',
-              color: 'purple-accent-2'
-            }
-          },
-        ]
+const props = defineProps<{
+  list: Download[]
+}>()
 </script>
 
 <template>
@@ -210,7 +50,7 @@ const desserts = [
         </tr>
       </thead>
       <tbody >
-        <tr v-for="item in desserts" :key="item.name">
+        <tr v-for="item in props.list" :key="item.name">
           <td class="tw-rounded-sm">
             <div class="tw-flex tw-justify-between">
               <div class="tw-w-max">

@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import DownloadDialog from './DownloadDialog.vue';
 import { useTheme } from 'vuetify/lib/framework.mjs';
-import { ref } from 'vue';
 import { useDrawerStore } from '../store/drawer';
+import { useDownloads } from '../store/downloads';
+
+
+const downloads = useDownloads()
+const store = useDrawerStore()
 
 // const theme = useTheme()
 // const themeIcon = ref(theme.global.current.value.dark ? 'mdi-white-balance-sunny' : 'mdi-weather-night')
@@ -13,20 +17,6 @@ import { useDrawerStore } from '../store/drawer';
 //   themeTooltip.value = theme.global.current.value.dark ? 'Light Mode' : 'Dark Mode'
 // }
 
-let loading = ref(false)
-let loaded = ref(false)
-let input = ref<HTMLInputElement>()
-function search() {
-  loading.value = true
-
-  setTimeout(() => {
-    loading.value = false
-    loaded.value = true
-  }, 2000)
-
-  input.value?.blur()
-}
-const store = useDrawerStore()
 
 </script>
 
@@ -34,8 +24,8 @@ const store = useDrawerStore()
   <nav class="tw-mx-5 tw-my-5 tw-flex tw-justify-between tw-gap-8 tw-items-center">
     <p class="text-button">GOWN</p>
 
-    <v-text-field :loading="loading" density="compact" variant="outlined" color="primary" label="Search" append-inner-icon="mdi-magnify" single-line hide-details @click:append-inner="search" v-on:keyup.enter="search" ref="input"/>
-
+    <v-text-field v-model="downloads.search" density="compact" variant="outlined" color="primary" label="Search" append-inner-icon="mdi-magnify" single-line hide-details/>
+    
     <div class="tw-flex tw-gap-5">
       <!-- <v-tooltip :text="themeTooltip" location="bottom">
         <template v-slot:activator="{ props }">
