@@ -1,38 +1,19 @@
 package storage
 
-import (
-	"changeme/gown/setting"
-	"os"
-	"path/filepath"
-)
+import "changeme/gown/lib/factory/download"
 
 type Storage struct {
-	data    [][]byte
-	setting *setting.Settings
+	Queue     []download.Download `json:"queue"`
+	Downloads []download.Download `json:"downloads"`
 }
 
-func New(parts int, setting *setting.Settings) Storage {
-	return Storage{
-		data:    make([][]byte, parts),
-		setting: setting,
-	}
-}
-
-func (s *Storage) Combine(data []byte, index int) {
-	s.data[index] = data
-}
-
-func (s *Storage) Save(name string) error {
-	if _, err := os.Stat(s.setting.SaveLocation); err != nil {
-		if err := os.MkdirAll(s.setting.SaveLocation, os.ModePerm); err != nil {
-			return err
-		}
-	}
-
-	combined := []byte{}
-	for i := 0; i < len(s.data); i++ {
-		combined = append(combined, s.data[i]...)
-	}
-
-	return os.WriteFile(filepath.Join(s.setting.SaveLocation, name), combined, os.ModePerm)
-}
+// TODO: implement storing data into persistent file
+// The data will be stored in a JSON file
+// The file will be stored in the data directory
+// The data will be :
+// - list of downloaded file
+// - list of queued download
+// - list of failed download
+// - selected theme
+// - theme configuration
+// - TBD

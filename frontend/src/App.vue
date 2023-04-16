@@ -14,6 +14,7 @@ const theme = useTheme()
 const now = useDateFormat(useNow(), 'MMMM DD, YYYY HH:mm').value
 const desserts: Download[] = [
   {
+    id: '1',
     status: {
       name: 'queued',
       icon: "mdi-tray-full",
@@ -24,12 +25,13 @@ const desserts: Download[] = [
     size: 301,
     date: now,
     type: {
-      name: 'music',
+      name: 'audio',
       icon: 'mdi-music-box' ,
       color: 'purple-accent-2'
     }
   },
   {
+    id: '2',
     status: {
       name: 'failed',
       icon: "mdi-alert-outline",
@@ -46,6 +48,7 @@ const desserts: Download[] = [
     }
   },
   {
+    id: '3',
     status: {
       name: 'success',
       icon: "mdi-check-circle-outline",
@@ -62,6 +65,7 @@ const desserts: Download[] = [
     }
   },
   {
+    id: '4',
     status: {
       name: 'success',
       icon: "mdi-check-circle-outline",
@@ -78,6 +82,7 @@ const desserts: Download[] = [
     }
   },
   {
+    id: '5',
     status: {
       name: 'failed',
       icon: "mdi-alert-outline",
@@ -94,6 +99,7 @@ const desserts: Download[] = [
     }
   },
   {
+    id: '6',
     status: {
       name: 'success',
       icon: "mdi-check-circle-outline",
@@ -110,6 +116,7 @@ const desserts: Download[] = [
     }
   },
   {
+    id: '7',
     status: {
       name: 'paused',
       icon: "mdi-pause-circle-outline",
@@ -126,6 +133,7 @@ const desserts: Download[] = [
     }
   },
   {
+    id: '8',
     status: {
       name: 'paused',
       icon: "mdi-pause-circle-outline",
@@ -142,6 +150,7 @@ const desserts: Download[] = [
     }
   },
   {
+    id: '9',
     status: {
       name: 'paused',
       icon: "mdi-pause-circle-outline",
@@ -152,12 +161,13 @@ const desserts: Download[] = [
     size: 520,
     date: now,
     type: {
-      name: 'music',
+      name: 'audio',
       icon: 'mdi-music-box',
       color: 'purple-accent-2'
     }
   },
   {
+    id: '10',
     status: {
       name: 'success',
       icon: "mdi-check-circle-outline",
@@ -168,7 +178,7 @@ const desserts: Download[] = [
     size: 300,
     date: now,
     type: {
-      name: 'music',
+      name: 'audio',
       icon: 'mdi-music-box',
       color: 'purple-accent-2'
     }

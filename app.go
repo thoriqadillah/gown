@@ -3,6 +3,7 @@ package main
 import (
 	"changeme/gown/http"
 	"changeme/gown/http/chunk"
+	"changeme/gown/lib/factory/download"
 	"changeme/gown/setting"
 	"changeme/gown/storage"
 	"changeme/gown/worker"
@@ -60,6 +61,9 @@ func (a *App) Fetch(url string) (*http.Response, error) {
 		return nil, err
 	}
 
+	//TODO: utilize this
+	download.NewFactory(res).Create()
+
 	return res, nil
 }
 
@@ -69,7 +73,7 @@ func (a *App) Download(res http.Response) error {
 	a.pool.Start()
 	// defer a.pool.Stop()
 
-	storage := storage.New(res.Totalpart, &a.settings)
+	storage := storage.NewFile(res.Totalpart, &a.settings)
 	chunks := make([]*chunk.Chunk, res.Totalpart)
 	for part := range chunks {
 		chunks[part] = chunk.New(a.ctx, res, part, &a.wg)
@@ -83,10 +87,10 @@ func (a *App) Download(res http.Response) error {
 	a.wg.Wait()
 
 	for part, chunk := range chunks {
-		storage.Combine(chunk.Data(), part)
+		storage.CombineFile(chunk.Data(), part)
 	}
 
-	if err := storage.Save(res.Filename); err != nil {
+	if err := storage.SaveFile(res.Filename); err != nil {
 		log.Printf("Error saving file: %v", err)
 		return err
 	}

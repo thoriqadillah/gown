@@ -4,8 +4,9 @@ import (
 	"changeme/gown/setting"
 	"log"
 	"math"
+	"mime"
 	"net/http"
-	"strings"
+	"regexp"
 )
 
 type Response struct {
@@ -42,7 +43,10 @@ func Fetch(url string, setting *setting.Settings) (*Response, error) {
 		return nil, err
 	}
 
-	contentType := res.Header.Get("Content-Type")
+	filename := filename(res)
+	regex := regexp.MustCompile("^.*.(zip|tar)$")
+	contentType := regex.ReplaceAllString(filename, "zip")
+	log.Println(contentType)
 
 	// check if the file support cansplit download
 	cansplit := res.Header.Get("Accept-Ranges") == "bytes"
@@ -62,7 +66,7 @@ func Fetch(url string, setting *setting.Settings) (*Response, error) {
 		ContentType: contentType,
 		Cansplit:    cansplit,
 		Totalpart:   totalpart,
-		Filename:    filename(contentType, url),
+		Filename:    filename,
 		Settings:    setting,
 	}
 
@@ -72,6 +76,8 @@ func Fetch(url string, setting *setting.Settings) (*Response, error) {
 func dynamicPartition(size int64, defaultParitionSize int64) int {
 	num := math.Log10(float64(size / (1024 * 1024)))
 	partsize := defaultParitionSize
+
+	// dampening the total partition
 	for i := 0; i < int(num); i++ {
 		partsize *= 2 // 2 is just author's self configured number
 	}
@@ -79,21 +85,8 @@ func dynamicPartition(size int64, defaultParitionSize int64) int {
 	return int(size / partsize)
 }
 
-func filename(contentType string, url string) string {
-	split := strings.Split(contentType, "/")
-	type_ := "." + split[len(split)-1]
-
-	split = strings.Split(url, "/")
-	filename := split[len(split)-1]
-	filename = strings.Split(filename, "?")[0]
-	if filename == "" {
-		return "file" + type_
-	}
-
-	split = strings.Split(filename, ".")
-	if len(split) != 0 {
-		return filename + type_
-	}
-
-	return filename
+func filename(res *http.Response) string {
+	disposition := res.Header.Get("Content-Disposition")
+	_, params, _ := mime.ParseMediaType(disposition)
+	return params["filename"]
 }

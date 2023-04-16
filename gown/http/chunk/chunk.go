@@ -25,11 +25,6 @@ type Chunk struct {
 	ctx      context.Context
 }
 
-type transfer struct {
-	index int
-	n     int
-}
-
 func New(ctx context.Context, res _http.Response, index int, wg *sync.WaitGroup) *Chunk {
 	totalpart := int64(res.Totalpart)
 	partsize := res.Size / totalpart
@@ -97,8 +92,8 @@ func (c *Chunk) download() error {
 			break
 		}
 
-		c.data = buffer
 		//TODO: combine the downloaded bytes into c.data
+		c.data = append(c.data, buffer...)
 		runtime.EventsEmit(c.ctx, "transfered", c.index, n)
 	}
 

@@ -25,7 +25,7 @@ export const useDownloads = defineStore('downloads', () => {
   const filterByImage = () => list.value = defaults.value.filter(d => d.type.name === 'image')
   const filterByVideo = () => list.value = defaults.value.filter(d => d.type.name === 'video')
   const filterByDocument = () => list.value = defaults.value.filter(d => d.type.name === 'document')
-  const filterByMusic = () => list.value = defaults.value.filter(d => d.type.name === 'music')
+  const filterByMusic = () => list.value = defaults.value.filter(d => d.type.name === 'audio')
   const filterByCompressed = ()  => list.value = defaults.value.filter(d => d.type.name === 'compressed')
   const setDefault = ()  => list.value = defaults.value
   const filter = (query: string) =>  {
