@@ -44,9 +44,7 @@ func Fetch(url string, setting *setting.Settings) (*Response, error) {
 	}
 
 	filename := filename(res)
-	regex := regexp.MustCompile("^.*.(zip|tar)$")
-	contentType := regex.ReplaceAllString(filename, "zip")
-	log.Println(contentType)
+	contentType := contentType(filename)
 
 	// check if the file support cansplit download
 	cansplit := res.Header.Get("Accept-Ranges") == "bytes"
@@ -71,6 +69,30 @@ func Fetch(url string, setting *setting.Settings) (*Response, error) {
 	}
 
 	return response, nil
+}
+
+func contentType(filename string) string {
+	if match, _ := regexp.MatchString(`^.*.(jpg|jpeg|png|gif|svg|bmp)$`, filename); match {
+		return "image"
+	}
+
+	if match, _ := regexp.MatchString(`^.*\.(mp4|mov|avi|mkv|wmv|flv|webm|mpeg|mpg|3gp|m4v|m4a)$`, filename); match {
+		return "video"
+	}
+
+	if match, _ := regexp.MatchString(`^.*.(mp3|wav|flac|aac|ogg|opus)$`, filename); match {
+		return "audio"
+	}
+
+	if match, _ := regexp.MatchString(`^.*.(doc|docx|pdf|txt|ppt|pptx|xls|xlsx|odt|ods|odp|odg|odf|rtf|tex|texi|texinfo|wpd|wps|wpg|wks|wqd|wqx|w)$`, filename); match {
+		return "document"
+	}
+
+	if match, _ := regexp.MatchString(`^.*.(zip|rar|7z|tar|gz|bz2|tgz|tbz2|xz|txz|zst|zstd)$`, filename); match {
+		return "compressed"
+	}
+
+	return "other"
 }
 
 func dynamicPartition(size int64, defaultParitionSize int64) int {
