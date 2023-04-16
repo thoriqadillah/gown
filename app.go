@@ -41,6 +41,10 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
+func (a *App) shutdown(ctx context.Context) {
+	a.pool.Stop()
+}
+
 // Greet returns a greeting for the given name
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
@@ -63,12 +67,12 @@ func (a *App) Download(res http.Response) error {
 	start := time.Now()
 
 	a.pool.Start()
-	defer a.pool.Stop()
+	// defer a.pool.Stop()
 
 	storage := storage.New(res.Totalpart, &a.settings)
 	chunks := make([]*chunk.Chunk, res.Totalpart)
 	for part := range chunks {
-		chunks[part] = chunk.New(res, part, &a.wg)
+		chunks[part] = chunk.New(a.ctx, res, part, &a.wg)
 	}
 
 	for _, job := range chunks {

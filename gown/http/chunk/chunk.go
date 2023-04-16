@@ -1,26 +1,36 @@
 package chunk
 
 import (
+	"bufio"
 	_http "changeme/gown/http"
+	"context"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type Chunk struct {
-	_http.Response
-	wg    *sync.WaitGroup
-	index int
-	start int64
-	end   int64
-	size  int64
-	data  []byte
+	response _http.Response
+	wg       *sync.WaitGroup
+	index    int
+	start    int64
+	end      int64
+	size     int64
+	data     []byte
+	ctx      context.Context
 }
 
-func New(res _http.Response, index int, wg *sync.WaitGroup) *Chunk {
+type transfer struct {
+	index int
+	n     int
+}
+
+func New(ctx context.Context, res _http.Response, index int, wg *sync.WaitGroup) *Chunk {
 	totalpart := int64(res.Totalpart)
 	partsize := res.Size / totalpart
 
@@ -32,13 +42,14 @@ func New(res _http.Response, index int, wg *sync.WaitGroup) *Chunk {
 	}
 
 	return &Chunk{
-		Response: res,
+		response: res,
 		wg:       wg,
 		index:    index,
 		start:    start,
 		end:      end,
 		size:     partsize,
-		data:     []byte{},
+		data:     make([]byte, partsize),
+		ctx:      ctx,
 	}
 }
 
@@ -52,10 +63,10 @@ func (c *Chunk) download() error {
 	if c.size == -1 {
 		log.Printf("Downloading chunk %d with size unknown", c.index+1)
 	} else {
-		log.Printf("Downloading chunk %d from %d to %d (~%d MB)", c.index+1, c.start, c.end, (c.end-c.start)/(1024*1024))
+		log.Printf("Downloading chunk %d from %d to %d (~%d MB)", c.index+1, c.start, c.end, (len(c.data))/(1024*1024))
 	}
 
-	req, err := http.NewRequest("GET", c.Url, nil)
+	req, err := http.NewRequest("GET", c.response.Url, nil)
 	if err != nil {
 		return err
 	}
@@ -70,10 +81,33 @@ func (c *Chunk) download() error {
 
 	defer res.Body.Close()
 
-	c.data, err = io.ReadAll(res.Body)
-	if err != nil {
-		return err
+	var _100KB int64 = 1024 * 100
+	r := bufio.NewReader(res.Body)
+	var transfered int64
+
+	for {
+		transfered += _100KB
+		if transfered > c.size {
+			_100KB = transfered - c.size
+		}
+		buffer := make([]byte, _100KB)
+
+		n, err := io.ReadFull(r, buffer)
+		if err == io.EOF {
+			break
+		}
+
+		c.data = buffer
+		//TODO: combine the downloaded bytes into c.data
+		runtime.EventsEmit(c.ctx, "transfered", c.index, n)
 	}
+
+	// c.data, err = io.ReadAll(res.Body)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// runtime.EventsEmit(c.ctx, "transfered", len(c.data))
 
 	elapsed := time.Since(start)
 	log.Printf("Chunk %d downloaded in %v s\n", c.index+1, elapsed.Seconds())
@@ -84,7 +118,7 @@ func (c *Chunk) download() error {
 func (c *Chunk) Execute() error {
 	var err error
 
-	for retry := 0; retry < c.Settings.Maxtries; retry++ {
+	for retry := 0; retry < c.response.Settings.Maxtries; retry++ {
 		if err = c.download(); err == nil {
 			return nil
 		}

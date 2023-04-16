@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import Dialog from '../services/download-dialog'
 import Downloader from '../services/downloader'
+import { useDownloads } from '../store/downloads';
 
 const response = ref()
 const input = ref()
@@ -13,6 +14,7 @@ const onURL = ref(true)
 const url = ref('')
 const size = ref('')
 
+const downloads = useDownloads()
 const dialog = new Dialog({ activator, loaded, loading, onFile, onURL })
 const downloader = new Downloader()
 
@@ -21,6 +23,7 @@ async function fetch() {
   dialog.loading()
 
   response.value = await downloader.fetch(url.value)
+  downloads.enqueue(response.value)
   size.value = downloader.parseSize(response.value.size)
 
   dialog.done()
@@ -32,12 +35,13 @@ async function download() {
   downloader.download(response.value)
   dialog.close()
 }
+
 </script>
 
 <template>
   <v-dialog v-model="activator" activator="parent" max-width="450px" transition="dialog-top-transition" persistent>
     <v-card>
-      <v-text-field v-if="onURL || !loaded" v-model="url" :loading="loading" :autofocus="activator" color="primary" type="input" hint="Click enter to fetch the file data from the URL you want to download" class="tw-p-3" density="compact" variant="outlined" label="URL" append-inner-icon="mdi-link" single-line v-on:keyup.enter="fetch()" ref="input"/>
+      <v-text-field v-if="onURL || !loaded" v-model="url" :loading="loading" :autofocus="activator" color="primary" type="input" hint="Click enter to fetch the file data from the URL you want to download" class="tw-p-3" density="compact" variant="outlined" label="URL" append-inner-icon="mdi-link" append-icon="mdi-magnify" @click:append="fetch()" single-line v-on:keyup.enter="fetch()" ref="input"/>
       <div v-else-if="onFile || !loaded" class="tw-flex tw-items-center">
         <div class="tw-basis-9/12">
           <v-text-field color="primary" v-model="response.filename" label="File name" append-inner-icon="mdi-file-document-edit" class="tw-px-3 tw-pt-3 -tw-mb-4" single-line v-on:keyup.enter="fetch" density="compact" variant="outlined" ref="input"/>
@@ -45,7 +49,7 @@ async function download() {
         </div>
         <div class="tw-basis-3/12 tw-text-center tw-pr-2 -tw-mt-5">
           <v-icon icon="mdi-file"></v-icon>
-          <p class="text-body-1 tw-mt-5">{{ size }} MB</p>
+          <p class="text-body-1 tw-mt-5">{{ size }}</p>
         </div>
       </div>
       
@@ -60,7 +64,7 @@ async function download() {
         </div>
         <div class="tw-flex tw-flex-row-reverse">
           <v-card-actions>
-            <v-btn color="primary" block @click="download()" :disabled="!loaded">Download</v-btn>
+            <v-btn color="primary" block @click="download()" :disabled="onURL || !loaded">Download</v-btn>
           </v-card-actions>
           <v-card-actions>
             <v-btn variant="text" block @click="dialog.close()">Cancel</v-btn>

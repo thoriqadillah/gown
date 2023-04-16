@@ -73,7 +73,7 @@ func dynamicPartition(size int64, defaultParitionSize int64) int {
 	num := math.Log10(float64(size / (1024 * 1024)))
 	partsize := defaultParitionSize
 	for i := 0; i < int(num); i++ {
-		partsize *= 3 // 3 is just author's self configured number
+		partsize *= 2 // 2 is just author's self configured number
 	}
 
 	return int(size / partsize)

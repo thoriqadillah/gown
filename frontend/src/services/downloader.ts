@@ -19,10 +19,11 @@ export default class Downloader {
   }
 
   parseSize(size: number): string {
-    if (size < this.KB) return (size / this.KB).toFixed(2)
-    if (size > this.KB && size < this.GB) return (size / this.MB).toFixed(2)
-    if (size > this.GB) return (size / this.GB).toFixed(2)
+    if (size < this.KB) return (size / this.KB).toFixed(2) + " KB"
+    if (size > this.KB && size < this.MB) return (size / this.KB).toFixed(2) + " KB"
+    if (size > this.KB && size < this.GB) return (size / this.MB).toFixed(2) + " MB"
+    if (size > this.GB) return (size / this.GB).toFixed(2) + " GB"
 
-    return ''
+    return '0 KB'
   }
 }

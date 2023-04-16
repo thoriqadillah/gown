@@ -1,12 +1,38 @@
 <script setup lang="ts">
 import { Download } from '../types/download';
-import { defineProps, computed, ref } from 'vue';
+import { defineProps, ref } from 'vue';
 import { useDownloads } from '../store/downloads';
+import { EventsOn } from '../../wailsjs/runtime/runtime';
+import { watch } from 'vue';
 
 const downloads = useDownloads()
 const props = defineProps<{
   list: Download[]
 }>()
+
+const transfered = ref(0)
+const progress = ref(0)
+const progressWrapper = ref<HTMLElement[]>([])
+const progressBar = ref()
+const totalparts = ref(0)
+
+watch(downloads.toDownload, (newval, oldval) => {
+  totalparts.value = downloads.toDownload[0].totalpart
+  console.log(progressWrapper.value);
+  
+})
+
+EventsOn("transfered", (...data) => {
+  transfered.value += data[1] / (1024*1024)
+  progress.value = ((transfered.value / (downloads.toDownload[0].size / (1024*1024))) * 100)
+  
+  let prog = progress.value.toFixed(0)
+  const progressBar = document.getElementById(`progressBar-0-${data[0]}`) as HTMLElement
+  progressBar.style.width = prog + '%'
+  
+  console.log(data);
+  
+})
 
 </script>
 
@@ -20,7 +46,7 @@ const props = defineProps<{
       <v-btn variant="outlined" @click="downloads.filterByCompressed()" prepend-icon="mdi-zip-box" color="yellow-accent-4">COMPRESSED</v-btn>
       <v-btn variant="outlined" @click="downloads.filterByMusic()" prepend-icon="mdi-music-box" color="purple-accent-2">MUSIC</v-btn>
     </div>
-
+    
     <v-table density="compact">
       <thead>
         <tr>
@@ -54,13 +80,16 @@ const props = defineProps<{
         </tr>
       </thead>
       <tbody >
-        <tr v-for="item in props.list" :key="item.name">
-          <td class="tw-rounded-sm">
-            <div class="tw-flex tw-justify-between">
+        <tr v-for="(item,i) in props.list" :key="item.name">
+          <td color="primary" class="tw-rounded-sm" id="nameCol">
+            <div class="tw-flex tw-justify-between tw-mt-1">
               <div class="tw-w-max">
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
                 <span class="tw-text-sm">{{ item.name }}</span>
               </div>
+            </div>
+            <div ref="progressWrapper" class="progressWrapper tw-flex tw-justify-between">
+              <div v-for="part in totalparts" :class="`tw-h-0.5 tw-bg-green-500 tw-opacity-50 tw-my-1 tw-w-1 tw-rounded-lg ` + `tw-basis-1/${totalparts}`" :id="`progressBar-${i}-${part-1}`" ref="progressBar"></div> 
             </div>
           </td>
           <td class="tw-text-sm tw-rounded-sm text-left">{{ item.timeElapsed }}</td>
