@@ -72,27 +72,21 @@ type (
 	}
 )
 
-type downloadFactory struct {
-	factory.Factory
-}
+type FactoryImpl func(res *http.Response) factory.Factory
 
 var start sync.Once
+var factories map[string]FactoryImpl
 
-func NewFactory(res *http.Response) downloadFactory {
-	var factories map[string]factory.Factory
+func NewFactory(res *http.Response) factory.Factory {
+	factory := factories[res.ContentType]
 
+	return factory(res)
+}
+
+func register(name string, factory FactoryImpl) {
 	start.Do(func() {
-		factories = map[string]factory.Factory{
-			"video":      videoFactory(res),
-			"audio":      audioFactory(res),
-			"document":   documentFactory(res),
-			"image":      imageFactory(res),
-			"other":      otherFactory(res),
-			"compressed": compressedFactory(res),
-		}
+		factories = make(map[string]FactoryImpl)
 	})
 
-	return downloadFactory{
-		Factory: factories[res.ContentType],
-	}
+	factories[name] = factory
 }

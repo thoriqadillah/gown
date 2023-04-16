@@ -37,3 +37,7 @@ func (v *OtherFactory) Create() interface{} {
 		},
 	}
 }
+
+func init() {
+	register("other", otherFactory)
+}

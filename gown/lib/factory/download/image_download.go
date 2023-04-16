@@ -37,3 +37,7 @@ func (v *ImageFactory) Create() interface{} {
 		},
 	}
 }
+
+func init() {
+	register("image", imageFactory)
+}

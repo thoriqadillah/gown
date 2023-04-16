@@ -37,3 +37,7 @@ func (v *VideoFactory) Create() interface{} {
 		},
 	}
 }
+
+func init() {
+	register("video", videoFactory)
+}

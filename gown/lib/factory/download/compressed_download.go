@@ -37,3 +37,7 @@ func (v *CompressedFactory) Create() interface{} {
 		},
 	}
 }
+
+func init() {
+	register("compressed", compressedFactory)
+}

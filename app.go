@@ -61,8 +61,9 @@ func (a *App) Fetch(url string) (*http.Response, error) {
 		return nil, err
 	}
 
-	//TODO: utilize this
-	download.NewFactory(res).Create()
+	// TODO: utilize this
+	factory := download.NewFactory(res)
+	log.Println(factory.Create())
 
 	return res, nil
 }

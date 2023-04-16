@@ -37,3 +37,7 @@ func (v *DocumentFactory) Create() interface{} {
 		},
 	}
 }
+
+func init() {
+	register("document", documentFactory)
+}
