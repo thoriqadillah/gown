@@ -12,13 +12,13 @@ type CompressedFactory struct {
 	res *http.Response
 }
 
-func compressedFactory(res *http.Response) factory.Factory {
+func compressedFactory(res *http.Response) factory.Factory[Download] {
 	return &CompressedFactory{
 		res: res,
 	}
 }
 
-func (v *CompressedFactory) Create() interface{} {
+func (v *CompressedFactory) Create() Download {
 	return Download{
 		ID:          uuid.New().String(),
 		Name:        v.res.Filename,

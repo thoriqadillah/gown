@@ -1,5 +1,5 @@
 package factory
 
-type Factory interface {
-	Create() interface{}
+type Factory[T any] interface {
+	Create() T
 }

@@ -12,13 +12,13 @@ type AudioFactory struct {
 	res *http.Response
 }
 
-func audioFactory(res *http.Response) factory.Factory {
+func audioFactory(res *http.Response) factory.Factory[Download] {
 	return &AudioFactory{
 		res: res,
 	}
 }
 
-func (v *AudioFactory) Create() interface{} {
+func (v *AudioFactory) Create() Download {
 	return Download{
 		ID:          uuid.New().String(),
 		Name:        v.res.Filename,

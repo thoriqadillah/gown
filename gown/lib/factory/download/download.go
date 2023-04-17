@@ -72,12 +72,12 @@ type (
 	}
 )
 
-type FactoryImpl func(res *http.Response) factory.Factory
+type FactoryImpl func(res *http.Response) factory.Factory[Download]
 
 var start sync.Once
 var factories map[string]FactoryImpl
 
-func NewFactory(res *http.Response) factory.Factory {
+func NewFactory(res *http.Response) factory.Factory[Download] {
 	factory := factories[res.ContentType]
 
 	return factory(res)

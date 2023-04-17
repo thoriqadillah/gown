@@ -12,13 +12,13 @@ type OtherFactory struct {
 	res *http.Response
 }
 
-func otherFactory(res *http.Response) factory.Factory {
+func otherFactory(res *http.Response) factory.Factory[Download] {
 	return &OtherFactory{
 		res: res,
 	}
 }
 
-func (v *OtherFactory) Create() interface{} {
+func (v *OtherFactory) Create() Download {
 	return Download{
 		ID:          uuid.New().String(),
 		Name:        v.res.Filename,
