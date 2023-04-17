@@ -2,7 +2,6 @@
 import { useDrawerStore } from '../store/drawer';
 
 const store = useDrawerStore()
-
 </script>
 
 <template>

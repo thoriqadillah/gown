@@ -37,3 +37,7 @@ func (v *AudioFactory) Create() interface{} {
 		},
 	}
 }
+
+func init() {
+	register("audio", audioFactory)
+}

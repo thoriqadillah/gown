@@ -38,5 +38,3 @@ createApp(App)
   .use(pinia)
   .use(vuetify)
   .mount('#app')
-
-console.log()

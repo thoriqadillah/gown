@@ -16,8 +16,6 @@ function toggleTheme() {
   themeIcon.value = theme.global.current.value.dark ? 'mdi-white-balance-sunny' : 'mdi-weather-night'
   themeTooltip.value = theme.global.current.value.dark ? 'Light Mode' : 'Dark Mode'
 }
-
-
 </script>
 
 <template>

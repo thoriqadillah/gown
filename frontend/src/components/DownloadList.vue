@@ -18,8 +18,6 @@ const totalparts = ref(0)
 
 watch(downloads.toDownload, (newval, oldval) => {
   totalparts.value = downloads.toDownload[0].totalpart
-  console.log(progressWrapper.value);
-  
 })
 
 EventsOn("transfered", (...data) => {
@@ -29,9 +27,6 @@ EventsOn("transfered", (...data) => {
   let prog = progress.value.toFixed(0)
   const progressBar = document.getElementById(`progressBar-0-${data[0]}`) as HTMLElement
   progressBar.style.width = prog + '%'
-  
-  console.log(data);
-  
 })
 
 </script>
