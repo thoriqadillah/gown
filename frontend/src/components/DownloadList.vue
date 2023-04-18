@@ -4,10 +4,11 @@ import { defineProps, ref } from 'vue';
 import { useDownloads } from '../store/downloads';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
 import { watch } from 'vue';
+import { download } from '../../wailsjs/go/models';
 
 const downloads = useDownloads()
 const props = defineProps<{
-  list: Download[]
+  list: download.Download[]
 }>()
 
 const transfered = ref(0)
@@ -16,8 +17,8 @@ const progressWrapper = ref<HTMLElement[]>([])
 const progressBar = ref()
 const totalparts = ref(0)
 
-watch(downloads.toDownload, (newval, oldval) => {
-  totalparts.value = downloads.toDownload[0].totalpart
+watch(downloads.list, (newval, oldval) => {
+  totalparts.value = downloads.toDownload.totalpart
 })
 
 EventsOn("transfered", (...data) => {
@@ -74,7 +75,7 @@ EventsOn("transfered", (...data) => {
           </th>
         </tr>
       </thead>
-      <tbody >
+      <tbody>
         <tr v-for="(item,i) in props.list" :key="item.name">
           <td color="primary" class="tw-rounded-sm" id="nameCol">
             <div class="tw-flex tw-justify-between tw-mt-1">
@@ -87,8 +88,8 @@ EventsOn("transfered", (...data) => {
               <div v-for="part in totalparts" :class="`tw-h-0.5 tw-bg-green-500 tw-opacity-50 tw-my-1 tw-w-1 tw-rounded-lg ` + `tw-basis-1/${totalparts}`" :id="`progressBar-${i}-${part-1}`" ref="progressBar"></div> 
             </div>
           </td>
-          <td class="tw-text-sm tw-rounded-sm text-left">{{ item.timeElapsed }}</td>
-          <td class="tw-text-sm tw-rounded-sm text-left">{{ item.size }}</td>
+          <td class="tw-text-sm tw-rounded-sm text-left">{{ item.timeElapsed == 0 ? '' : item.timeElapsed }}</td>
+          <td class="tw-text-sm tw-rounded-sm text-left">{{ downloads.parseSize(item.size) }}</td>
           <div class="tw-w-max mt-2 tw-text-left">
             <td class="tw-text-sm tw-rounded-sm text-left">{{ item.date }}</td>
           </div>

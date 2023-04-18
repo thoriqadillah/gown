@@ -14,6 +14,10 @@ export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
 
+export function InitData() {
+  return window['go']['main']['App']['InitData']();
+}
+
 export function Theme() {
   return window['go']['main']['App']['Theme']();
 }

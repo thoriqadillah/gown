@@ -8,8 +8,12 @@ import (
 	"changeme/gown/storage"
 	"changeme/gown/worker"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"io/fs"
 	"log"
+	"os"
 	"sync"
 	"time"
 )
@@ -20,6 +24,7 @@ type App struct {
 	settings setting.Settings
 	pool     worker.Pool
 	wg       sync.WaitGroup
+	data     []download.Download
 	err      error
 }
 
@@ -40,6 +45,39 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+
+	// creating the data folder
+	if _, err := os.Stat(a.settings.DataLocation); err != nil {
+		err := os.MkdirAll(a.settings.DataLocation, os.ModePerm)
+		if err != nil {
+			log.Fatalf("Cannot creating the folder: %v", err)
+		}
+
+		_, err = os.Create(a.settings.DataFilename)
+		if err != nil {
+			log.Fatalf("Cannot creating the file: %v", err)
+		}
+	}
+
+	// reading the data file
+	go func() {
+		jsonFile, err := os.Open(a.settings.DataFilename)
+		if err != nil {
+			log.Printf("Error opening data file: %v", err)
+			return
+		}
+
+		value, err := io.ReadAll(jsonFile)
+		if err != nil {
+			log.Printf("Error opening data file: %v", err)
+		}
+
+		err = json.Unmarshal(value, &a.data)
+		if err != nil {
+			log.Printf("Error opening data file: %v", err)
+		}
+		log.Println("data[]", a.data)
+	}()
 }
 
 func (a *App) shutdown(ctx context.Context) {
@@ -55,24 +93,48 @@ func (a *App) Theme() setting.Themes {
 	return a.settings.Themes
 }
 
-func (a *App) Fetch(url string) (*http.Response, error) {
+func (a *App) Fetch(url string) (*download.DownloadData, error) {
 	res, err := http.Fetch(url, &a.settings)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: utilize this
 	factory := download.NewFactory(res)
-	log.Println(factory.Create())
+	data := factory.Create()
+	downloadData := &download.DownloadData{
+		Response: res,
+		Data:     data,
+	}
 
-	return res, nil
+	go func() {
+		a.data = append(a.data, data)
+		log.Println("data[]", a.data)
+		dataVal, err := json.MarshalIndent(a.data, "", " ")
+		if err != nil {
+			log.Fatalf("Error marshaling the data: %v", err)
+		}
+
+		err = os.WriteFile(a.settings.DataFilename, dataVal, fs.ModePerm)
+		if err != nil {
+			log.Fatalf("Error writing the data into file: %v", err)
+		}
+	}()
+
+	return downloadData, nil
+}
+
+func (a *App) InitData() []download.Download {
+	if len(a.data) == 0 {
+		return []download.Download{}
+	}
+
+	return a.data
 }
 
 func (a *App) Download(res http.Response) error {
 	start := time.Now()
 
 	a.pool.Start()
-	// defer a.pool.Stop()
 
 	storage := storage.NewFile(res.Totalpart, &a.settings)
 	chunks := make([]*chunk.Chunk, res.Totalpart)

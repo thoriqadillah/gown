@@ -70,6 +70,11 @@ type (
 		Icon  string `json:"icon"`
 		Color string `json:"color"`
 	}
+
+	DownloadData struct {
+		Response *http.Response `json:"response"`
+		Data     Download       `json:"data"`
+	}
 )
 
 type FactoryImpl func(res *http.Response) factory.Factory[Download]

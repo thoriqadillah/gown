@@ -7,6 +7,8 @@ const (
 	DEFAULT_MAX_TRIES                    = 3
 	DEFAULT_SIMMULATANOUS_DOWNLOAD       = 4
 	DEFAULT_SAVE_LOCATION                = "/home/thoriqadillah/Downloads/"
+	DEFAULT_DATA_LOCATION                = "/home/thoriqadillah/.gown/"
+	DEFAULT_DATA_FILE_NAME               = "/home/thoriqadillah/.gown/downloads.json"
 )
 
 type Settings struct {
@@ -16,6 +18,8 @@ type Settings struct {
 	Maxtries        int    `json:"maxtries"`
 	SimmultanousNum int    `json:"simmultanousNum"`
 	SaveLocation    string `json:"saveLocation"`
+	DataLocation    string `json:"dataLocation"`
+	DataFilename    string `json:"dataFilename"`
 }
 
 func New() Settings {
@@ -26,5 +30,7 @@ func New() Settings {
 		Maxtries:        DEFAULT_MAX_TRIES,
 		SimmultanousNum: DEFAULT_SIMMULATANOUS_DOWNLOAD,
 		SaveLocation:    DEFAULT_SAVE_LOCATION,
+		DataLocation:    DEFAULT_DATA_LOCATION,
+		DataFilename:    DEFAULT_DATA_FILE_NAME,
 	}
 }

@@ -1,23 +1,25 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { Download } from "../types/download";
-import { http } from "../../wailsjs/go/models";
+import { download, http } from "../../wailsjs/go/models";
 
 export const useDownloads = defineStore('downloads', () => {
-  const list = ref<Download[]>(new Array<Download>())
-  const defaults = ref<Download[]>(new Array<Download>())
+  const list = ref<download.Download[]>(new Array<download.Download>())
+  const defaults = ref<download.Download[]>(new Array<download.Download>())
   const search = ref('')
-  const toDownload = ref<http.Response[]>([])
+  const toDownload = ref()
 
   const ascName = ref(true)
   const ascDate = ref(true)
   const ascSize = ref(true)
   const ascTimeElapsed = ref(true)
 
-  const enqueue = (res: http.Response) => toDownload.value.push(res)
-  const add = (download: Download) => list.value.push(download)
-  const remove = (download: Download) => list.value.splice(list.value.indexOf(download), 1)
-  const setData = (data: Download[]) => {
+  const add = (val: download.DownloadData) => {
+    list.value.push(val.data)
+    toDownload.value = val.response
+  }
+  const remove = (download: download.Download) => list.value.splice(list.value.indexOf(download), 1)
+  const setData = (data: download.Download[]) => {
     list.value = data
     defaults.value = data
   }
@@ -50,11 +52,22 @@ export const useDownloads = defineStore('downloads', () => {
     return ascTimeElapsed.value ? list.value.sort((a, b) => a.timeElapsed - b.timeElapsed) : list.value.sort((a, b) => a.timeElapsed - b.timeElapsed).reverse()
   }
 
+  const KB = 1024
+  const MB = KB * KB
+  const GB = MB * MB
+  const parseSize = (size: number): string => {
+    if (size < KB) return (size / KB).toFixed(2) + " KB"
+    if (size > KB && size < MB) return (size / KB).toFixed(2) + " KB"
+    if (size > KB && size < GB) return (size / MB).toFixed(2) + " MB"
+    if (size > GB) return (size / GB).toFixed(2) + " GB"
+
+    return '0 KB'
+  }
+
   return {
     list,
     search,
     toDownload,
-    enqueue,
     add,
     remove,
     setData,
@@ -69,5 +82,6 @@ export const useDownloads = defineStore('downloads', () => {
     sortByDate,
     sortBySize,
     sortByTimeElapsed,
+    parseSize
   }
 })
