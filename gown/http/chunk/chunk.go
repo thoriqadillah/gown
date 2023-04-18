@@ -1,7 +1,6 @@
 package chunk
 
 import (
-	"bufio"
 	_http "changeme/gown/http"
 	"context"
 	"fmt"
@@ -43,7 +42,7 @@ func New(ctx context.Context, res _http.Response, index int, wg *sync.WaitGroup)
 		start:    start,
 		end:      end,
 		size:     partsize,
-		data:     make([]byte, partsize),
+		data:     make([]byte, 0, partsize),
 		ctx:      ctx,
 	}
 }
@@ -51,7 +50,6 @@ func New(ctx context.Context, res _http.Response, index int, wg *sync.WaitGroup)
 func (c *Chunk) download() error {
 	defer c.wg.Done()
 
-	//TODO: implement download chunk
 	http_ := &http.Client{}
 	part := fmt.Sprintf("bytes=%d-%d", c.start, c.end)
 
@@ -73,36 +71,20 @@ func (c *Chunk) download() error {
 	if err != nil {
 		return err
 	}
-
 	defer res.Body.Close()
 
 	var _100KB int64 = 1024 * 100
-	r := bufio.NewReader(res.Body)
-	var transfered int64
+	buffer := make([]byte, _100KB)
 
 	for {
-		transfered += _100KB
-		if transfered > c.size {
-			_100KB = transfered - c.size
-		}
-		buffer := make([]byte, _100KB)
-
-		n, err := io.ReadFull(r, buffer)
+		n, err := io.ReadFull(res.Body, buffer)
 		if err == io.EOF {
 			break
 		}
 
-		//TODO: combine the downloaded bytes into c.data
-		c.data = append(c.data, buffer...)
-		runtime.EventsEmit(c.ctx, "transfered", c.index, n)
+		c.data = append(c.data, buffer[:n]...)
+		runtime.EventsEmit(c.ctx, "transfered", c.index, n) //TODO: implement proper transfer emition to differentiate which div to animate the progress bar
 	}
-
-	// c.data, err = io.ReadAll(res.Body)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// runtime.EventsEmit(c.ctx, "transfered", len(c.data))
 
 	elapsed := time.Since(start)
 	log.Printf("Chunk %d downloaded in %v s\n", c.index+1, elapsed.Seconds())
