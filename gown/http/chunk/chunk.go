@@ -56,7 +56,7 @@ func (c *Chunk) download() error {
 	if c.size == -1 {
 		log.Printf("Downloading chunk %d with size unknown", c.index+1)
 	} else {
-		log.Printf("Downloading chunk %d from %d to %d (~%d MB)", c.index+1, c.start, c.end, (len(c.data))/(1024*1024))
+		log.Printf("Downloading chunk %d from %d to %d (~%d MB)", c.index+1, c.start, c.end, (c.size)/(1024*1024))
 	}
 
 	req, err := http.NewRequest("GET", c.response.Url, nil)

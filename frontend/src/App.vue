@@ -13,7 +13,7 @@ import { download } from '../wailsjs/go/models';
 
 const theme = useTheme()
 
-// const now = useDateFormat(useNow(), 'MMMM DD, YYYY HH:mm').value
+// const now = 
 // const desserts: Download[] = [
 //   {
 //     id: '1',
@@ -188,6 +188,7 @@ const theme = useTheme()
 // ]
 const downloads = useDownloads()
 InitData().then((data: download.Download[]) => {
+  data.forEach(el => el.date = useDateFormat(el.date, 'MMMM DD, YYYY HH:mm').value)
   downloads.setData(data)
 })
 const data = computed(() => downloads.filter(downloads.search))

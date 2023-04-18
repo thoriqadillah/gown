@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { download } from '../../wailsjs/go/models';
+import { download, http } from '../../wailsjs/go/models';
 import Dialog from '../services/download-dialog'
 import Downloader from '../services/downloader'
 import { useDownloads } from '../store/downloads';
@@ -24,17 +24,16 @@ async function fetch() {
   dialog.loading()
 
   result.value = await downloader.fetch(url.value) as download.DownloadData
-  downloads.add(result.value.data)
+  downloads.add(result.value)
   size.value = downloads.parseSize(result.value.data.size)
 
   dialog.done()
-  onFile.value = true
-  onURL.value = false
+  dialog.next()
 }
 
 // TODO: implement download
 async function download() {
-  downloader.download(result.value.res)
+  downloader.download(result.value.response as http.Response)
   dialog.close()
 }
 
@@ -46,7 +45,7 @@ async function download() {
       <v-text-field v-if="onURL || !loaded" v-model="url" :loading="loading" :autofocus="activator" color="primary" type="input" hint="Click enter to fetch the file data from the URL you want to download" class="tw-p-3" density="compact" variant="outlined" label="URL" append-inner-icon="mdi-link" append-icon="mdi-magnify" @click:append="fetch()" single-line v-on:keyup.enter="fetch()" ref="input"/>
       <div v-else-if="onFile || !loaded" class="tw-flex tw-items-center">
         <div class="tw-basis-9/12">
-          <v-text-field color="primary" v-model="result.data.name" label="File name" append-inner-icon="mdi-file-document-edit" class="tw-px-3 tw-pt-3 -tw-mb-4" single-line v-on:keyup.enter="fetch" density="compact" variant="outlined" ref="input"/>
+          <v-text-field color="primary" v-model="result.response.filename" label="File name" append-inner-icon="mdi-file-document-edit" class="tw-px-3 tw-pt-3 -tw-mb-4" single-line v-on:keyup.enter="fetch" density="compact" variant="outlined" ref="input"/>
           <v-text-field color="primary" v-model="result.response.settings.saveLocation" label="Save location" append-inner-icon="mdi-folder" type="input" hint="Save location" class="tw-p-3" single-line v-on:keyup.enter="fetch" density="compact" variant="outlined" ref="input"/>
         </div>
         <div class="tw-basis-3/12 tw-text-center tw-pr-2 -tw-mt-5">

@@ -18,7 +18,7 @@ const (
 	STATUS_ICON_FAILED     = "mdi-alert-outline"
 	STATUS_ICON_PAUSED     = "mdi-pause-circle-outline"
 	STATUS_ICON_QUEUED     = "mdi-tray-full"
-	STATUS_ICON_PROCESSING = ""
+	STATUS_ICON_PROCESSING = "mdi-progress-helper"
 
 	STATUS_COLOR_SUCCESS    = "success"
 	STATUS_COLOR_FAILED     = "warning"

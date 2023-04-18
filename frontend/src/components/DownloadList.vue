@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { Download } from '../types/download';
 import { defineProps, ref } from 'vue';
 import { useDownloads } from '../store/downloads';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
 import { watch } from 'vue';
 import { download } from '../../wailsjs/go/models';
+import { useDateFormat } from '@vueuse/shared';
 
 const downloads = useDownloads()
 const props = defineProps<{
@@ -23,7 +23,7 @@ watch(downloads.list, (newval, oldval) => {
 
 EventsOn("transfered", (...data) => {
   transfered.value += data[1] / (1024*1024)
-  progress.value = ((transfered.value / (downloads.toDownload[0].size / (1024*1024))) * 100)
+  progress.value = ((transfered.value / (downloads.toDownload.size / (1024*1024))) * 100)
   
   let prog = progress.value.toFixed(0)
   const progressBar = document.getElementById(`progressBar-0-${data[0]}`) as HTMLElement
@@ -54,19 +54,19 @@ EventsOn("transfered", (...data) => {
           </th>
           <th class="text-left tw-cursor-pointer" @click="downloads.sortByTimeElapsed()">
             <div class="tw-flex tw-justify-between tw-items-center tw-w-max md:tw-w-full">
-              <span class="tw-text-sm tw-mr-3">Time Elapsed</span>
+              <span class="tw-text-sm tw-mr-3 tw-w-32">Time Elapsed</span>
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
           </th>
           <th class="text-left tw-cursor-pointer" @click="downloads.sortBySize">
             <div class="tw-flex tw-justify-between tw-items-center">
-              <span class="tw-text-sm tw-mr-3">Size</span>
+              <span class="tw-text-sm tw-mr-3 tw-w-20">Size</span>
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
           </th>
           <th class="text-left tw-cursor-pointer" @click="downloads.sortByDate()">
             <div class="tw-flex tw-justify-between tw-items-center">
-              <span class="tw-text-sm">Date</span>
+              <span class="tw-text-sm tw-w-32">Date</span>
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
           </th>
@@ -79,7 +79,7 @@ EventsOn("transfered", (...data) => {
         <tr v-for="(item,i) in props.list" :key="item.name">
           <td color="primary" class="tw-rounded-sm" id="nameCol">
             <div class="tw-flex tw-justify-between tw-mt-1">
-              <div class="tw-w-max">
+              <div class="tw-overflow-x-hidden tw-w-max">
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
                 <span class="tw-text-sm">{{ item.name }}</span>
               </div>
@@ -88,11 +88,9 @@ EventsOn("transfered", (...data) => {
               <div v-for="part in totalparts" :class="`tw-h-0.5 tw-bg-green-500 tw-opacity-50 tw-my-1 tw-w-1 tw-rounded-lg ` + `tw-basis-1/${totalparts}`" :id="`progressBar-${i}-${part-1}`" ref="progressBar"></div> 
             </div>
           </td>
-          <td class="tw-text-sm tw-rounded-sm text-left">{{ item.timeElapsed == 0 ? '' : item.timeElapsed }}</td>
-          <td class="tw-text-sm tw-rounded-sm text-left">{{ downloads.parseSize(item.size) }}</td>
-          <div class="tw-w-max mt-2 tw-text-left">
-            <td class="tw-text-sm tw-rounded-sm text-left">{{ item.date }}</td>
-          </div>
+          <td class="tw-text-sm tw-rounded-sm text-left tw-w-32">{{ item.timeElapsed == 0 ? '' : item.timeElapsed }}</td>
+          <td class="tw-text-sm tw-rounded-sm text-left tw-w-20">{{ downloads.parseSize(item.size) }}</td>
+          <td class="tw-text-sm tw-rounded-sm text-left tw-w-32">{{ useDateFormat(item.date, 'MMMM DD, YYYY HH:mm').value }}</td>
           <td class="tw-text-sm tw-text-left"><v-icon :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90 tw-ml-2"></v-icon></td>
         </tr>
       </tbody>
