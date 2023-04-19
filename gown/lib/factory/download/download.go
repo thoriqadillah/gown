@@ -18,7 +18,7 @@ const (
 	STATUS_ICON_FAILED     = "mdi-alert-outline"
 	STATUS_ICON_PAUSED     = "mdi-pause-circle-outline"
 	STATUS_ICON_QUEUED     = "mdi-tray-full"
-	STATUS_ICON_PROCESSING = ""
+	STATUS_ICON_PROCESSING = "mdi-progress-helper"
 
 	STATUS_COLOR_SUCCESS    = "success"
 	STATUS_COLOR_FAILED     = "warning"
@@ -52,11 +52,12 @@ type (
 	Download struct {
 		ID          string         `json:"id"`
 		Name        string         `json:"name"`
-		TimeElapsed int            `json:"timeElapsed"`
+		TimeElapsed string         `json:"timeElapsed"`
 		Size        int64          `json:"size"`
 		Date        time.Time      `json:"date"`
 		Status      DownloadStatus `json:"status"`
 		Type        DownloadType   `json:"type"`
+		Metadata    Metadata       `json:"metadata"`
 	}
 
 	DownloadStatus struct {
@@ -65,12 +66,31 @@ type (
 		Color string `json:"color"`
 	}
 
+	Metadata struct {
+		Url       string `json:"url"`
+		Cansplit  bool   `json:"cansplit"`
+		Totalpart int    `json:"totalpart"`
+	}
+
 	DownloadType struct {
 		Name  string `json:"name"`
 		Icon  string `json:"icon"`
 		Color string `json:"color"`
 	}
+
+	DownloadData struct {
+		Response *http.Response `json:"response"`
+		Data     Download       `json:"data"`
+	}
 )
+
+func SetStatusSuccess() DownloadStatus {
+	return DownloadStatus{
+		Name:  STATUS_NAME_SUCCESS,
+		Icon:  STATUS_ICON_SUCCESS,
+		Color: STATUS_COLOR_SUCCESS,
+	}
+}
 
 type FactoryImpl func(res *http.Response) factory.Factory[Download]
 

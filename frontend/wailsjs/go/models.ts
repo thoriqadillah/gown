@@ -1,27 +1,78 @@
-export namespace http {
+export namespace download {
 	
-	export class Response {
+	export class Metadata {
 	    url: string;
-	    size: number;
-	    contentType: string;
 	    cansplit: boolean;
 	    totalpart: number;
-	    filename: string;
-	    settings?: setting.Settings;
 	
 	    static createFrom(source: any = {}) {
-	        return new Response(source);
+	        return new Metadata(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.url = source["url"];
-	        this.size = source["size"];
-	        this.contentType = source["contentType"];
 	        this.cansplit = source["cansplit"];
 	        this.totalpart = source["totalpart"];
-	        this.filename = source["filename"];
-	        this.settings = this.convertValues(source["settings"], setting.Settings);
+	    }
+	}
+	export class DownloadType {
+	    name: string;
+	    icon: string;
+	    color: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DownloadType(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.icon = source["icon"];
+	        this.color = source["color"];
+	    }
+	}
+	export class DownloadStatus {
+	    name: string;
+	    icon: string;
+	    color: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DownloadStatus(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.icon = source["icon"];
+	        this.color = source["color"];
+	    }
+	}
+	export class Download {
+	    id: string;
+	    name: string;
+	    timeElapsed: string;
+	    size: number;
+	    // Go type: time
+	    date: any;
+	    status: DownloadStatus;
+	    type: DownloadType;
+	    metadata: Metadata;
+	
+	    static createFrom(source: any = {}) {
+	        return new Download(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.timeElapsed = source["timeElapsed"];
+	        this.size = source["size"];
+	        this.date = this.convertValues(source["date"], null);
+	        this.status = this.convertValues(source["status"], DownloadStatus);
+	        this.type = this.convertValues(source["type"], DownloadType);
+	        this.metadata = this.convertValues(source["metadata"], Metadata);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -42,6 +93,8 @@ export namespace http {
 		    return a;
 		}
 	}
+	
+	
 
 }
 
@@ -55,6 +108,8 @@ export namespace setting {
 	    maxtries: number;
 	    simmultanousNum: number;
 	    saveLocation: string;
+	    dataLocation: string;
+	    dataFilename: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Settings(source);
@@ -69,6 +124,8 @@ export namespace setting {
 	        this.maxtries = source["maxtries"];
 	        this.simmultanousNum = source["simmultanousNum"];
 	        this.saveLocation = source["saveLocation"];
+	        this.dataLocation = source["dataLocation"];
+	        this.dataFilename = source["dataFilename"];
 	    }
 	}
 	export class Themes {

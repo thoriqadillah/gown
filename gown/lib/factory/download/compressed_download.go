@@ -22,7 +22,7 @@ func (v *CompressedFactory) Create() Download {
 	return Download{
 		ID:          uuid.New().String(),
 		Name:        v.res.Filename,
-		TimeElapsed: 0,
+		TimeElapsed: "",
 		Size:        v.res.Size,
 		Date:        time.Now(),
 		Status: DownloadStatus{
@@ -34,6 +34,11 @@ func (v *CompressedFactory) Create() Download {
 			Name:  TYPE_NAME_COMPRESSED,
 			Icon:  TYPE_ICON_COMPRESSED,
 			Color: TYPE_COLOR_COMPRESSED,
+		},
+		Metadata: Metadata{
+			Url:       v.res.Url,
+			Cansplit:  v.res.Cansplit,
+			Totalpart: v.res.Totalpart,
 		},
 	}
 }

@@ -10,10 +10,18 @@ export function Fetch(arg1) {
   return window['go']['main']['App']['Fetch'](arg1);
 }
 
-export function Greet(arg1) {
-  return window['go']['main']['App']['Greet'](arg1);
+export function InitData() {
+  return window['go']['main']['App']['InitData']();
+}
+
+export function InitSetting() {
+  return window['go']['main']['App']['InitSetting']();
 }
 
 export function Theme() {
   return window['go']['main']['App']['Theme']();
+}
+
+export function UpdateData(arg1) {
+  return window['go']['main']['App']['UpdateData'](arg1);
 }

@@ -22,7 +22,7 @@ func (v *DocumentFactory) Create() Download {
 	return Download{
 		ID:          uuid.New().String(),
 		Name:        v.res.Filename,
-		TimeElapsed: 0,
+		TimeElapsed: "",
 		Size:        v.res.Size,
 		Date:        time.Now(),
 		Status: DownloadStatus{
@@ -34,6 +34,11 @@ func (v *DocumentFactory) Create() Download {
 			Name:  TYPE_NAME_DOCUMENT,
 			Icon:  TYPE_ICON_DOCUMENT,
 			Color: TYPE_COLOR_DOCUMENT,
+		},
+		Metadata: Metadata{
+			Url:       v.res.Url,
+			Cansplit:  v.res.Cansplit,
+			Totalpart: v.res.Totalpart,
 		},
 	}
 }

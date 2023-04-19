@@ -8,10 +8,8 @@ import (
 	"changeme/gown/storage"
 	"changeme/gown/worker"
 	"context"
-	"fmt"
 	"log"
 	"sync"
-	"time"
 )
 
 // App struct
@@ -20,7 +18,9 @@ type App struct {
 	settings setting.Settings
 	pool     worker.Pool
 	wg       sync.WaitGroup
+	data     []download.Download
 	err      error
+	storage  storage.Storage
 }
 
 // NewApp creates a new App application struct
@@ -40,44 +40,55 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	a.storage.Init()
 }
 
 func (a *App) shutdown(ctx context.Context) {
 	a.pool.Stop()
 }
 
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
-}
-
 func (a *App) Theme() setting.Themes {
 	return a.settings.Themes
 }
 
-func (a *App) Fetch(url string) (*http.Response, error) {
+func (a *App) Fetch(url string) (*download.Download, error) {
 	res, err := http.Fetch(url, &a.settings)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: utilize this
 	factory := download.NewFactory(res)
-	log.Println(factory.Create())
+	data := factory.Create()
 
-	return res, nil
+	return &data, nil
 }
 
-func (a *App) Download(res http.Response) error {
-	start := time.Now()
+func (a *App) InitData() []download.Download {
+	a.data = a.storage.Get()
+	return a.data
+}
 
+func (a *App) UpdateData(data []download.Download) {
+	a.storage.Save(data)
+	a.data = data
+}
+
+func (a *App) InitSetting() setting.Settings {
+	return a.settings
+}
+
+func (a *App) Download(toDownload download.Download) error {
 	a.pool.Start()
-	// defer a.pool.Stop()
 
-	storage := storage.NewFile(res.Totalpart, &a.settings)
-	chunks := make([]*chunk.Chunk, res.Totalpart)
+	go func() {
+		a.data = append(a.data, toDownload)
+		a.storage.Save(a.data)
+	}()
+
+	storage := storage.NewFile(toDownload.Metadata.Totalpart, &a.settings)
+	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)
 	for part := range chunks {
-		chunks[part] = chunk.New(a.ctx, res, part, &a.wg)
+		chunks[part] = chunk.New(a.ctx, toDownload, part, &a.settings, &a.wg)
 	}
 
 	for _, job := range chunks {
@@ -91,20 +102,17 @@ func (a *App) Download(res http.Response) error {
 		storage.CombineFile(chunk.Data(), part)
 	}
 
-	if err := storage.SaveFile(res.Filename); err != nil {
+	if err := storage.SaveFile(toDownload.Name); err != nil {
 		log.Printf("Error saving file: %v", err)
 		return err
 	}
-
-	elapsed := time.Since(start)
-	log.Printf("Took %v s to download %s\n", elapsed.Seconds(), res.Filename)
 
 	return nil
 }
 
 /*
 TODO:
-- implement progress bar
+- implement progress bar WIP
 - implement queue
 - implement theming
 - implement browser extension
