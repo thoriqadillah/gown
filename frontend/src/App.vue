@@ -4,14 +4,11 @@ import Navigation from './components/Navigation.vue'
 import DownloadList from './components/DownloadList.vue';
 import Main from './components/Main.vue';
 import { useDateFormat } from '@vueuse/shared';
-import { useNow } from '@vueuse/core';
-import { Download } from './types/download';
 import { computed } from 'vue';
 import { useDownloads } from './store/downloads'
-import { InitData } from '../wailsjs/go/main/App';
-import { download } from '../wailsjs/go/models';
-
-const theme = useTheme()
+import { InitData, InitSetting } from '../wailsjs/go/main/App';
+import { download, setting } from '../wailsjs/go/models';
+import { useSettings } from './store/setting';
 
 // const now = 
 // const desserts: Download[] = [
@@ -186,13 +183,20 @@ const theme = useTheme()
 //     }
 //   },
 // ]
+const theme = useTheme()
 const downloads = useDownloads()
+const settings = useSettings()
+
+const data = computed(() => downloads.filter(downloads.search))
+
 InitData().then((data: download.Download[]) => {
   data.forEach(el => el.date = useDateFormat(el.date, 'MMMM DD, YYYY HH:mm').value)
   downloads.setData(data)
 })
-const data = computed(() => downloads.filter(downloads.search))
 
+InitSetting().then((setting: setting.Settings) => {
+  settings.init(setting)
+})
 </script>
 
 <template>

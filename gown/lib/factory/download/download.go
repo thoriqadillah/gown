@@ -52,17 +52,24 @@ type (
 	Download struct {
 		ID          string         `json:"id"`
 		Name        string         `json:"name"`
-		TimeElapsed int            `json:"timeElapsed"`
+		TimeElapsed time.Duration  `json:"timeElapsed"`
 		Size        int64          `json:"size"`
 		Date        time.Time      `json:"date"`
 		Status      DownloadStatus `json:"status"`
 		Type        DownloadType   `json:"type"`
+		Metadata    Metadata       `json:"metadata"`
 	}
 
 	DownloadStatus struct {
 		Name  string `json:"name"`
 		Icon  string `json:"icon"`
 		Color string `json:"color"`
+	}
+
+	Metadata struct {
+		Url       string `json:"url"`
+		Cansplit  bool   `json:"cansplit"`
+		Totalpart int    `json:"totalpart"`
 	}
 
 	DownloadType struct {
@@ -76,6 +83,14 @@ type (
 		Data     Download       `json:"data"`
 	}
 )
+
+func SetStatusSuccess() DownloadStatus {
+	return DownloadStatus{
+		Name:  STATUS_NAME_SUCCESS,
+		Icon:  STATUS_ICON_SUCCESS,
+		Color: STATUS_COLOR_SUCCESS,
+	}
+}
 
 type FactoryImpl func(res *http.Response) factory.Factory[Download]
 

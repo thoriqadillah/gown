@@ -35,6 +35,11 @@ func (v *ImageFactory) Create() Download {
 			Icon:  TYPE_ICON_IMAGE,
 			Color: TYPE_COLOR_IMAGE,
 		},
+		Metadata: Metadata{
+			Url:       v.res.Url,
+			Cansplit:  v.res.Cansplit,
+			Totalpart: v.res.Totalpart,
+		},
 	}
 }
 

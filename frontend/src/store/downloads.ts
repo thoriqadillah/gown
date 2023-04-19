@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
-import { Download } from "../types/download";
-import { download, http } from "../../wailsjs/go/models";
+import { ref } from "vue";
+import { download } from "../../wailsjs/go/models";
 
 export const useDownloads = defineStore('downloads', () => {
   const list = ref<download.Download[]>(new Array<download.Download>())
@@ -14,9 +13,9 @@ export const useDownloads = defineStore('downloads', () => {
   const ascSize = ref(true)
   const ascTimeElapsed = ref(true)
 
-  const add = (val: download.DownloadData) => {
-    list.value.push(val.data)
-    toDownload.value = val.response
+  const add = (val: download.Download) => {
+    list.value.push(val)
+    toDownload.value = val
   }
   const remove = (download: download.Download) => list.value.splice(list.value.indexOf(download), 1)
   const setData = (data: download.Download[]) => {

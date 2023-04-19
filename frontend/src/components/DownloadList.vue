@@ -26,8 +26,14 @@ EventsOn("transfered", (...data) => {
   progress.value = ((transfered.value / (downloads.toDownload.size / (1024*1024))) * 100)
   
   let prog = progress.value.toFixed(0)
-  const progressBar = document.getElementById(`progressBar-0-${data[0]}`) as HTMLElement
+  const progressBar = document.getElementById(`progressBar-${data[0]}`) as HTMLElement
+  progressBar.style.display = 'block'
   progressBar.style.width = prog + '%'
+  
+  if (prog == '100') {
+    progressBar.style.display = 'none'
+    // refresh the status icon and time elapsed
+  }
 })
 
 </script>
@@ -85,7 +91,8 @@ EventsOn("transfered", (...data) => {
               </div>
             </div>
             <div ref="progressWrapper" class="progressWrapper tw-flex tw-justify-between">
-              <div v-for="part in totalparts" :class="`tw-h-0.5 tw-bg-green-500 tw-opacity-50 tw-my-1 tw-w-1 tw-rounded-lg ` + `tw-basis-1/${totalparts}`" :id="`progressBar-${i}-${part-1}`" ref="progressBar"></div> 
+              <!-- <div v-for="part in totalparts" :class="`tw-h-0.5 tw-bg-green-500 tw-opacity-50 tw-my-1 tw-w-1 tw-rounded-lg ` + `tw-basis-1/${totalparts}`" :id="`progressBar-${i}-${part-1}`" ref="progressBar"></div>  -->
+              <div class="tw-h-0.5 tw-bg-green-500 tw-opacity-50 tw-my-1 tw-w-1 tw-hidden tw-rounded-lg" :id="`progressBar-${item.id}`" ref="progressBar"></div> 
             </div>
           </td>
           <td class="tw-text-sm tw-rounded-sm text-left tw-w-32">{{ item.timeElapsed == 0 ? '' : item.timeElapsed }}</td>

@@ -1,7 +1,8 @@
 package chunk
 
 import (
-	_http "changeme/gown/http"
+	"changeme/gown/lib/factory/download"
+	"changeme/gown/setting"
 	"context"
 	"fmt"
 	"io"
@@ -14,36 +15,38 @@ import (
 )
 
 type Chunk struct {
-	response _http.Response
-	wg       *sync.WaitGroup
-	index    int
-	start    int64
-	end      int64
-	size     int64
-	data     []byte
-	ctx      context.Context
+	toDownload download.Download
+	wg         *sync.WaitGroup
+	index      int
+	start      int64
+	end        int64
+	size       int64
+	data       []byte
+	ctx        context.Context
+	*setting.Settings
 }
 
-func New(ctx context.Context, res _http.Response, index int, wg *sync.WaitGroup) *Chunk {
-	totalpart := int64(res.Totalpart)
-	partsize := res.Size / totalpart
+func New(ctx context.Context, toDownload download.Download, index int, setting *setting.Settings, wg *sync.WaitGroup) *Chunk {
+	totalpart := int64(toDownload.Metadata.Totalpart)
+	partsize := toDownload.Size / totalpart
 
 	start := int64(index * int(partsize))
 	end := start + int64(int(partsize)-1)
 
 	if index == int(totalpart)-1 {
-		end = res.Size
+		end = toDownload.Size
 	}
 
 	return &Chunk{
-		response: res,
-		wg:       wg,
-		index:    index,
-		start:    start,
-		end:      end,
-		size:     partsize,
-		data:     make([]byte, 0, partsize),
-		ctx:      ctx,
+		toDownload: toDownload,
+		wg:         wg,
+		index:      index,
+		start:      start,
+		end:        end,
+		size:       partsize,
+		data:       make([]byte, 0, partsize),
+		ctx:        ctx,
+		Settings:   setting,
 	}
 }
 
@@ -59,7 +62,7 @@ func (c *Chunk) download() error {
 		log.Printf("Downloading chunk %d from %d to %d (~%d MB)", c.index+1, c.start, c.end, (c.size)/(1024*1024))
 	}
 
-	req, err := http.NewRequest("GET", c.response.Url, nil)
+	req, err := http.NewRequest("GET", c.toDownload.Metadata.Url, nil)
 	if err != nil {
 		return err
 	}
@@ -83,7 +86,7 @@ func (c *Chunk) download() error {
 		}
 
 		c.data = append(c.data, buffer[:n]...)
-		runtime.EventsEmit(c.ctx, "transfered", c.index, n) //TODO: implement proper transfer emition to differentiate which div to animate the progress bar
+		runtime.EventsEmit(c.ctx, "transfered", c.toDownload.ID, n) //TODO: implement proper transfer emition to differentiate which div to animate the progress bar
 	}
 
 	elapsed := time.Since(start)
@@ -95,7 +98,7 @@ func (c *Chunk) download() error {
 func (c *Chunk) Execute() error {
 	var err error
 
-	for retry := 0; retry < c.response.Settings.Maxtries; retry++ {
+	for retry := 0; retry < c.Settings.Maxtries; retry++ {
 		if err = c.download(); err == nil {
 			return nil
 		}

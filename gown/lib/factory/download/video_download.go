@@ -35,6 +35,11 @@ func (v *VideoFactory) Create() Download {
 			Icon:  TYPE_ICON_VIDEO,
 			Color: TYPE_COLOR_VIDEO,
 		},
+		Metadata: Metadata{
+			Url:       v.res.Url,
+			Cansplit:  v.res.Cansplit,
+			Totalpart: v.res.Totalpart,
+		},
 	}
 }
 

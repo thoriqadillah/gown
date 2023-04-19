@@ -9,7 +9,6 @@ import (
 	"changeme/gown/worker"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/fs"
 	"log"
@@ -84,16 +83,11 @@ func (a *App) shutdown(ctx context.Context) {
 	a.pool.Stop()
 }
 
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
-}
-
 func (a *App) Theme() setting.Themes {
 	return a.settings.Themes
 }
 
-func (a *App) Fetch(url string) (*download.DownloadData, error) {
+func (a *App) Fetch(url string) (*download.Download, error) {
 	res, err := http.Fetch(url, &a.settings)
 	if err != nil {
 		return nil, err
@@ -101,14 +95,29 @@ func (a *App) Fetch(url string) (*download.DownloadData, error) {
 
 	factory := download.NewFactory(res)
 	data := factory.Create()
-	downloadData := &download.DownloadData{
-		Response: res,
-		Data:     data,
+
+	return &data, nil
+}
+
+func (a *App) InitData() []download.Download {
+	if len(a.data) == 0 {
+		return []download.Download{}
 	}
 
+	return a.data
+}
+
+func (a *App) InitSetting() setting.Settings {
+	return a.settings
+}
+
+func (a *App) Download(toDownload download.Download) error {
+	start := time.Now()
+
+	a.pool.Start()
+
 	go func() {
-		a.data = append(a.data, data)
-		log.Println("data[]", a.data)
+		a.data = append(a.data, toDownload)
 		dataVal, err := json.MarshalIndent(a.data, "", " ")
 		if err != nil {
 			log.Fatalf("Error marshaling the data: %v", err)
@@ -120,26 +129,10 @@ func (a *App) Fetch(url string) (*download.DownloadData, error) {
 		}
 	}()
 
-	return downloadData, nil
-}
-
-func (a *App) InitData() []download.Download {
-	if len(a.data) == 0 {
-		return []download.Download{}
-	}
-
-	return a.data
-}
-
-func (a *App) Download(res http.Response) error {
-	start := time.Now()
-
-	a.pool.Start()
-
-	storage := storage.NewFile(res.Totalpart, &a.settings)
-	chunks := make([]*chunk.Chunk, res.Totalpart)
+	storage := storage.NewFile(toDownload.Metadata.Totalpart, &a.settings)
+	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)
 	for part := range chunks {
-		chunks[part] = chunk.New(a.ctx, res, part, &a.wg)
+		chunks[part] = chunk.New(a.ctx, toDownload, part, &a.settings, &a.wg)
 	}
 
 	for _, job := range chunks {
@@ -153,13 +146,14 @@ func (a *App) Download(res http.Response) error {
 		storage.CombineFile(chunk.Data(), part)
 	}
 
-	if err := storage.SaveFile(res.Filename); err != nil {
+	if err := storage.SaveFile(toDownload.Name); err != nil {
 		log.Printf("Error saving file: %v", err)
 		return err
 	}
 
 	elapsed := time.Since(start)
-	log.Printf("Took %v s to download %s\n", elapsed.Seconds(), res.Filename)
+
+	log.Printf("Took %v s to download %s\n", elapsed.Seconds(), toDownload.Name)
 
 	return nil
 }

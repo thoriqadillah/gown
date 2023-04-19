@@ -35,6 +35,11 @@ func (v *OtherFactory) Create() Download {
 			Icon:  TYPE_ICON_OTHER,
 			Color: TYPE_COLOR_OTHER,
 		},
+		Metadata: Metadata{
+			Url:       v.res.Url,
+			Cansplit:  v.res.Cansplit,
+			Totalpart: v.res.Totalpart,
+		},
 	}
 }
 

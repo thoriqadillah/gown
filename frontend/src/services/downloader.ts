@@ -1,4 +1,4 @@
-import { download, http } from "../../wailsjs/go/models";
+import { download } from "../../wailsjs/go/models";
 import { Fetch } from "../../wailsjs/go/main/App";
 import { Download } from "../../wailsjs/go/main/App";
 
@@ -8,14 +8,12 @@ export default class Downloader {
   private MB = this.KB * this.KB
   private GB = this.MB * this.MB
 
-  async fetch(url: string): Promise<download.DownloadData | undefined> {
-    const response = await Fetch(url)
-
-    return response
+  async fetch(url: string): Promise<download.Download | undefined> {
+    return await Fetch(url)
   }
 
-  async download(res: http.Response): Promise<void> {
-    await Download(res)
+  async download(toDownload: download.Download): Promise<void> {
+    await Download(toDownload)
   }
 
   parseSize(size: number): string {

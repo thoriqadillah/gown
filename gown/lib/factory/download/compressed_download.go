@@ -35,6 +35,11 @@ func (v *CompressedFactory) Create() Download {
 			Icon:  TYPE_ICON_COMPRESSED,
 			Color: TYPE_COLOR_COMPRESSED,
 		},
+		Metadata: Metadata{
+			Url:       v.res.Url,
+			Cansplit:  v.res.Cansplit,
+			Totalpart: v.res.Totalpart,
+		},
 	}
 }
 

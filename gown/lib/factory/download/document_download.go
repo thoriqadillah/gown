@@ -35,6 +35,11 @@ func (v *DocumentFactory) Create() Download {
 			Icon:  TYPE_ICON_DOCUMENT,
 			Color: TYPE_COLOR_DOCUMENT,
 		},
+		Metadata: Metadata{
+			Url:       v.res.Url,
+			Cansplit:  v.res.Cansplit,
+			Totalpart: v.res.Totalpart,
+		},
 	}
 }
 
