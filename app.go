@@ -8,13 +8,8 @@ import (
 	"changeme/gown/storage"
 	"changeme/gown/worker"
 	"context"
-	"encoding/json"
-	"io"
-	"io/fs"
 	"log"
-	"os"
 	"sync"
-	"time"
 )
 
 // App struct
@@ -25,6 +20,7 @@ type App struct {
 	wg       sync.WaitGroup
 	data     []download.Download
 	err      error
+	storage  storage.Storage
 }
 
 // NewApp creates a new App application struct
@@ -44,19 +40,7 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-
-	// creating the data folder
-	if _, err := os.Stat(a.settings.DataLocation); err != nil {
-		err := os.MkdirAll(a.settings.DataLocation, os.ModePerm)
-		if err != nil {
-			log.Fatalf("Cannot creating the folder: %v", err)
-		}
-
-		_, err = os.Create(a.settings.DataFilename)
-		if err != nil {
-			log.Fatalf("Cannot creating the file: %v", err)
-		}
-	}
+	a.storage.Init()
 }
 
 func (a *App) shutdown(ctx context.Context) {
@@ -80,38 +64,12 @@ func (a *App) Fetch(url string) (*download.Download, error) {
 }
 
 func (a *App) InitData() []download.Download {
-	jsonFile, err := os.Open(a.settings.DataFilename)
-	if err != nil {
-		log.Printf("Error opening data file: %v", err)
-		return []download.Download{}
-	}
-
-	value, err := io.ReadAll(jsonFile)
-	if err != nil {
-		log.Printf("Error opening data file: %v", err)
-		return []download.Download{}
-	}
-
-	err = json.Unmarshal(value, &a.data)
-	if err != nil {
-		log.Printf("Error opening data file: %v", err)
-		return []download.Download{}
-	}
-
+	a.data = a.storage.Get()
 	return a.data
 }
 
 func (a *App) UpdateData(data []download.Download) {
-	dataVal, err := json.MarshalIndent(data, "", " ")
-	if err != nil {
-		log.Fatalf("Error marshaling the data: %v", err)
-	}
-
-	err = os.WriteFile(a.settings.DataFilename, dataVal, fs.ModePerm)
-	if err != nil {
-		log.Fatalf("Error writing the data into file: %v", err)
-	}
-
+	a.storage.Save(data)
 	a.data = data
 }
 
@@ -120,21 +78,11 @@ func (a *App) InitSetting() setting.Settings {
 }
 
 func (a *App) Download(toDownload download.Download) error {
-	start := time.Now()
-
 	a.pool.Start()
 
 	go func() {
 		a.data = append(a.data, toDownload)
-		dataVal, err := json.MarshalIndent(a.data, "", " ")
-		if err != nil {
-			log.Fatalf("Error marshaling the data: %v", err)
-		}
-
-		err = os.WriteFile(a.settings.DataFilename, dataVal, fs.ModePerm)
-		if err != nil {
-			log.Fatalf("Error writing the data into file: %v", err)
-		}
+		a.storage.Save(a.data)
 	}()
 
 	storage := storage.NewFile(toDownload.Metadata.Totalpart, &a.settings)
@@ -159,16 +107,12 @@ func (a *App) Download(toDownload download.Download) error {
 		return err
 	}
 
-	elapsed := time.Since(start)
-
-	log.Printf("Took %v s to download %s\n", elapsed.Seconds(), toDownload.Name)
-
 	return nil
 }
 
 /*
 TODO:
-- implement progress bar
+- implement progress bar WIP
 - implement queue
 - implement theming
 - implement browser extension

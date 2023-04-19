@@ -22,6 +22,7 @@ watch(downloads.list, (newval, oldval) => {
 })
 
 EventsOn("transfered", (...data) => {
+  // TODO: implement simultanous download
   transfered.value += data[1] / (1024*1024)
   progress.value = ((transfered.value / (downloads.toDownload.size / (1024*1024))) * 100)
   
@@ -43,7 +44,6 @@ EventsOn("transfered", (...data) => {
       }
     })
     downloads.updateData(downloads.list)
-    // refresh the status icon and time elapsed
   }
 })
 
