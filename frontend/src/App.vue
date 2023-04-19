@@ -190,7 +190,6 @@ const settings = useSettings()
 const data = computed(() => downloads.filter(downloads.search))
 
 InitData().then((data: download.Download[]) => {
-  data.forEach(el => el.date = useDateFormat(el.date, 'MMMM DD, YYYY HH:mm').value)
   downloads.setData(data)
 })
 

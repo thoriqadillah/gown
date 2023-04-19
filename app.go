@@ -33,6 +33,7 @@ func NewApp() *App {
 		pool:     worker,
 		err:      err,
 		wg:       sync.WaitGroup{},
+		storage:  storage.New(&s),
 	}
 }
 
@@ -81,7 +82,7 @@ func (a *App) Download(toDownload download.Download) error {
 	a.pool.Start()
 
 	go func() {
-		a.data = append(a.data, toDownload)
+		a.data = append([]download.Download{toDownload}, a.data...)
 		a.storage.Save(a.data)
 	}()
 

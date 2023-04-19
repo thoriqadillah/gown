@@ -21,7 +21,7 @@ watch(downloads.list, (newval, oldval) => {
   totalparts.value = downloads.toDownload.metadata.totalpart
 })
 
-EventsOn("transfered", (...data) => {
+EventsOn("transfered", async (...data) => {
   // TODO: implement simultanous download
   transfered.value += data[1] / (1024*1024)
   progress.value = ((transfered.value / (downloads.toDownload.size / (1024*1024))) * 100)
@@ -43,7 +43,7 @@ EventsOn("transfered", (...data) => {
         }
       }
     })
-    downloads.updateData(downloads.list)
+    await downloads.updateData(downloads.list)
   }
 })
 

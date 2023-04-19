@@ -15,7 +15,7 @@ export const useDownloads = defineStore('downloads', () => {
   const ascTimeElapsed = ref(true)
 
   const add = (val: download.Download) => {
-    list.value.push(val)
+    list.value.unshift(val)
     toDownload.value = val
   }
   const remove = (download: download.Download) => list.value.splice(list.value.indexOf(download), 1)
@@ -26,7 +26,7 @@ export const useDownloads = defineStore('downloads', () => {
   const updateData = async (data: download.Download[]) => {
     list.value = data
     defaults.value = data
-    await UpdateData(list.value)
+    await UpdateData(data)
   }
 
   const filterByImage = () => list.value = defaults.value.filter(d => d.type.name === 'image')
