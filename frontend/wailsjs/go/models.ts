@@ -51,7 +51,7 @@ export namespace download {
 	export class Download {
 	    id: string;
 	    name: string;
-	    timeElapsed: number;
+	    timeElapsed: string;
 	    size: number;
 	    // Go type: time
 	    date: any;

@@ -1,12 +1,13 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { download } from "../../wailsjs/go/models";
+import { UpdateData} from '../../wailsjs/go/main/App'
 
 export const useDownloads = defineStore('downloads', () => {
-  const list = ref<download.Download[]>(new Array<download.Download>())
-  const defaults = ref<download.Download[]>(new Array<download.Download>())
+  const list = ref<download.Download[]>([])
+  const defaults = ref<download.Download[]>([])
   const search = ref('')
-  const toDownload = ref()
+  const toDownload = ref(new download.Download())
 
   const ascName = ref(true)
   const ascDate = ref(true)
@@ -21,6 +22,11 @@ export const useDownloads = defineStore('downloads', () => {
   const setData = (data: download.Download[]) => {
     list.value = data
     defaults.value = data
+  }
+  const updateData = async (data: download.Download[]) => {
+    list.value = data
+    defaults.value = data
+    await UpdateData(list.value)
   }
 
   const filterByImage = () => list.value = defaults.value.filter(d => d.type.name === 'image')
@@ -48,7 +54,7 @@ export const useDownloads = defineStore('downloads', () => {
   }
   const sortByTimeElapsed = () => {
     ascTimeElapsed.value = !ascTimeElapsed.value
-    return ascTimeElapsed.value ? list.value.sort((a, b) => a.timeElapsed - b.timeElapsed) : list.value.sort((a, b) => a.timeElapsed - b.timeElapsed).reverse()
+    return ascTimeElapsed.value ? list.value.sort((a, b) => a.timeElapsed.localeCompare(b.timeElapsed)) : list.value.sort((a, b) => a.timeElapsed.localeCompare(b.timeElapsed)).reverse()
   }
 
   const KB = 1024
@@ -63,6 +69,18 @@ export const useDownloads = defineStore('downloads', () => {
     return '0 KB'
   }
 
+  const parseElapsedTime = (start: Date): string => {
+    const begin = new Date(start)
+    const end = new Date()
+
+    const elapsed = new Date(end.getTime() - begin.getTime()).getSeconds()
+    let s = elapsed % 60
+    let m = (elapsed / 60) % 60
+    let h = elapsed / 3600
+
+    return `${h.toFixed(0)}h : ${m < 10 ? '0'+m.toFixed(0) : m.toFixed(0)}m : ${s < 10 ? '0'+s.toFixed(0) : s.toFixed(0)}s`
+  }
+
   return {
     list,
     search,
@@ -70,6 +88,7 @@ export const useDownloads = defineStore('downloads', () => {
     add,
     remove,
     setData,
+    updateData,
     filter,
     filterByImage,
     filterByVideo,
@@ -81,6 +100,7 @@ export const useDownloads = defineStore('downloads', () => {
     sortByDate,
     sortBySize,
     sortByTimeElapsed,
-    parseSize
+    parseSize,
+    parseElapsedTime
   }
 })

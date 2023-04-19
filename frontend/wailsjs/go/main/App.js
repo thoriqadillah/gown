@@ -21,3 +21,7 @@ export function InitSetting() {
 export function Theme() {
   return window['go']['main']['App']['Theme']();
 }
+
+export function UpdateData(arg1) {
+  return window['go']['main']['App']['UpdateData'](arg1);
+}

@@ -52,7 +52,7 @@ type (
 	Download struct {
 		ID          string         `json:"id"`
 		Name        string         `json:"name"`
-		TimeElapsed time.Duration  `json:"timeElapsed"`
+		TimeElapsed string         `json:"timeElapsed"`
 		Size        int64          `json:"size"`
 		Date        time.Time      `json:"date"`
 		Status      DownloadStatus `json:"status"`

@@ -57,26 +57,6 @@ func (a *App) startup(ctx context.Context) {
 			log.Fatalf("Cannot creating the file: %v", err)
 		}
 	}
-
-	// reading the data file
-	go func() {
-		jsonFile, err := os.Open(a.settings.DataFilename)
-		if err != nil {
-			log.Printf("Error opening data file: %v", err)
-			return
-		}
-
-		value, err := io.ReadAll(jsonFile)
-		if err != nil {
-			log.Printf("Error opening data file: %v", err)
-		}
-
-		err = json.Unmarshal(value, &a.data)
-		if err != nil {
-			log.Printf("Error opening data file: %v", err)
-		}
-		log.Println("data[]", a.data)
-	}()
 }
 
 func (a *App) shutdown(ctx context.Context) {
@@ -100,11 +80,39 @@ func (a *App) Fetch(url string) (*download.Download, error) {
 }
 
 func (a *App) InitData() []download.Download {
-	if len(a.data) == 0 {
+	jsonFile, err := os.Open(a.settings.DataFilename)
+	if err != nil {
+		log.Printf("Error opening data file: %v", err)
+		return []download.Download{}
+	}
+
+	value, err := io.ReadAll(jsonFile)
+	if err != nil {
+		log.Printf("Error opening data file: %v", err)
+		return []download.Download{}
+	}
+
+	err = json.Unmarshal(value, &a.data)
+	if err != nil {
+		log.Printf("Error opening data file: %v", err)
 		return []download.Download{}
 	}
 
 	return a.data
+}
+
+func (a *App) UpdateData(data []download.Download) {
+	dataVal, err := json.MarshalIndent(data, "", " ")
+	if err != nil {
+		log.Fatalf("Error marshaling the data: %v", err)
+	}
+
+	err = os.WriteFile(a.settings.DataFilename, dataVal, fs.ModePerm)
+	if err != nil {
+		log.Fatalf("Error writing the data into file: %v", err)
+	}
+
+	a.data = data
 }
 
 func (a *App) InitSetting() setting.Settings {

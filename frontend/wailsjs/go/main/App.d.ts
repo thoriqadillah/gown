@@ -12,3 +12,5 @@ export function InitData():Promise<Array<download.Download>>;
 export function InitSetting():Promise<setting.Settings>;
 
 export function Theme():Promise<setting.Themes>;
+
+export function UpdateData(arg1:Array<download.Download>):Promise<void>;

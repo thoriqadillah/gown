@@ -22,7 +22,7 @@ func (v *AudioFactory) Create() Download {
 	return Download{
 		ID:          uuid.New().String(),
 		Name:        v.res.Filename,
-		TimeElapsed: 0,
+		TimeElapsed: "",
 		Size:        v.res.Size,
 		Date:        time.Now(),
 		Status: DownloadStatus{

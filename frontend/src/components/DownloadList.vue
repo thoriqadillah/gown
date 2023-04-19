@@ -18,7 +18,7 @@ const progressBar = ref()
 const totalparts = ref(0)
 
 watch(downloads.list, (newval, oldval) => {
-  totalparts.value = downloads.toDownload.totalpart
+  totalparts.value = downloads.toDownload.metadata.totalpart
 })
 
 EventsOn("transfered", (...data) => {
@@ -32,6 +32,17 @@ EventsOn("transfered", (...data) => {
   
   if (prog == '100') {
     progressBar.style.display = 'none'
+    downloads.list.forEach(el => {
+      if (el.id == data[0]) {
+        el.timeElapsed = downloads.parseElapsedTime(downloads.toDownload.date)
+        el.status = {
+          name: 'success',
+          icon: 'mdi-check-circle-outline',
+          color: 'success'
+        }
+      }
+    })
+    downloads.updateData(downloads.list)
     // refresh the status icon and time elapsed
   }
 })
@@ -95,7 +106,7 @@ EventsOn("transfered", (...data) => {
               <div class="tw-h-0.5 tw-bg-green-500 tw-opacity-50 tw-my-1 tw-w-1 tw-hidden tw-rounded-lg" :id="`progressBar-${item.id}`" ref="progressBar"></div> 
             </div>
           </td>
-          <td class="tw-text-sm tw-rounded-sm text-left tw-w-32">{{ item.timeElapsed == 0 ? '' : item.timeElapsed }}</td>
+          <td class="tw-text-sm tw-rounded-sm text-left tw-w-32">{{ item.timeElapsed }}</td>
           <td class="tw-text-sm tw-rounded-sm text-left tw-w-20">{{ downloads.parseSize(item.size) }}</td>
           <td class="tw-text-sm tw-rounded-sm text-left tw-w-32">{{ useDateFormat(item.date, 'MMMM DD, YYYY HH:mm').value }}</td>
           <td class="tw-text-sm tw-text-left"><v-icon :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90 tw-ml-2"></v-icon></td>
