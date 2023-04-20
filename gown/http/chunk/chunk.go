@@ -79,14 +79,16 @@ func (c *Chunk) download() error {
 	var _100KB int64 = 1024 * 100
 	buffer := make([]byte, _100KB)
 
+	var transfered float64 = 0
 	for {
 		n, err := io.ReadFull(res.Body, buffer)
 		if err == io.EOF {
 			break
 		}
 
+		transfered += float64(n)
 		c.data = append(c.data, buffer[:n]...)
-		runtime.EventsEmit(c.ctx, "transfered", c.toDownload.ID, n) //TODO: implement proper transfer emition to differentiate which div to animate the progress bar
+		runtime.EventsEmit(c.ctx, "transfered", c.toDownload.ID, c.index, (transfered / float64(c.size) * 100)) //TODO: implement proper transfer emition to differentiate which div to animate the progress bar
 	}
 
 	elapsed := time.Since(start)
