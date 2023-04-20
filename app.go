@@ -10,6 +10,9 @@ import (
 	"context"
 	"log"
 	"sync"
+	"time"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
@@ -78,18 +81,19 @@ func (a *App) InitSetting() setting.Settings {
 	return a.settings
 }
 
-func (a *App) Download(toDownload download.Download) error {
+func (a *App) Download(toDownload *download.Download) error {
 	a.pool.Start()
 
 	go func() {
-		a.data = append([]download.Download{toDownload}, a.data...)
+		toDownload.Date = time.Now()
+		a.data = append([]download.Download{*toDownload}, a.data...)
 		a.storage.Save(a.data)
 	}()
 
 	storage := storage.NewFile(toDownload.Metadata.Totalpart, &a.settings)
 	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)
 	for part := range chunks {
-		chunks[part] = chunk.New(a.ctx, toDownload, part, &a.settings, &a.wg)
+		chunks[part] = chunk.New(a.ctx, *toDownload, part, &a.settings, &a.wg)
 	}
 
 	for _, job := range chunks {
@@ -98,6 +102,8 @@ func (a *App) Download(toDownload download.Download) error {
 	}
 
 	a.wg.Wait()
+
+	runtime.EventsEmit(a.ctx, "done", true, toDownload.ID)
 
 	for part, chunk := range chunks {
 		storage.CombineFile(chunk.Data(), part)

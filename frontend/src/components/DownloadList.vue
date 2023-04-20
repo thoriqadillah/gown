@@ -21,11 +21,12 @@ EventsOn("transfered", async (...data) => {
       el.timeElapsed = downloads.parseElapsedTime(downloads.toDownload.date)
     }
   })
-  
-  if (prog == '100') {
+})
+
+EventsOn("done", async (...data) => {
+  if (data[0] == true) {
     downloads.list.forEach(el => {
-      if (el.id == data[0]) {
-        el.timeElapsed = downloads.parseElapsedTime(downloads.toDownload.date)
+      if (el.id == data[1]) {
         el.status = {
           name: 'success',
           icon: 'mdi-check-circle-outline',
@@ -59,6 +60,9 @@ EventsOn("transfered", async (...data) => {
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
           </th>
+          <th class="tw-text tw-cursor-pointer-left">
+            <span class="tw-text-sm">Status</span>
+          </th>
           <th class="text-left tw-cursor-pointer" @click="downloads.sortByTimeElapsed()">
             <div class="tw-flex tw-justify-between tw-items-center tw-w-max md:tw-w-full">
               <span class="tw-text-sm tw-mr-3 tw-w-32">Time Elapsed</span>
@@ -77,9 +81,6 @@ EventsOn("transfered", async (...data) => {
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
           </th>
-          <th class="tw-text tw-cursor-pointer-left">
-            <span class="tw-text-sm">Status</span>
-          </th>
         </tr>
       </thead>
       <tbody>
@@ -97,10 +98,10 @@ EventsOn("transfered", async (...data) => {
               </div> 
             </div>
           </td>
+          <td class="tw-text-sm tw-text-left"><v-icon :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90 tw-ml-2"></v-icon></td>
           <td class="tw-text-sm tw-rounded-sm text-left tw-w-32">{{ item.timeElapsed }}</td>
           <td class="tw-text-sm tw-rounded-sm text-left tw-w-20">{{ downloads.parseSize(item.size) }}</td>
           <td class="tw-text-sm tw-rounded-sm text-left tw-w-32">{{ useDateFormat(item.date, 'MMMM DD, YYYY HH:mm').value }}</td>
-          <td class="tw-text-sm tw-text-left"><v-icon :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90 tw-ml-2"></v-icon></td>
         </tr>
       </tbody>
     </v-table>

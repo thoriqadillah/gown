@@ -3,7 +3,7 @@
 import {download} from '../models';
 import {setting} from '../models';
 
-export function Download(arg1:download.Download):Promise<void>;
+export function Download(arg1:any):Promise<void>;
 
 export function Fetch(arg1:string):Promise<any>;
 

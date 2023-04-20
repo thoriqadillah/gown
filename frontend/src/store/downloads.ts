@@ -73,12 +73,12 @@ export const useDownloads = defineStore('downloads', () => {
     const begin = new Date(start)
     const end = new Date()
 
-    const elapsed = new Date(end.getTime() - begin.getTime()).getSeconds()
-    let s = elapsed % 60
-    let m = (elapsed / 60) % 60
-    let h = elapsed / 3600
+    const elapsed = new Date(end.getTime() - begin.getTime())
+    let s = elapsed.getSeconds() % 60
+    let m = elapsed.getMinutes() % 60
+    let h = (elapsed.getMinutes() / 60) % 24
 
-    return `${h.toFixed(0)}h : ${m < 10 ? '0'+m.toFixed(0) : m.toFixed(0)}m : ${s < 10 ? '0'+s.toFixed(0) : s.toFixed(0)}s`
+    return `${h}h : ${m < 10 ? '0'+m : m}m : ${s < 10 ? '0'+s : s}s`
   }
 
   return {
