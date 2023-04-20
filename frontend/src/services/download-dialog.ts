@@ -15,16 +15,17 @@ export default class Dialog {
 
   done() {
     this.state.loading.value = true
-    this.state.loaded.value = true
     this.state.loading.value = false
   }
-
+  
   next() {
+    this.state.loaded.value = true
     this.state.onFile.value = true
     this.state.onURL.value = false
   }
-
+  
   prev() {
+    this.state.loaded.value = true
     this.state.onFile.value = false
     this.state.onURL.value = true
   }

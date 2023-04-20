@@ -21,7 +21,6 @@ type App struct {
 	settings setting.Settings
 	pool     worker.Pool
 	wg       sync.WaitGroup
-	data     []download.Download
 	err      error
 	storage  storage.Storage
 }
@@ -68,13 +67,11 @@ func (a *App) Fetch(url string) (*download.Download, error) {
 }
 
 func (a *App) InitData() []download.Download {
-	a.data = a.storage.Get()
-	return a.data
+	return a.storage.Get()
 }
 
 func (a *App) UpdateData(data []download.Download) {
 	a.storage.Save(data)
-	a.data = data
 }
 
 func (a *App) InitSetting() setting.Settings {
@@ -84,11 +81,10 @@ func (a *App) InitSetting() setting.Settings {
 func (a *App) Download(toDownload *download.Download) error {
 	a.pool.Start()
 
-	go func() {
-		toDownload.Date = time.Now()
-		a.data = append([]download.Download{*toDownload}, a.data...)
-		a.storage.Save(a.data)
-	}()
+	toDownload.Date = time.Now()
+	data := a.storage.Get()
+	data = append([]download.Download{*toDownload}, data...)
+	a.storage.Save(data)
 
 	storage := storage.NewFile(toDownload.Metadata.Totalpart, &a.settings)
 	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)
@@ -119,7 +115,6 @@ func (a *App) Download(toDownload *download.Download) error {
 
 /*
 TODO:
-- implement progress bar WIP
 - implement queue
 - implement theming
 - implement browser extension

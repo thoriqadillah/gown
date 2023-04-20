@@ -23,14 +23,19 @@ const dialog = new Dialog({ activator, loaded, loading, onFile, onURL })
 const downloader = new Downloader()
 
 async function fetch() {
-  input.value.blur()
-  dialog.loading()
-
-  result.value = await downloader.fetch(url.value) as download.Download
-  size.value = downloads.parseSize(result.value.size)
-
-  dialog.done()
-  dialog.next()
+  try {
+    input.value.blur()
+    dialog.loading()
+    
+    result.value = await downloader.fetch(url.value) as download.Download
+    size.value = downloads.parseSize(result.value.size)
+    
+    dialog.done()
+    dialog.next()
+  } catch (error) {
+    input.value.blur()
+    dialog.done()
+  }
 }
 
 // TODO: implement download

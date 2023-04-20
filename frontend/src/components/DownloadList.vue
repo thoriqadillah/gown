@@ -34,6 +34,8 @@ EventsOn("done", async (...data) => {
         }
       }
     })
+    const wrapper = document.getElementById(data[1]) as HTMLElement
+    wrapper.style.display = 'none'
     await downloads.updateData(downloads.list)
   }
 })
@@ -92,9 +94,9 @@ EventsOn("done", async (...data) => {
                 <span class="tw-text-sm">{{ item.name }}</span>
               </div>
             </div>
-            <div class="progressWrapper tw-flex tw-justify-between">
+            <div class="progressWrapper tw-flex tw-justify-between" :id="item.id">
               <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >
-                <div class="tw-h-0.5 tw-bg-green-500 tw-my-1 tw-w-1 tw-hidden tw-rounded-lg" :id="`progressBar-${item.id}-${part-1}`"></div>
+                <div class="tw-h-0.5 tw-bg-green-500 tw-opacity-50 tw-my-1 tw-w-1 tw-hidden tw-rounded-lg" :id="`progressBar-${item.id}-${part-1}`"></div>
               </div> 
             </div>
           </td>
