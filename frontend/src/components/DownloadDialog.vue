@@ -91,7 +91,7 @@ async function execute() {
           <v-text-field color="primary" :error="savelocationHasError" :error-messages="savelocationErr" v-model="savelocation" label="Save location" append-inner-icon="mdi-folder" type="input" hint="Save location" class="tw-p-3" single-line density="compact" variant="outlined" />
         </div>
         <div class="tw-basis-3/12 tw-text-center tw-pr-2 -tw-mt-5">
-          <v-icon icon="mdi-file"></v-icon>
+          <v-icon :icon="result.type.icon" :color="result.type.color"></v-icon>
           <p class="text-body-1 tw-mt-5">{{ size }}</p>
         </div>
       </div>

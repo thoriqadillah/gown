@@ -4,11 +4,25 @@ import { useDownloads } from '../store/downloads';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
 import { download } from '../../wailsjs/go/models';
 import { useDateFormat } from '@vueuse/shared';
+import { ref, watch } from 'vue';
 
 const downloads = useDownloads()
 const props = defineProps<{
   list: download.Download[]
 }>()
+
+const editIcon = ref<HTMLElement[]>([])
+const singo = ref<HTMLElement[]>() 
+watch(singo, () => {
+  for (let i = 0; i < singo.value!.length; i++) {
+    singo.value![i].addEventListener('mouseover', () => {
+      editIcon.value[i].style.opacity = '100'
+    });
+    singo.value![i].addEventListener('mouseleave', () => {
+      editIcon.value[i].style.opacity = '0'
+    });
+  }
+})
 
 EventsOn("transfered", async (...data) => {
   let prog = data[2]
@@ -40,7 +54,6 @@ EventsOn("done", async (...data) => {
   }
   await downloads.updateData(downloads.list)
 })
-
 </script>
 
 <template>
@@ -87,13 +100,16 @@ EventsOn("done", async (...data) => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item,i) in props.list" :key="item.name">
-          <td color="primary" class="tw-rounded-sm" id="nameCol">
+        <tr v-for="item in props.list" :key="item.name">
+          <td color="primary" class="tw-rounded-sm" id="nameCol" ref="singo">
             <div class="tw-flex tw-justify-between tw-mt-1">
               <div class="tw-overflow-x-hidden tw-w-max">
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
                 <span class="tw-text-sm">{{ item.name }}</span>
               </div>
+              <span ref="editIcon" class="tw-opacity-0">
+                <v-icon icon="mdi-square-edit-outline" class="tw-text-sm tw-opacity-50 tw-mx-3 edit-icon"></v-icon>
+              </span>
             </div>
             <div class="progressWrapper tw-flex tw-justify-between" :id="item.id">
               <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >
