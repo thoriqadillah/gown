@@ -99,7 +99,7 @@ func (a *App) Download(toDownload *download.Download) error {
 
 	a.wg.Wait()
 
-	runtime.EventsEmit(a.ctx, "done", true, toDownload.ID)
+	runtime.EventsEmit(a.ctx, "done", toDownload.ID)
 
 	for part, chunk := range chunks {
 		storage.CombineFile(chunk.Data(), part)

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, ref } from 'vue';
+import { defineProps } from 'vue';
 import { useDownloads } from '../store/downloads';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
 import { download } from '../../wailsjs/go/models';
@@ -13,7 +13,7 @@ const props = defineProps<{
 EventsOn("transfered", async (...data) => {
   let prog = data[2]
   const progressBar = document.getElementById(`progressBar-${data[0]}-${data[1]}`) as HTMLElement
-  progressBar.style.display = 'block'
+  progressBar.style.opacity = '50'
   progressBar.style.width = prog + '%'
   
   downloads.list.forEach(el => {
@@ -24,20 +24,21 @@ EventsOn("transfered", async (...data) => {
 })
 
 EventsOn("done", async (...data) => {
-  if (data[0] == true) {
-    downloads.list.forEach(el => {
-      if (el.id == data[1]) {
-        el.status = {
-          name: 'success',
-          icon: 'mdi-check-circle-outline',
-          color: 'success'
-        }
+  for (const el of downloads.list) {
+    if (el.id == data[0]) {
+      el.status = {
+        name: 'success',
+        icon: 'mdi-check-circle-outline',
+        color: 'success'
       }
-    })
-    const wrapper = document.getElementById(data[1]) as HTMLElement
-    wrapper.style.display = 'none'
-    await downloads.updateData(downloads.list)
+      for (let i = 0; i < el.metadata.totalpart; i++) {
+        const progressBar = document.getElementById(`progressBar-${data[0]}-${i}`) as HTMLElement
+        progressBar.style.opacity = '0'
+      } 
+      break
+    }
   }
+  await downloads.updateData(downloads.list)
 })
 
 </script>
@@ -96,7 +97,7 @@ EventsOn("done", async (...data) => {
             </div>
             <div class="progressWrapper tw-flex tw-justify-between" :id="item.id">
               <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >
-                <div class="tw-h-0.5 tw-bg-green-500 tw-opacity-50 tw-my-1 tw-w-1 tw-hidden tw-rounded-lg" :id="`progressBar-${item.id}-${part-1}`"></div>
+                <div class="tw-h-0.5 tw-bg-green-500 tw-opacity-0 tw-mt-1 tw-w-1 tw-rounded-lg" :id="`progressBar-${item.id}-${part-1}`"></div>
               </div> 
             </div>
           </td>
