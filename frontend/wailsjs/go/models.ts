@@ -100,9 +100,22 @@ export namespace download {
 
 export namespace setting {
 	
-	export class Settings {
+	export class Theme {
 	    textColor: string;
 	    backgroundColor: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Theme(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.textColor = source["textColor"];
+	        this.backgroundColor = source["backgroundColor"];
+	    }
+	}
+	export class Settings {
+	    themes: Theme;
 	    partsize: number;
 	    concurrency: number;
 	    maxtries: number;
@@ -117,8 +130,7 @@ export namespace setting {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.textColor = source["textColor"];
-	        this.backgroundColor = source["backgroundColor"];
+	        this.themes = this.convertValues(source["themes"], Theme);
 	        this.partsize = source["partsize"];
 	        this.concurrency = source["concurrency"];
 	        this.maxtries = source["maxtries"];
@@ -127,20 +139,24 @@ export namespace setting {
 	        this.dataLocation = source["dataLocation"];
 	        this.dataFilename = source["dataFilename"];
 	    }
-	}
-	export class Themes {
-	    textColor: string;
-	    backgroundColor: string;
 	
-	    static createFrom(source: any = {}) {
-	        return new Themes(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.textColor = source["textColor"];
-	        this.backgroundColor = source["backgroundColor"];
-	    }
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 
 }

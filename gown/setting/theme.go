@@ -9,17 +9,17 @@ import (
 
 const DEFAULT_THEME_PATH = "/home/thoriqadillah/Development/Go/gown/themes/default.json"
 
-type Themes struct {
-	Components
+type Theme struct {
+	Component
 }
 
-func Theme() Themes {
-	return Themes{
-		Components: theme(DEFAULT_THEME_PATH),
+func Themes() Theme {
+	return Theme{
+		Component: theme(DEFAULT_THEME_PATH),
 	}
 }
 
-func theme(path string) Components {
+func theme(path string) Component {
 	f, err := os.Open(path)
 	if err != nil {
 		log.Panicf("Error opening file: %v\n", err)
@@ -31,7 +31,7 @@ func theme(path string) Components {
 		log.Panicf("Error reading file: %v\n", err)
 	}
 
-	var components Components
+	var components Component
 	if err := json.Unmarshal(data, &components); err != nil {
 		log.Panicf("Error unmarshalling file: %v\n", err)
 	}
@@ -39,7 +39,7 @@ func theme(path string) Components {
 	return components
 }
 
-type Components struct {
+type Component struct {
 	TextColor       string `json:"textColor"`
 	BackgroundColor string `json:"backgroundColor"`
 }

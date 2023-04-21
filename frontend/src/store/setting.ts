@@ -3,14 +3,32 @@ import { ref } from "vue";
 import { setting } from "../../wailsjs/go/models";
 
 export const useSettings = defineStore('settings', () => {
-  const value = ref(new setting.Settings())
+  const partsize = ref(0)
+  const concurrency = ref(0)
+  const maxtries = ref(0)
+  const simmultanousNum = ref(0)
+  const saveLocation = ref('')
+  const dataLocation = ref('')
+  const dataFilename = ref('')
 
   const init = (s: setting.Settings) => {
-    value.value = s
+    partsize.value = s.partsize
+    concurrency.value = s.concurrency
+    maxtries.value = s.maxtries
+    simmultanousNum.value = s.simmultanousNum
+    saveLocation.value = s.saveLocation
+    dataLocation.value = s.dataLocation
+    dataFilename.value = s.dataFilename
   }
   
   return {
-    value,
+    partsize,
+    concurrency,
+    maxtries,
+    simmultanousNum,
+    saveLocation,
+    dataLocation,
+    dataFilename,
     init
   }
 })

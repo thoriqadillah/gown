@@ -50,7 +50,7 @@ func (a *App) shutdown(ctx context.Context) {
 	a.pool.Stop()
 }
 
-func (a *App) Theme() setting.Themes {
+func (a *App) Theme() setting.Theme {
 	return a.settings.Themes
 }
 

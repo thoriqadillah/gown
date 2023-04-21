@@ -12,7 +12,7 @@ const (
 )
 
 type Settings struct {
-	Themes
+	Themes          Theme  `json:"themes"`
 	Partsize        int64  `json:"partsize"`
 	Concurrency     int    `json:"concurrency"`
 	Maxtries        int    `json:"maxtries"`
@@ -24,7 +24,7 @@ type Settings struct {
 
 func New() Settings {
 	return Settings{
-		Themes:          Theme(),
+		Themes:          Themes(),
 		Partsize:        DEFAULT_PART_SIZE,
 		Concurrency:     DEFAULT_CONCURRENCY,
 		Maxtries:        DEFAULT_MAX_TRIES,

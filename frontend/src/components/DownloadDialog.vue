@@ -51,7 +51,6 @@ watch(savelocation, (newval, oldval) => {
   savelocationErr.value = savelocation.value.trim().length === 0 ? 'This field is required' : ''
 })
 
-
 async function fetch() {
   try {
     input.value.blur()
@@ -60,7 +59,7 @@ async function fetch() {
     result.value = await downloader.fetch(url.value) as download.Download
     size.value = downloads.parseSize(result.value.size)
     filename.value = result.value.name
-    savelocation.value = settings.value.saveLocation
+    savelocation.value = settings.saveLocation
     
     dialog.done()
     dialog.next()
@@ -74,6 +73,7 @@ async function fetch() {
 
 // TODO: implement download
 async function execute() {
+  result.value.date = new Date() // set the start date when we click download
   downloader.download(result.value)
   downloads.add(result.value)
   dialog.close()
