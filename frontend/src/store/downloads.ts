@@ -16,9 +16,13 @@ export const useDownloads = defineStore('downloads', () => {
 
   const add = (val: download.Download) => {
     list.value.unshift(val)
+    defaults.value = list.value
     toDownload.value = val
   }
-  const remove = (download: download.Download) => list.value.splice(list.value.indexOf(download), 1)
+  const remove = (download: download.Download) => {
+    list.value.splice(list.value.indexOf(download), 1)
+    defaults.value = list.value
+  }
   const setData = (data: download.Download[]) => {
     list.value = data
     defaults.value = data
@@ -50,7 +54,7 @@ export const useDownloads = defineStore('downloads', () => {
 
   const sortByName = () => {
     ascName.value = !ascName.value
-    return ascName.value ? list.value.sort((a, b) => a.name.localeCompare(b.name)) : list.value.sort((a, b) => a.name.localeCompare(b.name)).reverse()
+    list.value = ascName.value ? list.value.sort((a, b) => a.name.localeCompare(b.name)) : list.value.sort((a, b) => b.name.localeCompare(a.name))
   }
   const sortByDate = () => {
     ascDate.value = !ascDate.value

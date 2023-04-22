@@ -97,7 +97,6 @@ func (a *App) InitSetting() setting.Settings {
 
 func (a *App) Download(toDownload *download.Download) error {
 	a.pool.Start()
-	//TODO: implement incremental filename if exist
 
 	data := a.storage.Get()
 	data = append([]download.Download{*toDownload}, data...)

@@ -12,16 +12,17 @@ const props = defineProps<{
 }>()
 
 const editIcon = ref<HTMLElement[]>([])
-const filename = ref<HTMLElement[]>() 
+const filenames = ref<HTMLElement[]>() 
 const hovered = ref<HTMLElement>()
 
-watch(filename, () => {
-  for (let i = 0; i < filename.value!.length; i++) {
-    filename.value![i].addEventListener('mouseover', () => {
+//FIXME: fix editable newly downloaded file
+watch(filenames, () => {
+  for (let i = 0; i < filenames.value!.length; i++) {
+    filenames.value![i].addEventListener('mouseover', () => {
       editIcon.value[i].style.opacity = '100'
-      hovered.value = filename.value![i]
+      hovered.value = filenames.value![i]
     });
-    filename.value![i].addEventListener('mouseleave', () => {
+    filenames.value![i].addEventListener('mouseleave', () => {
       editIcon.value[i].style.opacity = '0'
     });
   }
@@ -141,7 +142,7 @@ EventsOn("done", async (...data) => {
       </thead>
       <tbody>
         <tr v-for="item in props.list" :key="item.name">
-          <td color="primary" class="tw-rounded-sm namecol" :id="item.id" ref="filename" @click="editFilename()">
+          <td color="primary" class="tw-rounded-sm namecol" :id="item.id" ref="filenames" @click="editFilename()">
             <div class="tw-flex tw-justify-between tw-mt-1">
               <div class="tw-overflow-x-hidden tw-w-max tw-flex">
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>

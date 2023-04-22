@@ -17,7 +17,7 @@ const loaded = ref(false)
 const onFile = ref(false)
 const onURL = ref(true)
 const size = ref('')
-const url = ref('')
+let url = ref('')
 const urlErr = ref('')
 const urlHasError = ref(false)
 const savelocation = ref('')
@@ -73,12 +73,16 @@ async function fetch() {
 
 // TODO: implement download
 async function execute() {
-  result.value.date = new Date() // set the start date when we click download
-  result.value.name = result.value.name.replaceAll('/', '-') // parse the / to not consider it with folder
-
   downloader.download(result.value)
   downloads.add(result.value)
   dialog.close()
+  url = ref('')
+  urlErr.value = ''
+  urlHasError.value = false
+  filenameErr.value = ''
+  filenameHasError.value = false
+  savelocationErr.value = ''
+  savelocationHasError.value = false
 }
 
 </script>
