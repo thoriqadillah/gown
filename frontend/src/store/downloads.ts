@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { download } from "../../wailsjs/go/models";
-import { UpdateData} from '../../wailsjs/go/main/App'
+import { UpdateData, UpdateName} from '../../wailsjs/go/main/App'
 
 export const useDownloads = defineStore('downloads', () => {
   const list = ref<download.Download[]>([])
@@ -27,6 +27,14 @@ export const useDownloads = defineStore('downloads', () => {
     list.value = data
     defaults.value = data
     await UpdateData(data)
+  }
+  const updateName = async (oldval: string, newval: string, id: string) => {
+    for (const el of list.value) {
+      if (id == el.id) {
+        await UpdateName(oldval, newval)
+        break
+      }
+    }
   }
 
   const filterByImage = () => list.value = defaults.value.filter(d => d.type.name === 'image')
@@ -101,6 +109,7 @@ export const useDownloads = defineStore('downloads', () => {
     sortBySize,
     sortByTimeElapsed,
     parseSize,
-    parseElapsedTime
+    parseElapsedTime,
+    updateName
   }
 })

@@ -9,6 +9,8 @@ import (
 	"changeme/gown/worker"
 	"context"
 	"log"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -68,6 +70,22 @@ func (a *App) Fetch(url string) (*download.Download, error) {
 
 func (a *App) InitData() []download.Download {
 	return a.storage.Get()
+}
+
+func (a *App) UpdateName(oldname string, newname string) error {
+	oldname = filepath.Join(a.settings.SaveLocation, oldname)
+	newname = filepath.Join(a.settings.SaveLocation, newname)
+
+	if _, err := os.Stat(oldname); err != nil {
+		return err
+	}
+
+	log.Println(oldname, newname)
+	if err := os.Rename(oldname, newname); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (a *App) UpdateData(data []download.Download) {

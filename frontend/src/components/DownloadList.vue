@@ -12,17 +12,55 @@ const props = defineProps<{
 }>()
 
 const editIcon = ref<HTMLElement[]>([])
-const singo = ref<HTMLElement[]>() 
-watch(singo, () => {
-  for (let i = 0; i < singo.value!.length; i++) {
-    singo.value![i].addEventListener('mouseover', () => {
+const filename = ref<HTMLElement[]>() 
+const hovered = ref<HTMLElement>()
+
+watch(filename, () => {
+  for (let i = 0; i < filename.value!.length; i++) {
+    filename.value![i].addEventListener('mouseover', () => {
       editIcon.value[i].style.opacity = '100'
+      hovered.value = filename.value![i]
     });
-    singo.value![i].addEventListener('mouseleave', () => {
+    filename.value![i].addEventListener('mouseleave', () => {
       editIcon.value[i].style.opacity = '0'
     });
   }
 })
+
+const click = ref(0)
+const onEdit = ref(false)
+const selectedID = ref('')
+const newFilename = ref()
+const selected = ref()
+
+function editFilename() {
+  click.value += 1
+  if (click.value == 2) {
+    onEdit.value = true
+    selectedID.value = hovered.value!.id
+    selected.value = hovered.value
+    newFilename.value = selected.value.innerText
+    
+    click.value = 0
+  }
+}
+
+async function doneEditing() {
+  try {
+    onEdit.value = false
+    for (const el of downloads.list) {
+      if (el.id == selectedID.value) {
+        await downloads.updateName(el.name, newFilename.value, el.id)
+        el.name = newFilename.value
+        break
+      }
+    }
+  
+    await downloads.updateData(downloads.list)
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 EventsOn("transfered", async (...data) => {
   let prog = data[2]
@@ -101,14 +139,15 @@ EventsOn("done", async (...data) => {
       </thead>
       <tbody>
         <tr v-for="item in props.list" :key="item.name">
-          <td color="primary" class="tw-rounded-sm" id="nameCol" ref="singo">
+          <td color="primary" class="tw-rounded-sm namecol" :id="item.id" ref="filename" @click="editFilename()">
             <div class="tw-flex tw-justify-between tw-mt-1">
-              <div class="tw-overflow-x-hidden tw-w-max">
+              <div class="tw-overflow-x-hidden tw-w-max tw-flex">
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
-                <span class="tw-text-sm">{{ item.name }}</span>
+                <input v-if="selectedID == item.id && onEdit" type="text" v-model="newFilename" autofocus :size="item.name.length" class="tw-text-sm border tw-pb-1" @keyup.enter="doneEditing()" @keyup.esc="onEdit = false">
+                <span v-else class="tw-text-sm tw-inline">{{ item.name }}</span>
               </div>
               <span ref="editIcon" class="tw-opacity-0">
-                <v-icon icon="mdi-square-edit-outline" class="tw-text-sm tw-opacity-50 tw-mx-3 edit-icon"></v-icon>
+                <v-icon icon="mdi-square-edit-outline" class="tw-text-sm tw-opacity-50 tw-mx-3 edit-icon tw-mb-1" @click="onEdit = true"></v-icon>
               </span>
             </div>
             <div class="progressWrapper tw-flex tw-justify-between" :id="item.id">
