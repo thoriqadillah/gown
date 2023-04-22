@@ -74,6 +74,8 @@ async function fetch() {
 // TODO: implement download
 async function execute() {
   result.value.date = new Date() // set the start date when we click download
+  result.value.name = result.value.name.replaceAll('/', '-') // parse the / to not consider it with folder
+
   downloader.download(result.value)
   downloads.add(result.value)
   dialog.close()

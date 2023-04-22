@@ -59,6 +59,7 @@ async function doneEditing() {
     await downloads.updateData(downloads.list)
   } catch (error) {
     console.log(error);
+    // TODO: print this to log
   }
 }
 
@@ -68,11 +69,12 @@ EventsOn("transfered", async (...data) => {
   progressBar.style.opacity = '50'
   progressBar.style.width = prog + '%'
   
-  downloads.list.forEach(el => {
+  for (const el of downloads.list) {
     if (el.id == data[0]) {
       el.timeElapsed = downloads.parseElapsedTime(downloads.toDownload.date)
+      break
     }
-  })
+  }
 })
 
 EventsOn("done", async (...data) => {
@@ -143,7 +145,7 @@ EventsOn("done", async (...data) => {
             <div class="tw-flex tw-justify-between tw-mt-1">
               <div class="tw-overflow-x-hidden tw-w-max tw-flex">
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
-                <input v-if="selectedID == item.id && onEdit" type="text" v-model="newFilename" autofocus :size="item.name.length" class="tw-text-sm border tw-pb-1" @keyup.enter="doneEditing()" @keyup.esc="onEdit = false">
+                <input v-if="selectedID == item.id && onEdit" type="text" v-model="newFilename" autofocus :size="item.name.length-13" class="tw-text-sm border tw-pb-1" @keyup.enter="doneEditing()" @keyup.esc="onEdit = false">
                 <span v-else class="tw-text-sm tw-inline">{{ item.name }}</span>
               </div>
               <span ref="editIcon" class="tw-opacity-0">

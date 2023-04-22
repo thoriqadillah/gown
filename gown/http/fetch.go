@@ -108,6 +108,7 @@ func dynamicPartition(size int64, defaultParitionSize int64) int {
 }
 
 func filename(res *http.Response) string {
+	//TODO: there is no guarantee that this approach is always works. Add more implementation
 	disposition := res.Header.Get("Content-Disposition")
 	_, params, _ := mime.ParseMediaType(disposition)
 	return params["filename"]

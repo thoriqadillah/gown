@@ -12,7 +12,6 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -98,8 +97,8 @@ func (a *App) InitSetting() setting.Settings {
 
 func (a *App) Download(toDownload *download.Download) error {
 	a.pool.Start()
+	//TODO: implement incremental filename if exist
 
-	toDownload.Date = time.Now()
 	data := a.storage.Get()
 	data = append([]download.Download{*toDownload}, data...)
 	a.storage.Save(data)
