@@ -105,7 +105,11 @@ func dynamicPartition(size int64, defaultParitionSize int64) int {
 
 	// dampening the total partition
 	for i := 0; i < int(num); i++ {
-		partsize *= 2 // 2 is just author's self configured number
+		if int(num) == 3 {
+			partsize *= 3
+		} else {
+			partsize *= 2
+		}
 	}
 
 	return int(size / partsize)
