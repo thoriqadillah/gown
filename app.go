@@ -98,6 +98,7 @@ func (a *App) InitSetting() setting.Settings {
 func (a *App) Download(toDownload *download.Download) error {
 	a.pool.Start()
 
+	// TODO: handle simultanous download
 	data := a.storage.Get()
 	data = append([]download.Download{*toDownload}, data...)
 	a.storage.Save(data)

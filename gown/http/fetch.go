@@ -6,7 +6,11 @@ import (
 	"math"
 	"mime"
 	"net/http"
+	"os"
+	"path/filepath"
 	"regexp"
+	"strconv"
+	"strings"
 )
 
 type Response struct {
@@ -43,7 +47,7 @@ func Fetch(url string, setting *setting.Settings) (*Response, error) {
 		return nil, err
 	}
 
-	filename := filename(res)
+	filename := filename(res, setting)
 	contentType := contentType(filename)
 
 	// check if the file support cansplit download
@@ -107,9 +111,43 @@ func dynamicPartition(size int64, defaultParitionSize int64) int {
 	return int(size / partsize)
 }
 
-func filename(res *http.Response) string {
+func filename(res *http.Response, s *setting.Settings) string {
 	//TODO: there is no guarantee that this approach is always works. Add more implementation
 	disposition := res.Header.Get("Content-Disposition")
 	_, params, _ := mime.ParseMediaType(disposition)
-	return params["filename"]
+
+	return handleDuplicate(params["filename"], s)
+}
+
+func handleDuplicate(name string, s *setting.Settings) string {
+	filename := filepath.Join(s.SaveLocation, name)
+	if _, err := os.Stat(filename); err != nil {
+		return name
+	}
+
+	regex, err := regexp.Compile(`\((.*?)\)`)
+	if err != nil { // if there is no number prefix
+		return name
+	}
+
+	prefix := regex.FindStringSubmatch(name)
+	if len(prefix) == 0 {
+		split := strings.Split(name, ".")
+		split[0] += " (1)"
+		name = strings.Join(split, ".")
+		name = handleDuplicate(name, s)
+		return name
+	}
+
+	name = strings.ReplaceAll(name, " "+prefix[0], "")
+	number, err := strconv.Atoi(prefix[1])
+	if err != nil {
+		return name
+	}
+	split := strings.Split(name, ".")
+	split[0] += " (" + strconv.Itoa(number+1) + ")"
+	name = strings.Join(split, ".")
+	name = handleDuplicate(name, s)
+
+	return name
 }
