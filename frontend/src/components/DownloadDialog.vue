@@ -17,7 +17,7 @@ const loaded = ref(false)
 const onFile = ref(false)
 const onURL = ref(true)
 const size = ref('')
-const url = ref('')
+let url = ref('')
 const urlErr = ref('')
 const urlHasError = ref(false)
 const savelocation = ref('')
@@ -73,10 +73,16 @@ async function fetch() {
 
 // TODO: implement download
 async function execute() {
-  result.value.date = new Date() // set the start date when we click download
   downloader.download(result.value)
   downloads.add(result.value)
   dialog.close()
+  url = ref('')
+  urlErr.value = ''
+  urlHasError.value = false
+  filenameErr.value = ''
+  filenameHasError.value = false
+  savelocationErr.value = ''
+  savelocationHasError.value = false
 }
 
 </script>
@@ -91,7 +97,7 @@ async function execute() {
           <v-text-field color="primary" :error="savelocationHasError" :error-messages="savelocationErr" v-model="savelocation" label="Save location" append-inner-icon="mdi-folder" type="input" hint="Save location" class="tw-p-3" single-line density="compact" variant="outlined" />
         </div>
         <div class="tw-basis-3/12 tw-text-center tw-pr-2 -tw-mt-5">
-          <v-icon icon="mdi-file"></v-icon>
+          <v-icon :icon="result.type.icon" :color="result.type.color"></v-icon>
           <p class="text-body-1 tw-mt-5">{{ size }}</p>
         </div>
       </div>

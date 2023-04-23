@@ -9,8 +9,9 @@ import (
 	"changeme/gown/worker"
 	"context"
 	"log"
+	"os"
+	"path/filepath"
 	"sync"
-	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -70,6 +71,22 @@ func (a *App) InitData() []download.Download {
 	return a.storage.Get()
 }
 
+func (a *App) UpdateName(oldname string, newname string) error {
+	oldname = filepath.Join(a.settings.SaveLocation, oldname)
+	newname = filepath.Join(a.settings.SaveLocation, newname)
+
+	if _, err := os.Stat(oldname); err != nil {
+		return err
+	}
+
+	log.Println(oldname, newname)
+	if err := os.Rename(oldname, newname); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (a *App) UpdateData(data []download.Download) {
 	a.storage.Save(data)
 }
@@ -81,7 +98,7 @@ func (a *App) InitSetting() setting.Settings {
 func (a *App) Download(toDownload *download.Download) error {
 	a.pool.Start()
 
-	toDownload.Date = time.Now()
+	// TODO: handle simultanous download
 	data := a.storage.Get()
 	data = append([]download.Download{*toDownload}, data...)
 	a.storage.Save(data)

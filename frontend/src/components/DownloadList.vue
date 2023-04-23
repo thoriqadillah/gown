@@ -4,11 +4,65 @@ import { useDownloads } from '../store/downloads';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
 import { download } from '../../wailsjs/go/models';
 import { useDateFormat } from '@vueuse/shared';
+import { ref, watch } from 'vue';
 
 const downloads = useDownloads()
 const props = defineProps<{
   list: download.Download[]
 }>()
+
+const editIcon = ref<HTMLElement[]>([])
+const filenames = ref<HTMLElement[]>() 
+const hovered = ref<HTMLElement>()
+
+//FIXME: fix editable newly downloaded file
+watch(filenames, () => {
+  for (let i = 0; i < filenames.value!.length; i++) {
+    filenames.value![i].addEventListener('mouseover', () => {
+      editIcon.value[i].style.opacity = '100'
+      hovered.value = filenames.value![i]
+    });
+    filenames.value![i].addEventListener('mouseleave', () => {
+      editIcon.value[i].style.opacity = '0'
+    });
+  }
+})
+
+const click = ref(0)
+const onEdit = ref(false)
+const selectedID = ref('')
+const newFilename = ref()
+const selected = ref()
+
+function editFilename() {
+  click.value += 1
+  if (click.value == 2) {
+    onEdit.value = true
+    selectedID.value = hovered.value!.id
+    selected.value = hovered.value
+    newFilename.value = selected.value.innerText
+    
+    click.value = 0
+  }
+}
+
+async function doneEditing() {
+  try {
+    onEdit.value = false
+    for (const el of downloads.list) {
+      if (el.id == selectedID.value) {
+        await downloads.updateName(el.name, newFilename.value, el.id)
+        el.name = newFilename.value
+        break
+      }
+    }
+  
+    await downloads.updateData(downloads.list)
+  } catch (error) {
+    console.log(error);
+    // TODO: print this to log
+  }
+}
 
 EventsOn("transfered", async (...data) => {
   let prog = data[2]
@@ -16,11 +70,12 @@ EventsOn("transfered", async (...data) => {
   progressBar.style.opacity = '50'
   progressBar.style.width = prog + '%'
   
-  downloads.list.forEach(el => {
+  for (const el of downloads.list) {
     if (el.id == data[0]) {
       el.timeElapsed = downloads.parseElapsedTime(downloads.toDownload.date)
+      break
     }
-  })
+  }
 })
 
 EventsOn("done", async (...data) => {
@@ -40,7 +95,6 @@ EventsOn("done", async (...data) => {
   }
   await downloads.updateData(downloads.list)
 })
-
 </script>
 
 <template>
@@ -87,13 +141,17 @@ EventsOn("done", async (...data) => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item,i) in props.list" :key="item.name">
-          <td color="primary" class="tw-rounded-sm" id="nameCol">
+        <tr v-for="item in props.list" :key="item.name">
+          <td color="primary" class="tw-rounded-sm namecol" :id="item.id" ref="filenames" @click="editFilename()">
             <div class="tw-flex tw-justify-between tw-mt-1">
-              <div class="tw-overflow-x-hidden tw-w-max">
+              <div class="tw-overflow-x-hidden tw-w-max tw-flex">
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
-                <span class="tw-text-sm">{{ item.name }}</span>
+                <input v-if="selectedID == item.id && onEdit" type="text" v-model="newFilename" autofocus :size="item.name.length-13" class="tw-text-sm border tw-pb-1" @keyup.enter="doneEditing()" @keyup.esc="onEdit = false">
+                <span v-else class="tw-text-sm tw-inline">{{ item.name }}</span>
               </div>
+              <span ref="editIcon" class="tw-opacity-0">
+                <v-icon icon="mdi-square-edit-outline" class="tw-text-sm tw-opacity-50 tw-mx-3 edit-icon tw-mb-1" @click="onEdit = true"></v-icon>
+              </span>
             </div>
             <div class="progressWrapper tw-flex tw-justify-between" :id="item.id">
               <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >
