@@ -71,7 +71,7 @@ export const useDownloads = defineStore('downloads', () => {
 
   const KB = 1024
   const MB = KB * KB
-  const GB = MB * MB
+  const GB = MB * KB
   const parseSize = (size: number): string => {
     if (size < KB) return (size / KB).toFixed(2) + " KB"
     if (size > KB && size < MB) return (size / KB).toFixed(2) + " KB"

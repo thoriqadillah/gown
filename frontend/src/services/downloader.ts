@@ -15,7 +15,11 @@ export default class Downloader {
         const matches = regex.exec(name)        
         if (matches == null) {
           let split = name.split('.')
-          split[0] = split[0] + ' (1)'
+          if (split.length > 2) {
+            split[split.length - 2] += ' (1)'
+          } else {
+            split[0] += ' (1)'
+          }
           
           newname = split.join('.')
           newname = this.handleDuplication(newname)
@@ -25,7 +29,11 @@ export default class Downloader {
         const number = parseInt(matches![1]) + 1
         name = name.replaceAll(matches![0], '')
         let split = name.split('.')
-        split[0] = split[0] + `(${number})`
+        if (split.length > 2) {
+          split[split.length - 2] += `(${number})`
+        } else {
+          split[0] += `(${number})`
+        }
         newname = split.join('.')
         newname = this.handleDuplication(newname)
         return

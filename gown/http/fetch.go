@@ -137,7 +137,11 @@ func handleDuplicate(name string, s *setting.Settings) string {
 	prefix := regex.FindStringSubmatch(name)
 	if len(prefix) == 0 {
 		split := strings.Split(name, ".")
-		split[0] += " (1)"
+		if len(split) > 2 {
+			split[len(split)-2] += " (1)"
+		} else {
+			split[0] += " (1)"
+		}
 		name = strings.Join(split, ".")
 		name = handleDuplicate(name, s)
 		return name
@@ -149,7 +153,11 @@ func handleDuplicate(name string, s *setting.Settings) string {
 		return name
 	}
 	split := strings.Split(name, ".")
-	split[0] += " (" + strconv.Itoa(number+1) + ")"
+	if len(split) > 2 {
+		split[len(split)-2] += " (" + strconv.Itoa(number+1) + ")"
+	} else {
+		split[0] += " (" + strconv.Itoa(number+1) + ")"
+	}
 	name = strings.Join(split, ".")
 	name = handleDuplicate(name, s)
 

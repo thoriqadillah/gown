@@ -69,10 +69,11 @@ EventsOn("transfered", async (...data) => {
   const progressBar = document.getElementById(`progressBar-${data[0]}-${data[1]}`) as HTMLElement
   progressBar.style.opacity = '50'
   progressBar.style.width = prog + '%'
-  
+
   for (const el of downloads.list) {
     if (el.id == data[0]) {
       el.timeElapsed = downloads.parseElapsedTime(downloads.toDownload.date)
+      el.progress += data[3]
       break
     }
   }
@@ -118,6 +119,9 @@ EventsOn("done", async (...data) => {
             </div>
           </th>
           <th class="tw-text tw-cursor-pointer-left">
+            <span class="tw-text-sm">Progress</span>
+          </th>
+          <th class="tw-text tw-cursor-pointer-left">
             <span class="tw-text-sm">Status</span>
           </th>
           <th class="text-left tw-cursor-pointer" @click="downloads.sortByTimeElapsed()">
@@ -159,10 +163,11 @@ EventsOn("done", async (...data) => {
               </div> 
             </div>
           </td>
-          <td class="tw-text-sm tw-text-left"><v-icon :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90 tw-ml-2"></v-icon></td>
-          <td class="tw-text-sm tw-rounded-sm text-left tw-w-32">{{ item.timeElapsed }}</td>
-          <td class="tw-text-sm tw-rounded-sm text-left tw-w-20">{{ downloads.parseSize(item.size) }}</td>
-          <td class="tw-text-sm tw-rounded-sm text-left tw-w-32">{{ useDateFormat(item.date, 'MMMM DD, YYYY HH:mm').value }}</td>
+          <td class="tw-text-sm tw-text-center">{{  ((item.progress/item.size) * 100).toFixed(0) + '%' }}</td>
+          <td class="tw-text-sm tw-text-center"><v-icon :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90 tw-ml-2"></v-icon></td>
+          <td class="tw-text-sm tw-text-left tw-w-32">{{ item.timeElapsed }}</td>
+          <td class="tw-text-sm tw-text-left tw-w-20">{{ downloads.parseSize(item.size) }}</td>
+          <td class="tw-text-sm tw-text-left tw-w-32">{{ useDateFormat(item.date, 'MMMM DD, YYYY HH:mm').value }}</td>
         </tr>
       </tbody>
     </v-table>
