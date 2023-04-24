@@ -21,7 +21,6 @@ type App struct {
 	ctx      context.Context
 	settings setting.Settings
 	pool     worker.Pool
-	wg       sync.WaitGroup
 	err      error
 	storage  storage.Storage
 }
@@ -35,7 +34,6 @@ func NewApp() *App {
 		settings: s,
 		pool:     worker,
 		err:      err,
-		wg:       sync.WaitGroup{},
 		storage:  storage.New(&s),
 	}
 }
@@ -97,8 +95,8 @@ func (a *App) InitSetting() setting.Settings {
 
 func (a *App) Download(toDownload *download.Download) error {
 	a.pool.Start()
+	var wg sync.WaitGroup
 
-	// TODO: handle simultanous download
 	data := a.storage.Get()
 	data = append([]download.Download{*toDownload}, data...)
 	a.storage.Save(data)
@@ -106,17 +104,18 @@ func (a *App) Download(toDownload *download.Download) error {
 	storage := storage.NewFile(toDownload.Metadata.Totalpart, &a.settings)
 	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)
 	for part := range chunks {
-		chunks[part] = chunk.New(a.ctx, *toDownload, part, &a.settings, &a.wg)
+		chunks[part] = chunk.New(a.ctx, *toDownload, part, &a.settings, &wg)
 	}
 
 	for _, job := range chunks {
-		a.wg.Add(1)
+		wg.Add(1)
 		a.pool.Add(job)
 	}
 
-	a.wg.Wait()
+	wg.Wait()
 
 	runtime.EventsEmit(a.ctx, "done", toDownload.ID)
+	runtime.EventsOff(a.ctx, "done")
 
 	for part, chunk := range chunks {
 		storage.CombineFile(chunk.Data(), part)
