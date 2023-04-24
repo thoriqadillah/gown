@@ -23,7 +23,6 @@ type Chunk struct {
 	end        int64
 	size       int64
 	ctx        context.Context
-	tmpFile    *os.File
 	*setting.Settings
 }
 
