@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	STATUS_NAME_SUCCESS    = "success"
-	STATUS_NAME_FAILED     = "failed"
-	STATUS_NAME_PAUSED     = "paused"
-	STATUS_NAME_QUEUED     = "queued"
-	STATUS_NAME_PROCESSING = "processing"
+	STATUS_NAME_SUCCESS    = "Success"
+	STATUS_NAME_FAILED     = "Failed"
+	STATUS_NAME_PAUSED     = "Paused"
+	STATUS_NAME_QUEUED     = "Queued"
+	STATUS_NAME_PROCESSING = "Processing"
 
 	STATUS_ICON_SUCCESS    = "mdi-check-circle-outline"
 	STATUS_ICON_FAILED     = "mdi-alert-outline"

@@ -20,20 +20,15 @@ import (
 type App struct {
 	ctx      context.Context
 	settings setting.Settings
-	pool     worker.Pool
-	err      error
 	storage  storage.Storage
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
 	s := setting.New()
-	worker, err := worker.New(s.Concurrency, s.SimmultanousNum)
 
 	return &App{
 		settings: s,
-		pool:     worker,
-		err:      err,
 		storage:  storage.New(&s),
 	}
 }
@@ -43,10 +38,6 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	a.storage.Init()
-}
-
-func (a *App) shutdown(ctx context.Context) {
-	a.pool.Stop()
 }
 
 func (a *App) Theme() setting.Theme {
@@ -94,7 +85,13 @@ func (a *App) InitSetting() setting.Settings {
 }
 
 func (a *App) Download(toDownload *download.Download) error {
-	a.pool.Start()
+	worker, err := worker.New(toDownload.Metadata.Totalpart, a.settings.SimmultanousNum)
+	if err != nil {
+		log.Printf("Error initializing worker: %v\n", err)
+	}
+
+	worker.Start()
+
 	var wg sync.WaitGroup
 
 	data := a.storage.Get()
@@ -109,13 +106,14 @@ func (a *App) Download(toDownload *download.Download) error {
 
 	for _, job := range chunks {
 		wg.Add(1)
-		a.pool.Add(job)
+		worker.Add(job)
 	}
 
 	wg.Wait()
+	worker.Stop()
 
-	runtime.EventsEmit(a.ctx, "done", toDownload.ID)
-	runtime.EventsOff(a.ctx, "done")
+	// combining
+	runtime.EventsEmit(a.ctx, "downloaded", toDownload.ID, false)
 
 	for part, chunk := range chunks {
 		storage.CombineFile(chunk.Data(), part)
@@ -126,6 +124,10 @@ func (a *App) Download(toDownload *download.Download) error {
 		return err
 	}
 
+	// combined
+	runtime.EventsEmit(a.ctx, "downloaded", toDownload.ID, true)
+	runtime.EventsOff(a.ctx, "downloaded")
+
 	return nil
 }
 
@@ -134,5 +136,4 @@ TODO:
 - implement queue
 - implement theming
 - implement browser extension
-- implement simultanous download
 */

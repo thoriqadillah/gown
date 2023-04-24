@@ -88,8 +88,9 @@ func (c *Chunk) download() error {
 
 		transfered += float64(n)
 		c.data = append(c.data, buffer[:n]...)
-		runtime.EventsEmit(c.ctx, "transfered", c.toDownload.ID, c.index, (transfered / float64(c.size) * 100)) //TODO: implement proper transfer emition to differentiate which div to animate the progress bar
+		runtime.EventsEmit(c.ctx, "transfered", c.toDownload.ID, c.index, (transfered / float64(c.size) * 100), n) //TODO: implement proper transfer emition to differentiate which div to animate the progress bar
 	}
+	runtime.EventsOff(c.ctx, "transfered")
 
 	elapsed := time.Since(start)
 	log.Printf("Chunk %d downloaded in %v s\n", c.index+1, elapsed.Seconds())

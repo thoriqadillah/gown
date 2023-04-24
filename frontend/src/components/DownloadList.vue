@@ -79,21 +79,33 @@ EventsOn("transfered", async (...data) => {
   }
 })
 
-EventsOn("done", async (...data) => {
+EventsOn("downloaded", async (...data) => {
+  const [id, combined] = data
+  
   for (const el of downloads.list) {
-    if (el.id == data[0]) {
+    if (el.id != id) continue
+
+    if (!combined) {
       el.status = {
-        name: 'success',
-        icon: 'mdi-check-circle-outline',
-        color: 'success'
+        name: 'Combining',
+        icon: 'mdi-file-arrow-left-right-outline',
+        color: 'info'
       }
-      for (let i = 0; i < el.metadata.totalpart; i++) {
-        const progressBar = document.getElementById(`progressBar-${data[0]}-${i}`) as HTMLElement
-        progressBar.style.opacity = '0'
-      } 
       break
+    } 
+
+    el.status = {
+      name: 'Success',
+      icon: 'mdi-check-circle-outline',
+      color: 'success'
     }
+    for (let i = 0; i < el.metadata.totalpart; i++) {
+      const progressBar = document.getElementById(`progressBar-${data[0]}-${i}`) as HTMLElement
+      progressBar.style.opacity = '0'
+    } 
+    break
   }
+
   await downloads.updateData(downloads.list)
 })
 </script>
@@ -164,7 +176,13 @@ EventsOn("done", async (...data) => {
             </div>
           </td>
           <td class="tw-text-sm tw-text-center">{{  ((item.progress/item.size) * 100).toFixed(0) + '%' }}</td>
-          <td class="tw-text-sm tw-text-center"><v-icon :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90 tw-ml-2"></v-icon></td>
+          <td class="tw-text-sm tw-text-center">
+            <v-tooltip :text="item.status.name" location="top">
+              <template v-slot:activator="{ props }">
+                <v-icon v-bind="props" :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90 tw-ml-2"></v-icon>
+              </template>
+            </v-tooltip>
+          </td>
           <td class="tw-text-sm tw-text-left tw-w-32">{{ item.timeElapsed }}</td>
           <td class="tw-text-sm tw-text-left tw-w-20">{{ downloads.parseSize(item.size) }}</td>
           <td class="tw-text-sm tw-text-left tw-w-32">{{ useDateFormat(item.date, 'MMMM DD, YYYY HH:mm').value }}</td>
