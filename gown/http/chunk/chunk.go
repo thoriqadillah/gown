@@ -38,12 +38,6 @@ func New(ctx context.Context, toDownload download.Download, index int, setting *
 		end = toDownload.Size
 	}
 
-	tmp := filepath.Join(setting.SaveLocation, toDownload.ID+"-"+strconv.Itoa(index))
-	f, err := os.Create(tmp)
-	if err != nil {
-		log.Printf("Error creating file: %v\n", err)
-	}
-
 	return &Chunk{
 		toDownload: toDownload,
 		wg:         wg,
@@ -53,7 +47,6 @@ func New(ctx context.Context, toDownload download.Download, index int, setting *
 		size:       partsize,
 		ctx:        ctx,
 		Settings:   setting,
-		tmpFile:    f,
 	}
 }
 
@@ -83,6 +76,15 @@ func (c *Chunk) download() error {
 	}
 	defer res.Body.Close()
 
+	// create temp file
+	tmpFilename := filepath.Join(c.SaveLocation, c.toDownload.ID+"-"+strconv.Itoa(c.index))
+	file, err := os.Create(tmpFilename)
+	if err != nil {
+		log.Printf("Error creating file: %v\n", err)
+		return err
+	}
+	defer file.Close()
+
 	progressbar := &progressbar{
 		ctx:    c.ctx,
 		id:     c.toDownload.ID,
@@ -92,7 +94,7 @@ func (c *Chunk) download() error {
 		tmp:    0,
 	}
 
-	if _, err := io.Copy(c.tmpFile, progressbar); err != nil {
+	if _, err := io.Copy(file, progressbar); err != nil {
 		// TODO: retry from the position where error happened
 		return err
 	}
@@ -100,7 +102,6 @@ func (c *Chunk) download() error {
 	elapsed := time.Since(start)
 	log.Printf("Chunk %d downloaded in %v s\n", c.index+1, elapsed.Seconds())
 
-	defer c.tmpFile.Close()
 	return nil
 }
 
