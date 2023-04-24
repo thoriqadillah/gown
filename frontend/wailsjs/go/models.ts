@@ -56,6 +56,7 @@ export namespace download {
 	    // Go type: time
 	    date: any;
 	    status: DownloadStatus;
+	    progress: number;
 	    type: DownloadType;
 	    metadata: Metadata;
 	
@@ -71,6 +72,7 @@ export namespace download {
 	        this.size = source["size"];
 	        this.date = this.convertValues(source["date"], null);
 	        this.status = this.convertValues(source["status"], DownloadStatus);
+	        this.progress = source["progress"];
 	        this.type = this.convertValues(source["type"], DownloadType);
 	        this.metadata = this.convertValues(source["metadata"], Metadata);
 	    }

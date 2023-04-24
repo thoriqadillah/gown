@@ -56,6 +56,7 @@ type (
 		Size        int64          `json:"size"`
 		Date        time.Time      `json:"date"`
 		Status      DownloadStatus `json:"status"`
+		Progres     int64          `json:"progress"`
 		Type        DownloadType   `json:"type"`
 		Metadata    Metadata       `json:"metadata"`
 	}
