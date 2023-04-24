@@ -73,9 +73,9 @@ async function fetch() {
 
 // TODO: implement download
 async function execute() {
+  dialog.close()
   downloader.download(result.value)
   downloads.add(result.value)
-  dialog.close()
   url = ref('')
   urlErr.value = ''
   urlHasError.value = false

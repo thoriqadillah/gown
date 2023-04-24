@@ -14,6 +14,7 @@ type progressbar struct {
 	index      int
 	size       int64
 	transfered int64
+	tmp        int
 }
 
 func (r *progressbar) Read(payload []byte) (n int, err error) {
@@ -23,13 +24,19 @@ func (r *progressbar) Read(payload []byte) (n int, err error) {
 	}
 
 	r.transfered += int64(n)
+	r.tmp += n
 
-	runtime.EventsEmit(r.ctx, "transfered",
-		r.id,
-		r.index,
-		float64(r.transfered)/float64(r.size)*100, // for the actual progress bar
-		n, // for percentage
-	)
+	// emit event every 300kb downloaded because the default 32kb is too fast and the frontend cannot handle it
+	if r.tmp > 300*1024 {
+		runtime.EventsEmit(r.ctx, "transfered",
+			r.id,
+			r.index,
+			float64(r.transfered)/float64(r.size)*100,
+			r.tmp,
+		)
+
+		r.tmp = 0
+	}
 
 	return n, err
 }

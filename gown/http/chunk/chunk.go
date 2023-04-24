@@ -89,6 +89,7 @@ func (c *Chunk) download() error {
 		index:  c.index,
 		Reader: res.Body,
 		size:   c.size,
+		tmp:    0,
 	}
 
 	if _, err := io.Copy(c.tmpFile, progressbar); err != nil {
