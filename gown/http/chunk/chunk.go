@@ -8,10 +8,11 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
 	"sync"
 	"time"
-
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type Chunk struct {
@@ -21,7 +22,6 @@ type Chunk struct {
 	start      int64
 	end        int64
 	size       int64
-	data       []byte
 	ctx        context.Context
 	*setting.Settings
 }
@@ -44,7 +44,6 @@ func New(ctx context.Context, toDownload download.Download, index int, setting *
 		start:      start,
 		end:        end,
 		size:       partsize,
-		data:       make([]byte, 0, partsize),
 		ctx:        ctx,
 		Settings:   setting,
 	}
@@ -76,21 +75,28 @@ func (c *Chunk) download() error {
 	}
 	defer res.Body.Close()
 
-	var _100KB int64 = 1024 * 100
-	buffer := make([]byte, _100KB)
-
-	var transfered float64 = 0
-	for {
-		n, err := io.ReadFull(res.Body, buffer)
-		if err == io.EOF {
-			break
-		}
-
-		transfered += float64(n)
-		c.data = append(c.data, buffer[:n]...)
-		runtime.EventsEmit(c.ctx, "transfered", c.toDownload.ID, c.index, (transfered / float64(c.size) * 100), n) //TODO: implement proper transfer emition to differentiate which div to animate the progress bar
+	// create temp file
+	tmpFilename := filepath.Join(c.SaveLocation, c.toDownload.ID+"-"+strconv.Itoa(c.index))
+	file, err := os.Create(tmpFilename)
+	if err != nil {
+		log.Printf("Error creating file: %v\n", err)
+		return err
 	}
-	runtime.EventsOff(c.ctx, "transfered")
+	defer file.Close()
+
+	progressbar := &progressbar{
+		ctx:    c.ctx,
+		id:     c.toDownload.ID,
+		index:  c.index,
+		Reader: res.Body,
+		size:   c.size,
+		tmp:    0,
+	}
+
+	if _, err := io.Copy(file, progressbar); err != nil {
+		// TODO: retry from the position where error happened
+		return err
+	}
 
 	elapsed := time.Since(start)
 	log.Printf("Chunk %d downloaded in %v s\n", c.index+1, elapsed.Seconds())
@@ -115,8 +121,4 @@ func (c *Chunk) Execute() error {
 // TODO: implement handle error
 func (c *Chunk) HandleError(err error) {
 	log.Printf("Error while downloading chunk %d: %v\n", c.index+1, err)
-}
-
-func (c Chunk) Data() []byte {
-	return c.data
 }

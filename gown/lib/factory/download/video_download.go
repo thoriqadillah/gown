@@ -24,6 +24,7 @@ func (v *VideoFactory) Create() Download {
 		Name:        v.res.Filename,
 		TimeElapsed: "",
 		Size:        v.res.Size,
+		Progres:     0,
 		Date:        time.Now(),
 		Status: DownloadStatus{
 			Name:  STATUS_NAME_PROCESSING,

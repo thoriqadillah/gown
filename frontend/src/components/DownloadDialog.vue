@@ -30,11 +30,13 @@ const filenameHasError = ref(false)
 const dialog = new Dialog({ activator, loaded, loading, onFile, onURL })
 const downloader = new Downloader()
 
-watch(url, (newval, oldval) => {
+watch([url, filename, savelocation], () => {
   urlHasError.value = url.value.trim().length === 0
   urlErr.value = url.value.trim().length === 0 ? 'This field is required' : ''
-})
-watch(filename, (newval, oldval) => {
+  
+  savelocationHasError.value = savelocation.value.trim().length === 0
+  savelocationErr.value = savelocation.value.trim().length === 0 ? 'This field is required' : ''
+
   if (filename.value.trim().length === 0) {
     filenameErr.value = 'This field is required'
     filenameHasError.value = true
@@ -45,10 +47,6 @@ watch(filename, (newval, oldval) => {
     filenameErr.value = ''
     filenameHasError.value = false
   }
-})
-watch(savelocation, (newval, oldval) => {
-  savelocationHasError.value = savelocation.value.trim().length === 0
-  savelocationErr.value = savelocation.value.trim().length === 0 ? 'This field is required' : ''
 })
 
 async function fetch() {
@@ -73,9 +71,9 @@ async function fetch() {
 
 // TODO: implement download
 async function execute() {
+  dialog.close()
   downloader.download(result.value)
   downloads.add(result.value)
-  dialog.close()
   url = ref('')
   urlErr.value = ''
   urlHasError.value = false
@@ -84,7 +82,6 @@ async function execute() {
   savelocationErr.value = ''
   savelocationHasError.value = false
 }
-
 </script>
 
 <template>

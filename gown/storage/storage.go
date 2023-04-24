@@ -23,6 +23,12 @@ func New(s *setting.Settings) Storage {
 }
 
 func (s *Storage) Init() {
+	if _, err := os.Stat(s.SaveLocation); err != nil {
+		if err := os.MkdirAll(s.SaveLocation, os.ModePerm); err != nil {
+			log.Fatalf("Cannot creating the save location folder: %v", err)
+		}
+	}
+
 	if _, err := os.Stat(s.DataLocation); err != nil {
 		err := os.MkdirAll(s.DataLocation, os.ModePerm)
 		if err != nil {

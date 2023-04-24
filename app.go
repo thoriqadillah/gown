@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -98,10 +99,11 @@ func (a *App) Download(toDownload *download.Download) error {
 	data = append([]download.Download{*toDownload}, data...)
 	a.storage.Save(data)
 
-	storage := storage.NewFile(toDownload.Metadata.Totalpart, &a.settings)
+	storage := storage.NewFile(toDownload.Metadata.Totalpart, toDownload.Size, &a.settings)
 	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)
 	for part := range chunks {
 		chunks[part] = chunk.New(a.ctx, *toDownload, part, &a.settings, &wg)
+		storage.CombineFile(toDownload.ID+"-"+strconv.Itoa(part), part)
 	}
 
 	for _, job := range chunks {
@@ -114,10 +116,6 @@ func (a *App) Download(toDownload *download.Download) error {
 
 	// combining
 	runtime.EventsEmit(a.ctx, "downloaded", toDownload.ID, false)
-
-	for part, chunk := range chunks {
-		storage.CombineFile(chunk.Data(), part)
-	}
 
 	if err := storage.SaveFile(toDownload.Name); err != nil {
 		log.Printf("Error saving file: %v", err)
