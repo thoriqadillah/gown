@@ -64,20 +64,23 @@ async function doneEditing() {
   }
 }
 
-EventsOn("transfered", async (...data) => {
-  let prog = data[2]
-  const progressBar = document.getElementById(`progressBar-${data[0]}-${data[1]}`) as HTMLElement
-  progressBar.style.opacity = '50'
-  progressBar.style.width = prog + '%'
+// TODO: fix the progress bar not responding
+// EventsOn("transfered", async (...data) => {
+//   console.log(data);
+  
+//   let prog = data[2]
+//   const progressBar = document.getElementById(`progressBar-${data[0]}-${data[1]}`) as HTMLElement
+//   progressBar.style.opacity = '50'
+//   progressBar.style.width = prog + '%'
 
-  for (const el of downloads.list) {
-    if (el.id == data[0]) {
-      el.timeElapsed = downloads.parseElapsedTime(downloads.toDownload.date)
-      el.progress += data[3]
-      break
-    }
-  }
-})
+//   for (const el of downloads.list) {
+//     if (el.id == data[0]) {
+//       el.timeElapsed = downloads.parseElapsedTime(downloads.toDownload.date)
+//       el.progress += data[3]
+//       break
+//     }
+//   }
+// })
 
 EventsOn("downloaded", async (...data) => {
   const [id, combined] = data
@@ -91,6 +94,10 @@ EventsOn("downloaded", async (...data) => {
         icon: 'mdi-file-arrow-left-right-outline',
         color: 'info'
       }
+
+      // TODO: delete this
+      el.timeElapsed = downloads.parseElapsedTime(downloads.toDownload.date)
+      el.progress += downloads.toDownload.size
       break
     } 
 
