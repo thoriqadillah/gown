@@ -12,7 +12,8 @@ type progressbar struct {
 	ctx        context.Context
 	id         string
 	index      int
-	size       int64
+	partsize   int64
+	totalsize  int64
 	transfered int64
 	tmp        int
 }
@@ -31,8 +32,8 @@ func (r *progressbar) Read(payload []byte) (n int, err error) {
 		runtime.EventsEmit(r.ctx, "transfered",
 			r.id,
 			r.index,
-			float64(r.transfered)/float64(r.size)*100,
-			r.tmp,
+			float64(r.transfered)/float64(r.partsize)*100,
+			float64(100*r.tmp)/float64(r.totalsize),
 		)
 
 		r.tmp = 0

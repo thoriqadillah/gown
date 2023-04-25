@@ -21,7 +21,7 @@ EventsOn("transfered", async (...data) => {
   for (const el of downloads.list) {
     if (el.id == data[0]) {
       el.timeElapsed = downloads.parseElapsedTime(downloads.toDownload.date)
-      el.progress += 100*data[3]/downloads.toDownload.size
+      el.progress += data[3]
       break
     }
   }

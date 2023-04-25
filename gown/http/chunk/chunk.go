@@ -85,12 +85,13 @@ func (c *Chunk) download() error {
 	defer file.Close()
 
 	progressbar := &progressbar{
-		ctx:    c.ctx,
-		id:     c.toDownload.ID,
-		index:  c.index,
-		Reader: res.Body,
-		size:   c.size,
-		tmp:    0,
+		ctx:       c.ctx,
+		id:        c.toDownload.ID,
+		index:     c.index,
+		Reader:    res.Body,
+		partsize:  c.size,
+		totalsize: c.toDownload.Size,
+		tmp:       0,
 	}
 
 	if _, err := io.Copy(file, progressbar); err != nil {
