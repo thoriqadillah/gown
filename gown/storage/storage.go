@@ -8,21 +8,14 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 type Storage struct {
-	data []download.Download
 	*setting.Settings
 }
 
 func New(s *setting.Settings) Storage {
-	return Storage{
-		data:     []download.Download{},
-		Settings: s,
-	}
-}
-
-func (s *Storage) Init() {
 	if _, err := os.Stat(s.SaveLocation); err != nil {
 		if err := os.MkdirAll(s.SaveLocation, os.ModePerm); err != nil {
 			log.Fatalf("Cannot creating the save location folder: %v", err)
@@ -34,11 +27,14 @@ func (s *Storage) Init() {
 		if err != nil {
 			log.Fatalf("Cannot creating the folder: %v", err)
 		}
+	}
 
-		_, err = os.Create(s.DataFilename)
-		if err != nil {
-			log.Fatalf("Cannot creating the file: %v", err)
-		}
+	if _, err := os.OpenFile(s.DataFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644); err != nil {
+		log.Fatalf("Cannot creating the file: %v", err)
+	}
+
+	return Storage{
+		Settings: s,
 	}
 }
 
@@ -55,27 +51,46 @@ func (s *Storage) Get() []download.Download {
 		return []download.Download{}
 	}
 
-	err = json.Unmarshal(value, &s.data)
+	var downloaded []download.Download
+	err = json.Unmarshal(value, &downloaded)
 	if err != nil {
 		log.Printf("Error opening data file: %v", err)
 		return []download.Download{}
 	}
 
-	return s.data
+	return downloaded
 }
 
-func (s *Storage) Save(data []download.Download) {
+func (s *Storage) Add(val download.Download) error {
+	data := s.Get()
+	data = append([]download.Download{val}, data...)
+
+	return s.Update(data)
+}
+
+func (s *Storage) Update(data []download.Download) error {
 	dataVal, err := json.MarshalIndent(data, "", " ")
 	if err != nil {
-		log.Fatalf("Error marshaling the data: %v", err)
-		return
+		log.Printf("Error marshaling the data: %v", err)
+		return err
 	}
 
 	err = os.WriteFile(s.DataFilename, dataVal, fs.ModePerm)
 	if err != nil {
-		log.Fatalf("Error writing the data into file: %v", err)
-		return
+		log.Printf("Error writing the data into file: %v", err)
+		return err
 	}
+
+	return nil
+}
+
+func (s *Storage) Delete(name string) error {
+	filename := filepath.Join(s.SaveLocation, name)
+	if err := os.Remove(filename); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // TODO: implement storing data into persistent file
