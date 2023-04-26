@@ -4,14 +4,23 @@ import { useDownloads } from '../store/downloads';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
 import { download } from '../../wailsjs/go/models';
 import { useDateFormat } from '@vueuse/shared';
-import { ref, watch } from 'vue';
+import { ref, Ref } from 'vue';
+import { onMounted } from 'vue';
 
 const downloads = useDownloads()
 const props = defineProps<{
   list: download.Download[]
 }>()
 
-// TODO: fix the progress bar not responding
+const deleteDialog = ref<{[key: string]: boolean}>({})
+const deleteFromdisk = ref<{[key: string]: boolean}>({})
+onMounted(() => {
+  downloads.list.forEach(el => {
+    deleteDialog.value[el.id] = false
+    deleteFromdisk.value[el.id] = false
+  })
+})
+
 EventsOn("transfered", async (...data) => {
   let prog = data[2]
   const progressBar = document.getElementById(`progressBar-${data[0]}-${data[1]}`) as HTMLElement
@@ -82,11 +91,11 @@ EventsOn("downloaded", async (...data) => {
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
           </th>
-          <th class="tw-text tw-cursor-pointer-left">
+          <th class="text-center">
             <span class="tw-text-sm">Progress</span>
           </th>
-          <th class="tw-text tw-cursor-pointer-left">
-            <span class="tw-text-sm">Status</span>
+          <th class="text-center">
+            <span class="tw-text-sm tw-ml-2">Status</span>
           </th>
           <th class="text-left tw-cursor-pointer" @click="downloads.sortByTimeElapsed()">
             <div class="tw-flex tw-justify-between tw-items-center tw-w-max md:tw-w-full">
@@ -106,12 +115,17 @@ EventsOn("downloaded", async (...data) => {
               <v-icon icon="mdi-arrow-up-down" class="tw-text-sm"></v-icon>
             </div>
           </th>
+          <th class="text-center">
+            <div class="tw-flex tw-justify-between tw-items-center">
+              <span class="tw-text-sm tw-w-32">Action</span>
+            </div>
+          </th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="item in props.list" :key="item.name">
-          <td color="primary" class="tw-rounded-sm namecol" :id="item.id">
-            <div class="tw-flex tw-justify-between tw-mt-1 tw-mr-3">
+          <td color="primary" class="tw-rounded-sm" :id="item.id">
+            <div class="tw-flex tw-justify-between tw-mt-1 tw-mr-3 tw-items-center group">
               <div class="tw-overflow-x-hidden tw-w-max tw-flex">
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
                 <span class="tw-text-sm tw-inline">{{ item.name }}</span>
@@ -123,9 +137,9 @@ EventsOn("downloaded", async (...data) => {
               </div> 
             </div>
           </td>
-          <td class="tw-text-sm tw-text-center">{{ item.progress.toFixed(0) + '%' }}</td>
+          <td class="tw-text-sm">{{ item.progress.toFixed(0) + '%' }}</td>
           <td class="tw-text-sm tw-text-center">
-            <v-tooltip :text="item.status.name" location="top">
+            <v-tooltip :text="item.status.name" location="bottom">
               <template v-slot:activator="{ props }">
                 <v-icon v-bind="props" :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90 tw-ml-2"></v-icon>
               </template>
@@ -134,6 +148,34 @@ EventsOn("downloaded", async (...data) => {
           <td class="tw-text-sm tw-text-left tw-w-32">{{ item.timeElapsed }}</td>
           <td class="tw-text-sm tw-text-left tw-w-20">{{ downloads.parseSize(item.size) }}</td>
           <td class="tw-text-sm tw-text-left tw-w-32">{{ useDateFormat(item.date, 'MMMM DD, YYYY HH:mm').value }}</td>
+          <td class="tw-text-sm tw-text-center">
+            <v-tooltip text="Delete" location="bottom">
+              <template v-slot:activator="{ props }">
+                <v-btn v-bind="props" color="red" density="compact" variant="text" icon>
+                  <v-icon icon="mdi-trash-can-outline" class="tw-text-base"></v-icon>
+
+                  <v-dialog v-model="deleteDialog[item.id]" activator="parent" max-width="450px">
+                    <v-card>
+                      <v-card-text>Delete file {{ item.name }}?</v-card-text>
+                      <div class="tw-flex tw-justify-between">
+                        <v-card-actions>
+                          <v-checkbox v-model="deleteFromdisk[item.id]" label="Delete from disk" color="red" value="true" hide-details/>
+                        </v-card-actions>
+                        <div class="tw-flex tw-flex-row-reverse">
+                          <v-card-actions>
+                            <v-btn color="red" block @click="downloads.remove(item.id, deleteFromdisk[item.id])">Delete</v-btn>
+                          </v-card-actions>
+                          <v-card-actions>
+                            <v-btn variant="text" block @click="deleteDialog[item.id] = false">Cancel</v-btn>
+                          </v-card-actions>
+                        </div>
+                      </div>
+                    </v-card>
+                  </v-dialog>
+                </v-btn>
+              </template>
+            </v-tooltip>
+          </td>
         </tr>
       </tbody>
     </v-table>

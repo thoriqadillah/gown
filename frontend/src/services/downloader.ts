@@ -9,36 +9,34 @@ export default class Downloader {
     var regex = /\(([^)]+)\)/; // get number inside the parenthesis
     const downloads = useDownloads()
     
-    let newname = name
-    downloads.list.forEach(el => {
-      if (el.name == name) {
-        const matches = regex.exec(name)        
-        if (matches == null) {
-          let split = name.split('.')
-          if (split.length > 2) {
-            split[split.length - 2] += ' (1)'
-          } else {
-            split[0] += ' (1)'
-          }
-          
-          newname = split.join('.')
-          newname = this.handleDuplication(newname)
-          return
-        }
-        
-        const number = parseInt(matches![1]) + 1
-        name = name.replaceAll(matches![0], '')
+    let newname = name  
+    if (downloads.names.indexOf(name) > -1) {
+      const matches = regex.exec(name)        
+      if (matches == null) {
         let split = name.split('.')
         if (split.length > 2) {
-          split[split.length - 2] += `(${number})`
+          split[split.length - 2] += ' (1)'
         } else {
-          split[0] += `(${number})`
+          split[0] += ' (1)'
         }
+        
         newname = split.join('.')
         newname = this.handleDuplication(newname)
-        return
+        return newname
       }
-    })
+      
+      const number = parseInt(matches![1]) + 1
+      name = name.replaceAll(matches![0], '')
+      let split = name.split('.')
+      if (split.length > 2) {
+        split[split.length - 2] += `(${number})`
+      } else {
+        split[0] += `(${number})`
+      }
+      newname = split.join('.')
+      newname = this.handleDuplication(newname)
+      return newname
+    }
     
     return newname
   }

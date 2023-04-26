@@ -38,7 +38,6 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	a.storage.Init()
 }
 
 func (a *App) Theme() setting.Theme {
@@ -77,8 +76,12 @@ func (a *App) UpdateName(oldname string, newname string) error {
 	return nil
 }
 
+func (a *App) Delete(name string) error {
+	return a.storage.Delete(name)
+}
+
 func (a *App) UpdateData(data []download.Download) {
-	a.storage.Save(data)
+	a.storage.Update(data)
 }
 
 func (a *App) InitSetting() setting.Settings {
@@ -91,13 +94,12 @@ func (a *App) Download(toDownload *download.Download) error {
 		log.Printf("Error initializing worker: %v\n", err)
 	}
 
+	var wg sync.WaitGroup
 	worker.Start()
 
-	var wg sync.WaitGroup
-
-	data := a.storage.Get()
-	data = append([]download.Download{*toDownload}, data...)
-	a.storage.Save(data)
+	if err := a.storage.Add(*toDownload); err != nil {
+		return err
+	}
 
 	storage := storage.NewFile(toDownload.Metadata.Totalpart, toDownload.Size, &a.settings)
 	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)

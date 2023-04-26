@@ -8,7 +8,7 @@ const (
 	DEFAULT_SIMMULATANOUS_DOWNLOAD       = 4
 	DEFAULT_SAVE_LOCATION                = "/home/thoriqadillah/Downloads/"
 	DEFAULT_DATA_LOCATION                = "/home/thoriqadillah/.gown/"
-	DEFAULT_DATA_FILE_NAME               = "/home/thoriqadillah/.gown/downloads.json"
+	DEFAULT_DATA_FILE_NAME               = "/home/thoriqadillah/.gown/data.json"
 )
 
 type Settings struct {

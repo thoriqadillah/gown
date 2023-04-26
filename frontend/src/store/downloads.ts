@@ -1,13 +1,15 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { download } from "../../wailsjs/go/models";
-import { UpdateData, UpdateName} from '../../wailsjs/go/main/App'
+import { UpdateData, UpdateName, Delete } from '../../wailsjs/go/main/App'
 
 export const useDownloads = defineStore('downloads', () => {
   const list = ref<download.Download[]>([])
   const defaults = ref<download.Download[]>([])
   const search = ref('')
   const toDownload = ref(new download.Download())
+  const ids = ref<string[]>([])
+  const names = ref<string[]>([])
 
   const ascName = ref(true)
   const ascDate = ref(true)
@@ -16,16 +18,29 @@ export const useDownloads = defineStore('downloads', () => {
 
   const add = (val: download.Download) => {
     list.value.unshift(val)
+    ids.value.unshift(val.id)
+    names.value.unshift(val.name)
+
     defaults.value = list.value
     toDownload.value = val
   }
-  const remove = (download: download.Download) => {
-    list.value.splice(list.value.indexOf(download), 1)
+  const remove = async (id: string, fromdisk: boolean) => {
+    const index = ids.value.indexOf(id)
+    
+    const deleted = list.value.splice(index, 1)
+    ids.value.splice(index, 1)
+    names.value.splice(index, 1)
+    
+    await UpdateData(list.value)
+    if (fromdisk) Delete(deleted[0].name)
     defaults.value = list.value
   }
   const setData = (data: download.Download[]) => {
     list.value = data
     defaults.value = data
+
+    ids.value = list.value.map(el => el.id)
+    names.value = list.value.map(el => el.name)
   }
   const updateData = async (data: download.Download[]) => {
     list.value = data
@@ -97,6 +112,7 @@ export const useDownloads = defineStore('downloads', () => {
     list,
     search,
     toDownload,
+    names,
     add,
     remove,
     setData,
