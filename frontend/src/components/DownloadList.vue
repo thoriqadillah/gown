@@ -24,7 +24,6 @@ onMounted(() => {
 EventsOn("transfered", async (...data) => {
   let prog = data[2]
   const progressBar = document.getElementById(`progressBar-${data[0]}-${data[1]}`) as HTMLElement
-  progressBar.style.opacity = '50'
   progressBar.style.width = prog + '%'
 
   for (const el of downloads.list) {
@@ -123,16 +122,16 @@ EventsOn("downloaded", async (...data) => {
       <tbody class="tw-relative">
         <tr v-for="item in props.list" :key="item.name">
           <td color="primary" class="tw-rounded-sm">
+            <div class="progressWrapper tw-flex tw-justify-between tw-absolute tw-w-full tw-left-0 tw-right-0 tw-px-5 xl:tw-px-0 xl:tw-pl-5" :id="item.id">
+              <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >
+                <div class="tw-h-10 tw-bg-green-500 tw-opacity-10 tw-w-0 -tw-mt-1.5" :id="`progressBar-${item.id}-${part-1}`"></div>
+              </div> 
+            </div>
             <div class="tw-flex tw-justify-between tw-mt-1 tw-mr-3 tw-items-center group">
               <div class="tw-overflow-x-hidden tw-w-max tw-flex">
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
                 <span class="tw-text-sm tw-inline">{{ item.name }}</span>
               </div>
-            </div>
-            <div class="progressWrapper tw-flex tw-justify-between tw-absolute tw-w-full tw-left-0 tw-right-0 tw-px-5" :id="item.id">
-              <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >
-                <div class="tw-h-0.5 tw-bg-green-500 tw-opacity-0 tw-mt-1 tw-w-1 tw-rounded-lg" :id="`progressBar-${item.id}-${part-1}`"></div>
-              </div> 
             </div>
           </td>
           <td class="tw-text-sm">{{ item.progress.toFixed(0) + '%' }}</td>
