@@ -60,10 +60,8 @@ EventsOn("downloaded", async (...data) => {
       icon: 'mdi-check-circle-outline',
       color: 'success'
     }
-    for (let i = 0; i < el.metadata.totalpart; i++) {
-      const progressBar = document.getElementById(`progressBar-${data[0]}-${i}`) as HTMLElement
-      progressBar.style.opacity = '0'
-    } 
+    const progressBar = document.getElementById(data[0]) as HTMLElement
+    progressBar.style.opacity = '0'
     break
   }
 
@@ -122,16 +120,16 @@ EventsOn("downloaded", async (...data) => {
           </th>
         </tr>
       </thead>
-      <tbody>
+      <tbody class="tw-relative">
         <tr v-for="item in props.list" :key="item.name">
-          <td color="primary" class="tw-rounded-sm" :id="item.id">
+          <td color="primary" class="tw-rounded-sm">
             <div class="tw-flex tw-justify-between tw-mt-1 tw-mr-3 tw-items-center group">
               <div class="tw-overflow-x-hidden tw-w-max tw-flex">
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
                 <span class="tw-text-sm tw-inline">{{ item.name }}</span>
               </div>
             </div>
-            <div class="progressWrapper tw-flex tw-justify-between" :id="item.id">
+            <div class="progressWrapper tw-flex tw-justify-between tw-absolute tw-w-full tw-left-0 tw-right-0 tw-px-5" :id="item.id">
               <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >
                 <div class="tw-h-0.5 tw-bg-green-500 tw-opacity-0 tw-mt-1 tw-w-1 tw-rounded-lg" :id="`progressBar-${item.id}-${part-1}`"></div>
               </div> 
