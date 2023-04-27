@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { parseElapsedTime, parseSize } from '../utils/parser';
 import { ref, computed, onMounted } from 'vue';
 import { useDateFormat } from '@vueuse/shared';
 import { useDownloads } from '../store/downloads';
@@ -23,7 +24,7 @@ EventsOn("transfered", async (...data) => {
 
   for (const el of downloads.list) {
     if (el.id == data[0]) {
-      el.timeElapsed = downloads.parseElapsedTime(downloads.toDownload.date)
+      el.timeElapsed = parseElapsedTime(downloads.toDownload.date)
       el.progress += data[3]
       break
     }
@@ -43,7 +44,7 @@ EventsOn("downloaded", async (...data) => {
         color: 'info'
       }
 
-      el.timeElapsed = downloads.parseElapsedTime(downloads.toDownload.date)
+      el.timeElapsed = parseElapsedTime(downloads.toDownload.date)
       el.progress = 100
       break
     } 
@@ -53,7 +54,7 @@ EventsOn("downloaded", async (...data) => {
       icon: 'mdi-check-circle-outline',
       color: 'success'
     }
-    
+
     const progressBar = document.getElementById(data[0]) as HTMLElement
     progressBar.style.opacity = '0'
     break
@@ -138,7 +139,7 @@ EventsOn("downloaded", async (...data) => {
             </v-tooltip>
           </td>
           <td class="tw-text-sm tw-text-left tw-w-32">{{ item.timeElapsed }}</td>
-          <td class="tw-text-sm tw-text-left tw-w-20">{{ downloads.parseSize(item.size) }}</td>
+          <td class="tw-text-sm tw-text-left tw-w-20">{{ parseSize(item.size) }}</td>
           <td class="tw-text-sm tw-text-left tw-w-32">{{ useDateFormat(item.date, 'MMMM DD, YYYY HH:mm').value }}</td>
           <td class="tw-text-sm tw-text-center">
             <v-tooltip text="Delete" location="bottom">

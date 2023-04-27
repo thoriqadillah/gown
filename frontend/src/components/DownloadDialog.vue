@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { download } from '../../wailsjs/go/models';
-import Dialog from '../services/download-dialog'
-import Downloader from '../services/downloader'
 import { useDownloads } from '../store/downloads';
 import { useSettings } from '../store/setting';
+import { ref, watch } from 'vue';
+import { parseSize } from '../utils/parser';
+import { download } from '../../wailsjs/go/models';
+import Downloader from '../services/downloader'
+import Dialog from '../services/download-dialog'
 
 const downloads = useDownloads()
 const settings = useSettings()
@@ -16,31 +17,29 @@ const activator = ref(false)
 const loaded = ref(false)
 const onFile = ref(false)
 const onURL = ref(true)
-const size = ref('')
+
 let url = ref('')
 const urlErr = ref('')
 const urlHasError = ref(false)
-const savelocation = ref('')
 const savelocationErr = ref('')
 const savelocationHasError = ref(false)
-const filename = ref('')
 const filenameErr = ref('')
 const filenameHasError = ref(false)
 
 const dialog = new Dialog({ activator, loaded, loading, onFile, onURL })
 const downloader = new Downloader()
 
-watch([url, filename, savelocation], () => {
+watch([url, () => result.value.name, settings], () => {
   urlHasError.value = url.value.trim().length === 0
   urlErr.value = url.value.trim().length === 0 ? 'This field is required' : ''
   
-  savelocationHasError.value = savelocation.value.trim().length === 0
-  savelocationErr.value = savelocation.value.trim().length === 0 ? 'This field is required' : ''
+  savelocationHasError.value = settings.saveLocation.trim().length === 0
+  savelocationErr.value = settings.saveLocation.trim().length === 0 ? 'This field is required' : ''
 
-  if (filename.value.trim().length === 0) {
+  if (result.value.name.trim().length === 0) {
     filenameErr.value = 'This field is required'
     filenameHasError.value = true
-  } else if (filename.value.trim().length > 256) {
+  } else if (result.value.name.trim().length > 256) {
     filenameErr.value = 'File name must be below 256 characters'
     filenameHasError.value = true
   } else {
@@ -55,9 +54,6 @@ async function fetch() {
     dialog.loading()
     
     result.value = await downloader.fetch(url.value) as download.Download
-    size.value = downloads.parseSize(result.value.size)
-    filename.value = result.value.name
-    savelocation.value = settings.saveLocation
     
     dialog.done()
     dialog.next()
@@ -69,7 +65,6 @@ async function fetch() {
   }
 }
 
-// TODO: implement download
 async function execute() {
   dialog.close()
   downloader.download(result.value)
@@ -90,12 +85,12 @@ async function execute() {
       <v-text-field v-if="onURL || !loaded" :error="urlHasError" :error-messages="urlErr" v-model="url" :loading="loading" :autofocus="activator" color="primary" type="input" hint="Click enter to fetch the file data from the URL you want to download" class="tw-p-3" density="compact" variant="outlined" label="URL" append-inner-icon="mdi-link" append-icon="mdi-magnify" @click:append="fetch()" single-line v-on:keyup.enter="fetch()" ref="input"/>
       <div v-else-if="onFile || !loaded" class="tw-flex tw-items-center">
         <div class="tw-basis-9/12">
-          <v-text-field color="primary" :error="filenameHasError" :error-messages="filenameErr" v-model="filename" label="File name" append-inner-icon="mdi-file-document-edit" type="input" hint="File name" class="tw-px-3 tw-pt-3 -tw-mb-2" single-line density="compact" variant="outlined" />
-          <v-text-field color="primary" :error="savelocationHasError" :error-messages="savelocationErr" v-model="savelocation" label="Save location" append-inner-icon="mdi-folder" type="input" hint="Save location" class="tw-p-3" single-line density="compact" variant="outlined" />
+          <v-text-field color="primary" :error="filenameHasError" :error-messages="filenameErr" v-model="result.name" label="File name" append-inner-icon="mdi-file-document-edit" type="input" hint="File name" class="tw-px-3 tw-pt-3 -tw-mb-2" single-line density="compact" variant="outlined" />
+          <v-text-field color="primary" :error="savelocationHasError" :error-messages="savelocationErr" v-model="settings.saveLocation" label="Save location" append-inner-icon="mdi-folder" type="input" hint="Save location" class="tw-p-3" single-line density="compact" variant="outlined" />
         </div>
         <div class="tw-basis-3/12 tw-text-center tw-pr-2 -tw-mt-5">
           <v-icon :icon="result.type.icon" :color="result.type.color"></v-icon>
-          <p class="text-body-1 tw-mt-5">{{ size }}</p>
+          <p class="text-body-1 tw-mt-5">{{ parseSize(result.size) }}</p>
         </div>
       </div>
       

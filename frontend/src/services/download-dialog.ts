@@ -1,5 +1,12 @@
-import { ref, Ref } from "vue"
-import { DialogState } from "../types/dialog"
+import { Ref } from "vue"
+
+type DialogState = {
+  activator: Ref<boolean>
+  loading: Ref<boolean>
+  loaded: Ref<boolean>
+  onURL: Ref<boolean>
+  onFile: Ref<boolean>
+}
 
 export default class Dialog {
 

@@ -51,7 +51,8 @@ export default class Downloader {
 
   async download(toDownload: download.Download): Promise<void> {
     toDownload.date = new Date() // set the start date when we click download
-    
     await Download(toDownload)
   }
+  
+  // TODO: implement resume download
 }

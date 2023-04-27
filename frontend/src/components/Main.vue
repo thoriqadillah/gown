@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { provide } from 'vue';
-import { ref } from 'vue';
+import { provide, ref } from 'vue';
 
 const drawer = ref(false)
 provide('drawer', drawer)

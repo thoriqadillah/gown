@@ -47,14 +47,6 @@ export const useDownloads = defineStore('downloads', () => {
     defaults.value = data
     await UpdateData(data)
   }
-  const updateName = async (oldval: string, newval: string, id: string) => {
-    for (const el of list.value) {
-      if (id == el.id) {
-        await UpdateName(oldval, newval)
-        break
-      }
-    }
-  }
 
   const filterByImage = () => list.value = defaults.value.filter(d => d.type.name === 'image')
   const filterByVideo = () => list.value = defaults.value.filter(d => d.type.name === 'video')
@@ -84,30 +76,6 @@ export const useDownloads = defineStore('downloads', () => {
     return ascTimeElapsed.value ? list.value.sort((a, b) => a.timeElapsed.localeCompare(b.timeElapsed)) : list.value.sort((a, b) => a.timeElapsed.localeCompare(b.timeElapsed)).reverse()
   }
 
-  const KB = 1024
-  const MB = KB * KB
-  const GB = MB * KB
-  const parseSize = (size: number): string => {
-    if (size < KB) return (size / KB).toFixed(2) + " KB"
-    if (size > KB && size < MB) return (size / KB).toFixed(2) + " KB"
-    if (size > KB && size < GB) return (size / MB).toFixed(2) + " MB"
-    if (size > GB) return (size / GB).toFixed(2) + " GB"
-
-    return '0 KB'
-  }
-
-  const parseElapsedTime = (start: Date): string => {
-    const begin = new Date(start)
-    const end = new Date()
-
-    const elapsed = new Date(end.getTime() - begin.getTime())
-    let s = elapsed.getSeconds() % 60
-    let m = elapsed.getMinutes() % 60
-    let h = ((elapsed.getMinutes() / 60) % 24)
-
-    return `${h < 10 ? '0'+h.toFixed(0) : h.toFixed(0)}h : ${m < 10 ? '0'+m : m}m : ${s < 10 ? '0'+s : s}s`
-  }
-
   return {
     list,
     search,
@@ -128,8 +96,5 @@ export const useDownloads = defineStore('downloads', () => {
     sortByDate,
     sortBySize,
     sortByTimeElapsed,
-    parseSize,
-    parseElapsedTime,
-    updateName
   }
 })

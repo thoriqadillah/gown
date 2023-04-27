@@ -20,7 +20,7 @@ InitSetting().then(setting => settings.init(setting))
     <v-theme-provider :theme="theme.global.name.value">
       <Main>
         <Navigation />
-        <DownloadList/>
+        <DownloadList />
       </Main>
     </v-theme-provider>
   </v-app>
