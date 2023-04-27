@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { useDrawerStore } from '../store/drawer';
+import { ref, provide } from 'vue';
 
-const store = useDrawerStore()
+const drawer = ref(false)
+provide('drawer', drawer)
+
 </script>
 
 <template>
   <v-card>
     <v-layout >
-      <v-navigation-drawer v-model="store.drawer" :elevation="0" expand-on-hover rail :border="0" location="right">
+      <v-navigation-drawer v-model="drawer" :elevation="0" expand-on-hover rail :border="0" location="right">
         <v-list density="compact" nav class="tw-flex tw-flex-col tw-mt-12">
           <v-list-item active-color="primary" prepend-icon="mdi-brightness-4" title="Theme" value="theme"></v-list-item>
           <v-list-item active-color="primary" prepend-icon="mdi-bug-outline" title="Log" value="log"></v-list-item>

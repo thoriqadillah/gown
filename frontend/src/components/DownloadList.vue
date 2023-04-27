@@ -4,7 +4,7 @@ import { useDownloads } from '../store/downloads';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
 import { download } from '../../wailsjs/go/models';
 import { useDateFormat } from '@vueuse/shared';
-import { ref, Ref } from 'vue';
+import { ref } from 'vue';
 import { onMounted } from 'vue';
 
 const downloads = useDownloads()

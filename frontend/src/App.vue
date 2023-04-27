@@ -3,7 +3,7 @@ import { useTheme } from 'vuetify/lib/framework.mjs';
 import Navigation from './components/Navigation.vue'
 import DownloadList from './components/DownloadList.vue';
 import Main from './components/Main.vue';
-import { computed } from 'vue';
+import { computed, provide, ref } from 'vue';
 import { useDownloads } from './store/downloads'
 import { InitData, InitSetting } from '../wailsjs/go/main/App';
 import { download, setting } from '../wailsjs/go/models';
@@ -13,7 +13,10 @@ const theme = useTheme()
 const downloads = useDownloads()
 const settings = useSettings()
 
-const data = computed(() => downloads.filter(downloads.search))
+const search = ref('')
+provide('search', search)
+
+const data = computed(() => downloads.filter(search.value))
 
 InitData().then((data: download.Download[]) => {
   downloads.setData(data)
