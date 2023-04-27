@@ -88,7 +88,7 @@ EventsOn("downloaded", async (...data) => {
             <span class="tw-text-sm">Progress</span>
           </th>
           <th class="text-center">
-            <span class="tw-text-sm tw-ml-2">Status</span>
+            <span class="tw-text-sm">Status</span>
           </th>
           <th class="text-left tw-cursor-pointer" @click="downloads.sortByTimeElapsed()">
             <div class="tw-flex tw-justify-between tw-items-center tw-w-max md:tw-w-full">
@@ -110,14 +110,14 @@ EventsOn("downloaded", async (...data) => {
           </th>
           <th class="text-center">
             <div class="tw-flex tw-justify-between tw-items-center">
-              <span class="tw-text-sm tw-w-32">Action</span>
+              <span class="tw-text-sm tw-w-10">Action</span>
             </div>
           </th>
         </tr>
       </thead>
       <tbody class="tw-relative">
         <tr v-for="item in items" :key="item.name">
-          <td color="primary" class="tw-rounded-sm">
+          <td color="primary" class="tw-rounded-sm bordered nameCol">
             <div class="progressWrapper tw-flex tw-justify-between tw-absolute tw-w-full tw-left-0 tw-right-0 tw-px-5 xl:tw-px-0 xl:tw-pl-5" :id="item.id">
               <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >
                 <div class="tw-h-10 tw-bg-green-500 tw-opacity-10 tw-w-0 -tw-mt-1.5" :id="`progressBar-${item.id}-${part-1}`"></div>
@@ -126,48 +126,70 @@ EventsOn("downloaded", async (...data) => {
             <div class="tw-flex tw-justify-between tw-mt-1 tw-mr-3 tw-items-center group">
               <div class="tw-overflow-x-hidden tw-w-max tw-flex">
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
+                <!-- TODO: add mark if not resumable -->
                 <span class="tw-text-sm tw-inline">{{ item.name }}</span>
               </div>
+              <!-- TODO: pause/resume implementation -->
+              <!-- TODO: hidden if it successfully downloaded -->
+              <v-btn v-if="item.progress != 100" density="compact" variant="text" icon class="iconName tw-opacity-0 tw-ml-5 -tw-mr-3">
+                <v-icon icon="mdi-pause-box-outline" class="tw-text-base tw-opacity-50"></v-icon>
+
+                <!-- TODO: Add dialog if resumable -->
+                <v-dialog activator="parent" max-width="450px">
+                  <v-card>
+                    <v-card-text>Do you want to pause {{ item.name }}?</v-card-text>
+                    <div class="tw-flex tw-justify-between">
+                      <v-card-actions>
+                        <v-checkbox label="Delete from disk" color="red" value="true" hide-details/>
+                      </v-card-actions>
+                      <div class="tw-flex tw-flex-row-reverse">
+                        <v-card-actions>
+                          <v-btn color="red" block>Delete</v-btn>
+                        </v-card-actions>
+                        <v-card-actions>
+                          <v-btn variant="text" block>Cancel</v-btn>
+                        </v-card-actions>
+                      </div>
+                    </div>
+                  </v-card>
+                </v-dialog>
+              </v-btn>
             </div>
           </td>
-          <td class="tw-text-sm">{{ item.progress.toFixed(0) + '%' }}</td>
-          <td class="tw-text-sm tw-text-center">
+          <td class="tw-text-sm bordered tw-text-center">{{ item.progress.toFixed(0) + '%' }}</td>
+          <td class="tw-text-sm tw-text-center bordered">
             <v-tooltip :text="item.status.name" location="bottom">
               <template v-slot:activator="{ props }">
-                <v-icon v-bind="props" :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90 tw-ml-2"></v-icon>
+                <v-icon v-bind="props" :icon="item.status.icon" :color="item.status.color" class="tw-opacity-90"></v-icon>
               </template>
             </v-tooltip>
           </td>
-          <td class="tw-text-sm tw-text-left tw-w-32">{{ item.timeElapsed }}</td>
-          <td class="tw-text-sm tw-text-left tw-w-20">{{ parseSize(item.size) }}</td>
-          <td class="tw-text-sm tw-text-left tw-w-32">{{ useDateFormat(item.date, 'MMMM DD, YYYY HH:mm').value }}</td>
-          <td class="tw-text-sm tw-text-center">
-            <v-tooltip text="Delete" location="bottom">
-              <template v-slot:activator="{ props }">
-                <v-btn v-bind="props" color="red" density="compact" variant="text" icon>
-                  <v-icon icon="mdi-trash-can-outline" class="tw-text-base"></v-icon>
+          <td class="tw-text-sm tw-text-left bordered">{{ item.timeElapsed }}</td>
+          <td class="tw-text-sm tw-text-left bordered">{{ parseSize(item.size) }}</td>
+          <td class="tw-text-sm tw-text-left bordered">{{ useDateFormat(item.date, 'MMMM DD, YYYY HH:mm').value }}</td>
+          <td class="tw-text-sm tw-text-center bordered tw-w-10">
+            <v-btn color="red" density="compact" variant="text" icon>
+              <v-icon icon="mdi-trash-can-outline" class="tw-text-base"></v-icon>
 
-                  <v-dialog v-model="deleteDialog[item.id]" activator="parent" max-width="450px">
-                    <v-card>
-                      <v-card-text>Delete file {{ item.name }}?</v-card-text>
-                      <div class="tw-flex tw-justify-between">
-                        <v-card-actions>
-                          <v-checkbox v-model="deleteFromdisk[item.id]" label="Delete from disk" color="red" value="true" hide-details/>
-                        </v-card-actions>
-                        <div class="tw-flex tw-flex-row-reverse">
-                          <v-card-actions>
-                            <v-btn color="red" block @click="downloads.remove(item.id, deleteFromdisk[item.id])">Delete</v-btn>
-                          </v-card-actions>
-                          <v-card-actions>
-                            <v-btn variant="text" block @click="deleteDialog[item.id] = false">Cancel</v-btn>
-                          </v-card-actions>
-                        </div>
-                      </div>
-                    </v-card>
-                  </v-dialog>
-                </v-btn>
-              </template>
-            </v-tooltip>
+              <v-dialog v-model="deleteDialog[item.id]" activator="parent" max-width="450px">
+                <v-card>
+                  <v-card-text>Delete file {{ item.name }}?</v-card-text>
+                  <div class="tw-flex tw-justify-between">
+                    <v-card-actions>
+                      <v-checkbox v-model="deleteFromdisk[item.id]" label="Delete from disk" color="red" value="true" hide-details/>
+                    </v-card-actions>
+                    <div class="tw-flex tw-flex-row-reverse">
+                      <v-card-actions>
+                        <v-btn color="red" block @click="downloads.remove(item.id, deleteFromdisk[item.id])">Delete</v-btn>
+                      </v-card-actions>
+                      <v-card-actions>
+                        <v-btn variant="text" block @click="deleteDialog[item.id] = false">Cancel</v-btn>
+                      </v-card-actions>
+                    </div>
+                  </div>
+                </v-card>
+              </v-dialog>
+            </v-btn>
           </td>
         </tr>
       </tbody>
@@ -181,5 +203,16 @@ EventsOn("downloaded", async (...data) => {
 }
 .v-table .v-table__wrapper > table > tbody > tr:nth-child(even) {
   background: rgb(87, 83, 78, 0.05);
+}
+.bordered {
+  border-left: 1px solid rgb(87, 83, 78);
+  border-left: 1px solid rgb(87, 83, 78, 0.05);
+  border-right: 1px solid rgba(87, 83, 78, 0.05);
+  border-right: 1px solid rgba(87, 83, 78, 0.05);
+  -webkit-background-clip: padding-box; /* for Safari */
+  background-clip: padding-box; /* for IE9+, Firefox 4+, Opera, Chrome */
+}
+.nameCol:hover .iconName {
+  opacity: 100;
 }
 </style>
