@@ -1,16 +1,11 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useDateFormat } from '@vueuse/shared';
 import { useDownloads } from '../store/downloads';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
-import { download } from '../../wailsjs/go/models';
-import { useDateFormat } from '@vueuse/shared';
-import { ref, Ref } from 'vue';
-import { onMounted } from 'vue';
 
 const downloads = useDownloads()
-const props = defineProps<{
-  list: download.Download[]
-}>()
+const items = computed(() => downloads.filter(downloads.search))
 
 const deleteDialog = ref<{[key: string]: boolean}>({})
 const deleteFromdisk = ref<{[key: string]: boolean}>({})
@@ -48,7 +43,6 @@ EventsOn("downloaded", async (...data) => {
         color: 'info'
       }
 
-      // TODO: delete this
       el.timeElapsed = downloads.parseElapsedTime(downloads.toDownload.date)
       el.progress = 100
       break
@@ -59,6 +53,7 @@ EventsOn("downloaded", async (...data) => {
       icon: 'mdi-check-circle-outline',
       color: 'success'
     }
+    
     const progressBar = document.getElementById(data[0]) as HTMLElement
     progressBar.style.opacity = '0'
     break
@@ -120,7 +115,7 @@ EventsOn("downloaded", async (...data) => {
         </tr>
       </thead>
       <tbody class="tw-relative">
-        <tr v-for="item in props.list" :key="item.name">
+        <tr v-for="item in items" :key="item.name">
           <td color="primary" class="tw-rounded-sm">
             <div class="progressWrapper tw-flex tw-justify-between tw-absolute tw-w-full tw-left-0 tw-right-0 tw-px-5 xl:tw-px-0 xl:tw-pl-5" :id="item.id">
               <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >

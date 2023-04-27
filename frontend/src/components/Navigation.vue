@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import DownloadDialog from './DownloadDialog.vue';
-import { ref } from 'vue';
-import { useTheme } from 'vuetify/lib/framework.mjs';
-import { useDrawerStore } from '../store/drawer';
 import { useDownloads } from '../store/downloads';
+import { ref, inject } from 'vue';
+import { useTheme } from 'vuetify/lib/framework.mjs';
 
 const downloads = useDownloads()
-const store = useDrawerStore()
+const drawer = inject('drawer')
 
 const theme = useTheme()
 const themeIcon = ref(theme.global.current.value.dark ? 'mdi-white-balance-sunny' : 'mdi-weather-night')
@@ -70,7 +69,7 @@ function toggleTheme() {
 
       <v-tooltip text="Menu" location="bottom">
         <template v-slot:activator="{ props }">
-          <v-btn class="xl:tw-hidden" v-bind="props" density="comfortable" icon="mdi-dots-vertical" variant="flat" @click="store.openDrawer()"/>
+          <v-btn class="xl:tw-hidden" v-bind="props" density="comfortable" icon="mdi-dots-vertical" variant="flat" @click="drawer = !drawer"/>
         </template>
       </v-tooltip>
     </div>

@@ -1,27 +1,18 @@
 <script lang="ts" setup>
-import { useTheme } from 'vuetify/lib/framework.mjs';
-import Navigation from './components/Navigation.vue'
-import DownloadList from './components/DownloadList.vue';
-import Main from './components/Main.vue';
-import { computed } from 'vue';
-import { useDownloads } from './store/downloads'
 import { InitData, InitSetting } from '../wailsjs/go/main/App';
-import { download, setting } from '../wailsjs/go/models';
+import { useDownloads } from './store/downloads'
 import { useSettings } from './store/setting';
+import { useTheme } from 'vuetify/lib/framework.mjs';
+import DownloadList from './components/DownloadList.vue';
+import Navigation from './components/Navigation.vue'
+import Main from './components/Main.vue';
 
 const theme = useTheme()
 const downloads = useDownloads()
 const settings = useSettings()
 
-const data = computed(() => downloads.filter(downloads.search))
-
-InitData().then((data: download.Download[]) => {
-  downloads.setData(data)
-})
-
-InitSetting().then((setting: setting.Settings) => {
-  settings.init(setting)
-})
+InitData().then(data => downloads.setData(data))
+InitSetting().then(setting => settings.init(setting))
 </script>
 
 <template>
@@ -29,7 +20,7 @@ InitSetting().then((setting: setting.Settings) => {
     <v-theme-provider :theme="theme.global.name.value">
       <Main>
         <Navigation />
-        <DownloadList :list="data"/>
+        <DownloadList/>
       </Main>
     </v-theme-provider>
   </v-app>
