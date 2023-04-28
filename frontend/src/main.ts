@@ -17,6 +17,7 @@ const customDark: ThemeDefinition = {
   }
 }
 
+//TODO: import theme from disk
 const pinia = createPinia()
 const vuetify = createVuetify({
   theme: {

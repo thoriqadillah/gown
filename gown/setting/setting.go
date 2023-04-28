@@ -34,3 +34,5 @@ func New() Settings {
 		DataFilename:    DEFAULT_DATA_FILE_NAME,
 	}
 }
+
+// TODO: store settings into disk

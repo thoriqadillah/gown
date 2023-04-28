@@ -43,3 +43,6 @@ type Component struct {
 	TextColor       string `json:"textColor"`
 	BackgroundColor string `json:"backgroundColor"`
 }
+
+// TODO: store theme into disk
+// TODO: make the theme usable
