@@ -37,26 +37,13 @@ EventsOn("downloaded", async (...data) => {
   for (const el of downloads.list) {
     if (el.id != id) continue
 
-    if (!combined) {
-      el.status = {
-        name: 'Combining',
-        icon: 'mdi-file-arrow-left-right-outline',
-        color: 'info'
-      }
-
-      el.timeElapsed = parseElapsedTime(downloads.toDownload.date)
-      el.progress = 100
-      break
-    } 
-
+    el.progress = 100
     el.status = {
-      name: 'Success',
-      icon: 'mdi-check-circle-outline',
-      color: 'success'
+      name: !combined ? 'Combining' : 'Success',
+      icon: !combined ? 'mdi-file-arrow-left-right-outline' : 'mdi-check-circle-outline',
+      color: !combined ? 'info' : 'success'
     }
-
-    const progressBar = document.getElementById(data[0]) as HTMLElement
-    progressBar.style.opacity = '0'
+    
     break
   }
 
@@ -118,9 +105,9 @@ EventsOn("downloaded", async (...data) => {
       <tbody class="tw-relative">
         <tr v-for="item in items" :key="item.name">
           <td color="primary" class="tw-rounded-sm bordered nameCol">
-            <div class="progressWrapper tw-flex tw-justify-between tw-absolute tw-w-full tw-left-0 tw-right-0 tw-px-5 xl:tw-px-0 xl:tw-pl-5" :id="item.id">
+            <div v-if="item.progress != 100" class="progressWrapper tw-flex tw-justify-between tw-absolute tw-w-full tw-left-0 tw-right-0 tw-px-5 tw-mt-1" :id="item.id">
               <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >
-                <div class="tw-h-10 tw-bg-green-500 tw-opacity-10 tw-w-0 -tw-mt-1.5" :id="`progressBar-${item.id}-${part-1}`"></div>
+                <div class="tw-h-9 tw-bg-green-500 tw-opacity-10 tw-w-0 -tw-mt-1.5" :id="`progressBar-${item.id}-${part-1}`"></div>
               </div> 
             </div>
             <div class="tw-flex tw-justify-between tw-mt-1 tw-mr-3 tw-items-center group">
