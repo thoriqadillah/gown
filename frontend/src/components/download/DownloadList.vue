@@ -19,7 +19,7 @@ EventsOn("transfered", async (...data) => {
   for (const el of downloads.list) {
     if (el.id == data[0]) {
       el.timeElapsed = parseElapsedTime(el.date)
-      el.progress += progress
+      el.progress += progress // FIXME: a float can't be saved into backend. Need int64
       break
     }
   }

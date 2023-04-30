@@ -89,6 +89,8 @@ func (a *App) InitSetting() setting.Settings {
 }
 
 func (a *App) Download(toDownload *download.Download) error {
+	canceled := false
+
 	worker, err := worker.New(toDownload.Metadata.Totalpart, a.settings.SimmultanousNum)
 	if err != nil {
 		log.Printf("Error initializing worker: %v\n", err)
@@ -113,8 +115,16 @@ func (a *App) Download(toDownload *download.Download) error {
 		worker.Add(job)
 	}
 
+	runtime.EventsOn(a.ctx, "stop", func(optionalData ...interface{}) {
+		canceled = true
+	})
+
 	wg.Wait()
 	worker.Stop()
+
+	if canceled {
+		return nil
+	}
 
 	// combining
 	runtime.EventsEmit(a.ctx, "downloaded", toDownload.ID, false)
@@ -129,6 +139,10 @@ func (a *App) Download(toDownload *download.Download) error {
 	runtime.EventsOff(a.ctx, "downloaded")
 
 	return nil
+}
+
+func (a *App) StopDownload(id string) {
+
 }
 
 /*

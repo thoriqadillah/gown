@@ -2,6 +2,7 @@ package chunk
 
 import (
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -16,12 +17,23 @@ type progressbar struct {
 	totalsize  int64
 	transfered int64
 	tmp        int
+	err        error
 }
+
+var errCanceled = fmt.Errorf("download canceled")
 
 func (r *progressbar) Read(payload []byte) (n int, err error) {
 	n, err = r.Reader.Read(payload)
 	if err != nil {
 		return n, err
+	}
+
+	runtime.EventsOn(r.ctx, "stop", func(optionalData ...interface{}) {
+		r.err = errCanceled
+	})
+
+	if r.err != nil {
+		return n, r.err
 	}
 
 	r.transfered += int64(n)

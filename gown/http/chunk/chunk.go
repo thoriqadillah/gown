@@ -113,6 +113,10 @@ func (c *Chunk) Execute() error {
 			return nil
 		}
 
+		if err == errCanceled {
+			return err
+		}
+
 		log.Printf("Error while downloading chunk %d: %v. Retrying....\n", c.index+1, err)
 	}
 
@@ -121,6 +125,7 @@ func (c *Chunk) Execute() error {
 
 // TODO: implement handle error
 func (c *Chunk) HandleError(err error) {
+	log.Println("download canceled")
 	//TODO: save the downloaded data and mark the range if resumable. otherwise, delete the temp file
 	log.Printf("Error while downloading chunk %d: %v\n", c.index+1, err)
 }
