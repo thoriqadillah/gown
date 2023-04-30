@@ -1,31 +1,25 @@
 <script setup lang="ts">
-import { parseElapsedTime, parseSize } from '../utils/parser';
-import { ref, computed, onMounted } from 'vue';
+import { computed } from 'vue';
+import { parseElapsedTime, parseSize } from '../../utils/parser';
 import { useDateFormat } from '@vueuse/shared';
-import { useDownloads } from '../store/downloads';
-import { EventsOn } from '../../wailsjs/runtime/runtime';
+import { useDownloads } from '../../store/downloads';
+import { EventsOn } from '../../../wailsjs/runtime/runtime';
+import Actionable from './Actionable.vue';
+import Deletable from './Deletable.vue';
 
 const downloads = useDownloads()
 const items = computed(() => downloads.filter(downloads.search))
 
-const deleteDialog = ref<{[key: string]: boolean}>({})
-const deleteFromdisk = ref<{[key: string]: boolean}>({})
-onMounted(() => {
-  downloads.list.forEach(el => {
-    deleteDialog.value[el.id] = false
-    deleteFromdisk.value[el.id] = false
-  })
-})
-
 EventsOn("transfered", async (...data) => {
-  let prog = data[2]
-  const progressBar = document.getElementById(`progressBar-${data[0]}-${data[1]}`) as HTMLElement
-  progressBar.style.width = prog + '%'
+  const [id, index, transfered, progress] = data
+
+  const progressBar = document.getElementById(`progressBar-${id}-${index}`) as HTMLElement
+  progressBar.style.width = transfered + '%'
 
   for (const el of downloads.list) {
     if (el.id == data[0]) {
-      el.timeElapsed = parseElapsedTime(downloads.toDownload.date)
-      el.progress += data[3]
+      el.timeElapsed = parseElapsedTime(el.date)
+      el.progress += progress
       break
     }
   }
@@ -104,7 +98,7 @@ EventsOn("downloaded", async (...data) => {
       </thead>
       <tbody class="tw-relative">
         <tr v-for="item in items" :key="item.name">
-          <td color="primary" class="tw-rounded-sm bordered nameCol">
+          <td color="primary" class="tw-rounded-sm bordered name-col">
             <div v-if="item.progress != 100" class="progressWrapper tw-flex tw-justify-between tw-absolute tw-w-full tw-left-0 tw-right-0 tw-px-5 tw-mt-1" :id="item.id">
               <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >
                 <div class="tw-h-9 tw-bg-green-500 tw-opacity-10 tw-w-0 -tw-mt-1.5" :id="`progressBar-${item.id}-${part-1}`"></div>
@@ -116,31 +110,7 @@ EventsOn("downloaded", async (...data) => {
                 <!-- TODO: add mark if not resumable -->
                 <span class="tw-text-sm tw-inline">{{ item.name }}</span>
               </div>
-              <!-- TODO: pause/resume implementation -->
-              <!-- TODO: hidden if it successfully downloaded -->
-              <v-btn v-if="item.progress != 100" density="compact" variant="text" icon class="iconName tw-opacity-0 tw-ml-5 -tw-mr-3">
-                <v-icon icon="mdi-pause-box-outline" class="tw-text-base tw-opacity-50"></v-icon>
-
-                <!-- TODO: Add dialog if resumable -->
-                <v-dialog activator="parent" max-width="450px">
-                  <v-card>
-                    <v-card-text>Do you want to pause {{ item.name }}?</v-card-text>
-                    <div class="tw-flex tw-justify-between">
-                      <v-card-actions>
-                        <v-checkbox label="Delete from disk" color="red" value="true" hide-details/>
-                      </v-card-actions>
-                      <div class="tw-flex tw-flex-row-reverse">
-                        <v-card-actions>
-                          <v-btn color="red" block>Delete</v-btn>
-                        </v-card-actions>
-                        <v-card-actions>
-                          <v-btn variant="text" block>Cancel</v-btn>
-                        </v-card-actions>
-                      </div>
-                    </div>
-                  </v-card>
-                </v-dialog>
-              </v-btn>
+              <Actionable :active="item.progress != 100" :filename="item.name" :id="item.id"/>
             </div>
           </td>
           <td class="tw-text-sm bordered tw-text-center">{{ item.progress.toFixed(0) + '%' }}</td>
@@ -155,28 +125,7 @@ EventsOn("downloaded", async (...data) => {
           <td class="tw-text-sm tw-text-left bordered">{{ parseSize(item.size) }}</td>
           <td class="tw-text-sm tw-text-left bordered">{{ useDateFormat(item.date, 'MMMM DD, YYYY HH:mm').value }}</td>
           <td class="tw-text-sm tw-text-center bordered tw-w-10">
-            <v-btn color="red" density="compact" variant="text" icon>
-              <v-icon icon="mdi-trash-can-outline" class="tw-text-base"></v-icon>
-
-              <v-dialog v-model="deleteDialog[item.id]" activator="parent" max-width="450px">
-                <v-card>
-                  <v-card-text>Delete file {{ item.name }}?</v-card-text>
-                  <div class="tw-flex tw-justify-between">
-                    <v-card-actions>
-                      <v-checkbox v-model="deleteFromdisk[item.id]" label="Delete from disk" color="red" value="true" hide-details/>
-                    </v-card-actions>
-                    <div class="tw-flex tw-flex-row-reverse">
-                      <v-card-actions>
-                        <v-btn color="red" block @click="downloads.remove(item.id, deleteFromdisk[item.id])">Delete</v-btn>
-                      </v-card-actions>
-                      <v-card-actions>
-                        <v-btn variant="text" block @click="deleteDialog[item.id] = false">Cancel</v-btn>
-                      </v-card-actions>
-                    </div>
-                  </div>
-                </v-card>
-              </v-dialog>
-            </v-btn>
+            <Deletable :filename="item.name" :id="item.id"/>
           </td>
         </tr>
       </tbody>
@@ -199,7 +148,7 @@ EventsOn("downloaded", async (...data) => {
   -webkit-background-clip: padding-box; /* for Safari */
   background-clip: padding-box; /* for IE9+, Firefox 4+, Opera, Chrome */
 }
-.nameCol:hover .iconName {
+.name-col:hover .icon-name {
   opacity: 100;
 }
 </style>

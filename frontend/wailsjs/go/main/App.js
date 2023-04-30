@@ -22,6 +22,10 @@ export function InitSetting() {
   return window['go']['main']['App']['InitSetting']();
 }
 
+export function StopDownload(arg1) {
+  return window['go']['main']['App']['StopDownload'](arg1);
+}
+
 export function Theme() {
   return window['go']['main']['App']['Theme']();
 }

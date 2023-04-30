@@ -13,6 +13,8 @@ export function InitData():Promise<Array<download.Download>>;
 
 export function InitSetting():Promise<setting.Settings>;
 
+export function StopDownload(arg1:string):Promise<void>;
+
 export function Theme():Promise<setting.Theme>;
 
 export function UpdateData(arg1:Array<download.Download>):Promise<void>;

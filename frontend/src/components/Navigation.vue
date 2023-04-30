@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import DownloadDialog from './DownloadDialog.vue';
+import DownloadDialog from './download/DownloadDialog.vue';
 import { useDownloads } from '../store/downloads';
 import { ref, inject } from 'vue';
 import { useTheme } from 'vuetify/lib/framework.mjs';

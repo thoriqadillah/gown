@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { useDownloads } from '../store/downloads';
-import { useSettings } from '../store/setting';
+import { useDownloads } from '../../store/downloads';
+import { useSettings } from '../../store/setting';
 import { ref, watch } from 'vue';
-import { parseSize } from '../utils/parser';
-import { download } from '../../wailsjs/go/models';
-import Downloader from '../services/downloader'
-import Dialog from '../services/download-dialog'
+import { parseSize } from '../../utils/parser';
+import { download } from '../../../wailsjs/go/models';
+import Downloader from '../../services/downloader'
+import Dialog from '../../services/download-dialog'
 
 const downloads = useDownloads()
 const settings = useSettings()
@@ -36,7 +36,7 @@ watch([url, () => result.value?.name, settings], () => {
 })
 
 const dialog = new Dialog({ activator, loaded, loading, onFile, onURL })
-const downloader = new Downloader()
+const downloader = Downloader.service()
 
 async function fetch() {
   try {

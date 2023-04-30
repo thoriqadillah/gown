@@ -3,7 +3,7 @@ import { InitData, InitSetting } from '../wailsjs/go/main/App';
 import { useDownloads } from './store/downloads'
 import { useSettings } from './store/setting';
 import { useTheme } from 'vuetify/lib/framework.mjs';
-import DownloadList from './components/DownloadList.vue';
+import DownloadList from './components/download/DownloadList.vue';
 import Navigation from './components/Navigation.vue'
 import Main from './components/Main.vue';
 

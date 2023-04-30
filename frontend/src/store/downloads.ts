@@ -1,13 +1,12 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { download } from "../../wailsjs/go/models";
-import { UpdateData, UpdateName, Delete } from '../../wailsjs/go/main/App'
+import { UpdateData, Delete } from '../../wailsjs/go/main/App'
 
 export const useDownloads = defineStore('downloads', () => {
   const list = ref<download.Download[]>([])
   const defaults = ref<download.Download[]>([])
   const search = ref('')
-  const toDownload = ref(new download.Download())
   const ids = ref<string[]>([])
   const names = ref<string[]>([])
 
@@ -22,7 +21,6 @@ export const useDownloads = defineStore('downloads', () => {
     names.value.unshift(val.name)
 
     defaults.value = list.value
-    toDownload.value = val
   }
   const remove = async (id: string, fromdisk: boolean) => {
     const index = ids.value.indexOf(id)
@@ -79,7 +77,6 @@ export const useDownloads = defineStore('downloads', () => {
   return {
     list,
     search,
-    toDownload,
     names,
     add,
     remove,
