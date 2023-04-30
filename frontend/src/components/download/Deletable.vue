@@ -7,7 +7,7 @@ const props = defineProps<{
   id: string
 }>()
 
-const downloads = useDownloads()
+const store = useDownloads()
 const dialog = ref(false)
 const deleteFromdisk = ref(false)
 </script>
@@ -25,7 +25,7 @@ const deleteFromdisk = ref(false)
           </v-card-actions>
           <div class="tw-flex tw-flex-row-reverse">
             <v-card-actions>
-              <v-btn color="red" block @click="downloads.remove(props.id, deleteFromdisk)">Delete</v-btn>
+              <v-btn color="red" block @click="store.remove(props.id, deleteFromdisk)">Delete</v-btn>
             </v-card-actions>
             <v-card-actions>
               <v-btn variant="text" block @click="dialog = false">Cancel</v-btn>

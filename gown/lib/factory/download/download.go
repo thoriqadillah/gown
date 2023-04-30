@@ -55,8 +55,9 @@ type (
 		TimeElapsed string         `json:"timeElapsed"`
 		Size        int64          `json:"size"`
 		Date        time.Time      `json:"date"`
+		Progressbar []float64      `json:"progressbar"`
 		Status      DownloadStatus `json:"status"`
-		Progres     int64          `json:"progress"`
+		Progres     float64        `json:"progress"`
 		Type        DownloadType   `json:"type"`
 		Metadata    Metadata       `json:"metadata"`
 	}

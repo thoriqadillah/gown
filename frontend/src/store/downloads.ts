@@ -15,6 +15,9 @@ export const useDownloads = defineStore('downloads', () => {
   const ascSize = ref(true)
   const ascTimeElapsed = ref(true)
 
+  const indexOf = (id: string): number => {
+    return ids.value.indexOf(id)
+  }
   const add = (val: download.Download) => {
     list.value.unshift(val)
     ids.value.unshift(val.id)
@@ -93,5 +96,6 @@ export const useDownloads = defineStore('downloads', () => {
     sortByDate,
     sortBySize,
     sortByTimeElapsed,
+    indexOf
   }
 })

@@ -5,6 +5,7 @@ import { useSettings } from './store/setting';
 import { useTheme } from 'vuetify/lib/framework.mjs';
 import DownloadList from './components/download/DownloadList.vue';
 import Navigation from './components/Navigation.vue'
+import Alert from './components/Alert.vue';
 import Main from './components/Main.vue';
 
 const theme = useTheme()
@@ -21,6 +22,7 @@ InitSetting().then(setting => settings.init(setting))
       <Main>
         <Navigation />
         <DownloadList />
+        <Alert/>
       </Main>
     </v-theme-provider>
   </v-app>

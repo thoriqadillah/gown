@@ -6,9 +6,11 @@ import { parseSize } from '../../utils/parser';
 import { download } from '../../../wailsjs/go/models';
 import Downloader from '../../services/downloader'
 import Dialog from '../../services/download-dialog'
+import { useAlert } from '../../store/alert';
 
-const downloads = useDownloads()
+const store = useDownloads()
 const settings = useSettings()
+const alert = useAlert()
 
 const result = ref<download.Download>()
 const input = ref()
@@ -19,6 +21,7 @@ const onFile = ref(false)
 const onURL = ref(true)
 
 let url = ref('')
+const urlError = ref('')
 
 const urlHasError = ref(false)
 const savelocationHasError = ref(false)
@@ -31,6 +34,7 @@ const validate = ref({
 
 watch([url, () => result.value?.name, settings], () => {
   urlHasError.value = url.value.trim().length === 0
+  urlError.value = urlHasError.value ? urlError.value : ''
   savelocationHasError.value = settings.saveLocation.trim().length === 0
   filenameHasError.value = result.value!.name.trim().length === 0 || result.value!.name.trim().length > 256
 })
@@ -50,25 +54,30 @@ async function fetch() {
   } catch (error) {
     input.value.blur()
     dialog.done()
+    urlError.value = error as string
     // TODO: add alert to error message
   }
 }
 
 async function execute() {
-  dialog.close()
-  downloader.download(result.value!)
-  downloads.add(result.value!)
+  try {
+    dialog.close()
+    downloader.download(result.value!)
+    store.add(result.value!)
+  } catch (error) {
+    alert.open(error as string)
+  }
 }
 </script>
 
 <template>
   <v-dialog v-model="activator" activator="parent" max-width="450px" transition="dialog-top-transition" persistent>
     <v-card>
-      <v-text-field v-if="onURL || !loaded" :rules="[validate.required]" v-model="url" :loading="loading" :autofocus="activator" color="primary" type="input" hint="Click enter to fetch the file data from the URL you want to download" class="tw-p-3" density="compact" variant="outlined" label="URL" append-inner-icon="mdi-link" append-icon="mdi-magnify" @click:append="fetch()" single-line v-on:keyup.enter="fetch()" ref="input"/>
+      <v-text-field v-if="onURL || !loaded" :error-messages="urlError" :rules="[validate.required]" v-model="url" :loading="loading" :autofocus="activator" color="primary" type="input" hint="Click enter to fetch the file data from the URL you want to download" class="tw-p-3" density="compact" variant="outlined" label="URL" append-inner-icon="mdi-link" append-icon="mdi-magnify" @click:append="fetch()" single-line v-on:keyup.enter="fetch()" ref="input"/>
       <div v-else-if="onFile || !loaded" class="tw-flex tw-items-center">
         <div class="tw-basis-9/12">
           <v-text-field color="primary" :rules="[validate.required, validate.max]" v-model="result!.name" label="File name" append-inner-icon="mdi-file-document-edit" type="input" hint="File name" class="tw-px-3 tw-pt-3 -tw-mb-2" single-line density="compact" variant="outlined" />
-          <v-text-field color="primary" :rules="[validate.required]" v-model="settings.saveLocation" label="Save location" append-inner-icon="mdi-folder" type="input" hint="Save location" class="tw-p-3" single-line density="compact" variant="outlined" />
+          <v-text-field color="primary" :rules="[validate.required]" :model-value="settings.saveLocation" label="Save location" append-inner-icon="mdi-folder" type="input" hint="Save location" class="tw-p-3" single-line density="compact" variant="outlined" />
         </div>
         <div class="tw-basis-3/12 tw-text-center tw-pr-2 -tw-mt-5">
           <v-icon :icon="result!.type.icon" :color="result!.type.color"></v-icon>

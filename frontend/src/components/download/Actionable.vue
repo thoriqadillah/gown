@@ -6,10 +6,11 @@ import { ref } from 'vue';
 const props = defineProps<{
   active: boolean,
   filename: string,
+  statusname: string,
   id: string,
 }>()
 
-const downloads = useDownloads()
+const store = useDownloads()
 const downloader = Downloader.service()
 const dialog = ref(false)
 const clicked = ref(false)
@@ -21,17 +22,14 @@ function resumepause(id: string) {
 async function stop(id: string) {
   downloader.stop(id)
   dialog.value = false
+  clicked.value = !clicked.value
   // TODO: improve this one
-  downloads.list.forEach(el => {
-    if (el.id == id) {
-      el.status.icon = 'mdi-stop-circle-outline'
-      el.status.color = 'warning'
-      el.status.name = 'Canceled'
-    }
-    return
-  })
-
-  await downloads.updateData(downloads.list)
+  const target = store.list[store.indexOf(id)]
+  target.status.icon = 'mdi-stop-circle-outline'
+  target.status.color = 'warning'
+  target.status.name = 'Canceled'
+  
+  await store.updateData(store.list)
 }
 </script>
 
@@ -40,10 +38,10 @@ async function stop(id: string) {
     <div v-if="props.active" class="tw-flex">
       <!-- TODO: pause/resume implementation -->
       <v-btn @click="resumepause(props.id)" density="compact" variant="text" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
-        <v-icon :icon="clicked ? 'mdi-play' : 'mdi-pause'" class="tw-text-base tw-opacity-70"></v-icon>    
+        <v-icon class="tw-text-base tw-opacity-70" :icon="props.statusname === 'Canceled' ? 'mdi-replay' : props.statusname === 'Paused' ? 'mdi-play' : 'mdi-pause'"></v-icon>    
       </v-btn>
 
-      <v-btn density="compact" variant="text" color="warning" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
+      <v-btn density="compact" :disabled="props.statusname === 'Canceled'"  variant="text" color="warning" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
         <v-icon icon="mdi-stop" class="tw-text-base tw-opacity-70"></v-icon>
 
         <v-dialog v-model="dialog" activator="parent" max-width="450px">
