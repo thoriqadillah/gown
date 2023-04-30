@@ -4,21 +4,21 @@ import { parseElapsedTime, parseSize } from '../../utils/parser';
 import { useDateFormat } from '@vueuse/shared';
 import { useDownloads } from '../../store/downloads';
 import { EventsOn } from '../../../wailsjs/runtime/runtime';
+import { useAlert } from '../../store/alert';
 import Actionable from './Actionable.vue';
 import Deletable from './Deletable.vue';
 
+const alert = useAlert()
 const store = useDownloads()
 const items = computed(() => store.filter(store.search))
 
 EventsOn("transfered", async (...data) => {
   const [id, index, transfered, progress] = data
 
-  const progressBar = document.getElementById(`progressBar-${id}-${index}`) as HTMLElement
-  progressBar.style.width = transfered + '%'
-
   const target = store.list[store.indexOf(id)]
   target.timeElapsed = parseElapsedTime(target.date)
-  target.progress += progress // FIXME: a float can't be saved into backend. Need int64
+  target.progress += progress
+  target.progressbar[index] = transfered
 })
 
 EventsOn("downloaded", async (...data) => {
@@ -31,6 +31,7 @@ EventsOn("downloaded", async (...data) => {
     icon: !combined ? 'mdi-file-arrow-left-right-outline' : 'mdi-check-circle-outline',
     color: !combined ? 'info' : 'success'
   }
+  alert.open(`${target.name} successfuly downloaded`, 'success')
   
   await store.updateData(store.list)
 })
@@ -87,14 +88,9 @@ EventsOn("downloaded", async (...data) => {
           </th>
         </tr>
       </thead>
-      <tbody class="tw-relative">
+      <tbody>
         <tr v-for="item in items" :key="item.name">
           <td color="primary" class="tw-rounded-sm bordered name-col">
-            <div v-if="item.progress != 100" class="progressWrapper tw-flex tw-justify-between tw-absolute tw-w-full tw-left-0 tw-right-0 tw-px-5 tw-mt-1" :id="item.id">
-              <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >
-                <div class="tw-h-9 tw-bg-green-500 tw-opacity-10 tw-w-0 -tw-mt-1.5" :id="`progressBar-${item.id}-${part-1}`"></div>
-              </div> 
-            </div>
             <div class="tw-flex tw-justify-between tw-mt-1 tw-mr-3 tw-items-center group">
               <div class="tw-overflow-x-hidden tw-w-max tw-flex">
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
@@ -102,6 +98,11 @@ EventsOn("downloaded", async (...data) => {
                 <span class="tw-text-sm tw-inline">{{ item.name }}</span>
               </div>
               <Actionable :active="item.progress != 100" :filename="item.name" :id="item.id" :statusname="item.status.name"/>
+            </div>
+            <div v-if="item.progress != 100" class="progressWrapper tw-flex tw-justify-between tw-mt-1">
+              <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >
+                <div class="tw-h-0.5 tw-bg-green-500 -tw-mt-1" :style="{ width: `${item.progressbar[part-1]}%` }"></div>
+              </div> 
             </div>
           </td>
           <td class="tw-text-sm bordered tw-text-center">{{ item.progress.toFixed(0) + '%' }}</td>
