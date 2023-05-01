@@ -21,7 +21,7 @@ export default class Downloader {
     var regex = /\(([^)]+)\)/; // get number inside the parenthesis
     
     let newname = name  
-    if (this.downloads.names.indexOf(name) > -1) {
+    if (this.downloads.list.findIndex(el => el.name === name) > -1) {
       const matches = regex.exec(name)        
       if (matches == null) {
         let split = name.split('.')

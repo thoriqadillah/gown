@@ -15,7 +15,7 @@ const items = computed(() => store.filter(store.search))
 EventsOn("transfered", async (...data) => {
   const [id, index, transfered, progress] = data
 
-  const target = store.list[store.indexOf(id)]
+  const target = store.list[store.list.findIndex(el => el.id === id)]
   target.timeElapsed = parseElapsedTime(target.date)
   target.progress += progress
   target.progressbar[index] = transfered
@@ -24,7 +24,7 @@ EventsOn("transfered", async (...data) => {
 EventsOn("downloaded", async (...data) => {
   const [id, combined] = data
   
-  const target = store.list[store.indexOf(id)]
+  const target = store.list[store.list.findIndex(el => el.id === id)]
   target.progress = 100
   target.status = {
     name: !combined ? 'Combining' : 'Success',

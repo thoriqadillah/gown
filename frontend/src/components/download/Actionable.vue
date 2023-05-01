@@ -24,7 +24,7 @@ async function stop(id: string) {
   dialog.value = false
   clicked.value = !clicked.value
   // TODO: improve this one
-  const target = store.list[store.indexOf(id)]
+  const target = store.list[store.list.findIndex(el => el.id === id)]
   target.status.icon = 'mdi-stop-circle-outline'
   target.status.color = 'warning'
   target.status.name = 'Canceled'

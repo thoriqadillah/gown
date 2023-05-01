@@ -7,30 +7,19 @@ export const useDownloads = defineStore('downloads', () => {
   const list = ref<download.Download[]>([])
   const defaults = ref<download.Download[]>([])
   const search = ref('')
-  const ids = ref<string[]>([])
-  const names = ref<string[]>([])
 
   const ascName = ref(true)
   const ascDate = ref(true)
   const ascSize = ref(true)
   const ascTimeElapsed = ref(true)
 
-  const indexOf = (id: string): number => {
-    return ids.value.indexOf(id)
-  }
   const add = (val: download.Download) => {
     list.value.unshift(val)
-    ids.value.unshift(val.id)
-    names.value.unshift(val.name)
-
     defaults.value = list.value
   }
   const remove = async (id: string, fromdisk: boolean) => {
-    const index = ids.value.indexOf(id)
-    
+    const index = list.value.findIndex(el => el.id === id)
     const deleted = list.value.splice(index, 1)
-    ids.value.splice(index, 1)
-    names.value.splice(index, 1)
     
     await UpdateData(list.value)
     if (fromdisk) Delete(deleted[0].name)
@@ -39,9 +28,6 @@ export const useDownloads = defineStore('downloads', () => {
   const setData = (data: download.Download[]) => {
     list.value = data
     defaults.value = data
-
-    ids.value = list.value.map(el => el.id)
-    names.value = list.value.map(el => el.name)
   }
   const updateData = async (data: download.Download[]) => {
     list.value = data
@@ -80,7 +66,6 @@ export const useDownloads = defineStore('downloads', () => {
   return {
     list,
     search,
-    names,
     add,
     remove,
     setData,
@@ -96,6 +81,5 @@ export const useDownloads = defineStore('downloads', () => {
     sortByDate,
     sortBySize,
     sortByTimeElapsed,
-    indexOf
   }
 })
