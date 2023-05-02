@@ -1,5 +1,19 @@
 export namespace download {
 	
+	export class Chunk {
+	    downloaded: number;
+	    progressbar: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Chunk(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.downloaded = source["downloaded"];
+	        this.progressbar = source["progressbar"];
+	    }
+	}
 	export class Metadata {
 	    url: string;
 	    cansplit: boolean;
@@ -55,7 +69,7 @@ export namespace download {
 	    size: number;
 	    // Go type: time
 	    date: any;
-	    progressbar: number[];
+	    chunks: Chunk[];
 	    status: DownloadStatus;
 	    progress: number;
 	    type: DownloadType;
@@ -72,7 +86,7 @@ export namespace download {
 	        this.timeElapsed = source["timeElapsed"];
 	        this.size = source["size"];
 	        this.date = this.convertValues(source["date"], null);
-	        this.progressbar = source["progressbar"];
+	        this.chunks = this.convertValues(source["chunks"], Chunk);
 	        this.status = this.convertValues(source["status"], DownloadStatus);
 	        this.progress = source["progress"];
 	        this.type = this.convertValues(source["type"], DownloadType);

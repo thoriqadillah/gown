@@ -28,14 +28,6 @@ func (r *progressbar) Read(payload []byte) (n int, err error) {
 		return n, err
 	}
 
-	runtime.EventsOn(r.ctx, "stop", func(optionalData ...interface{}) {
-		r.err = errCanceled
-	})
-
-	if r.err != nil {
-		return n, r.err
-	}
-
 	r.transfered += int64(n)
 	r.tmp += n
 
@@ -49,6 +41,15 @@ func (r *progressbar) Read(payload []byte) (n int, err error) {
 		)
 
 		r.tmp = 0
+	}
+
+	runtime.EventsOn(r.ctx, "stop", func(optionalData ...interface{}) {
+		r.err = errCanceled
+	})
+
+	if r.err != nil {
+		runtime.EventsEmit(r.ctx, "total-bytes", r.index, r.transfered)
+		return n, r.err
 	}
 
 	return n, err

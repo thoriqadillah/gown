@@ -18,7 +18,7 @@ EventsOn("transfered", async (...data) => {
   const target = store.list[store.list.findIndex(el => el.id === id)]
   target.timeElapsed = parseElapsedTime(target.date)
   target.progress += progress
-  target.progressbar[index] = transfered
+  target.chunks[index].progressbar = transfered
 })
 
 EventsOn("downloaded", async (...data) => {
@@ -101,7 +101,7 @@ EventsOn("downloaded", async (...data) => {
             </div>
             <div v-if="item.progress != 100" class="progressWrapper tw-flex tw-justify-between tw-mt-1">
               <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >
-                <div class="tw-h-0.5 tw-bg-green-500 -tw-mt-1" :style="{ width: `${item.progressbar[part-1]}%` }"></div>
+                <div class="tw-h-0.5 tw-bg-green-500 -tw-mt-1" :style="{ width: `${item.chunks[part-1].progressbar}%` }"></div>
               </div> 
             </div>
           </td>

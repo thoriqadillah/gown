@@ -6,6 +6,10 @@ export function Delete(arg1) {
   return window['go']['main']['App']['Delete'](arg1);
 }
 
+export function DeleteTempfile(arg1) {
+  return window['go']['main']['App']['DeleteTempfile'](arg1);
+}
+
 export function Download(arg1) {
   return window['go']['main']['App']['Download'](arg1);
 }
@@ -20,10 +24,6 @@ export function InitData() {
 
 export function InitSetting() {
   return window['go']['main']['App']['InitSetting']();
-}
-
-export function StopDownload(arg1) {
-  return window['go']['main']['App']['StopDownload'](arg1);
 }
 
 export function Theme() {

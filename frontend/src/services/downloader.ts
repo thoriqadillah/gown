@@ -1,13 +1,13 @@
 import { download } from "../../wailsjs/go/models";
-import { Fetch } from "../../wailsjs/go/main/App";
+import { DeleteTempfile, Fetch } from "../../wailsjs/go/main/App";
 import { Download } from "../../wailsjs/go/main/App";
 import { useDownloads } from "../store/downloads";
-import { EventsEmit } from "../../wailsjs/runtime/runtime";
+import { EventsEmit, EventsOn } from "../../wailsjs/runtime/runtime";
 
 export default class Downloader {
 
   private static instance: Downloader
-  private downloads = useDownloads()
+  private store = useDownloads()
 
   public static service(): Downloader {
     if (!Downloader.instance) {
@@ -21,7 +21,7 @@ export default class Downloader {
     var regex = /\(([^)]+)\)/; // get number inside the parenthesis
     
     let newname = name  
-    if (this.downloads.list.findIndex(el => el.name === name) > -1) {
+    if (this.store.list.findIndex(el => el.name === name) > -1) {
       const matches = regex.exec(name)        
       if (matches == null) {
         let split = name.split('.')
@@ -67,6 +67,21 @@ export default class Downloader {
   
   // TODO: implement resume download
   async pause(id: string) {
+    EventsEmit("stop", id)
+    const target = this.store.list[this.store.list.findIndex(el => el.id === id)]
+    
+    EventsOn("total-bytes", async (...data) => {
+      const [index, downloaded] = data
+      target.chunks[index].downloaded = downloaded
+
+      target.status.icon = 'mdi-pause-circle-outline'
+      target.status.color = ''
+      target.status.name = 'Paused'
+      
+      await this.store.updateData(this.store.list)
+    })
+    console.log(target);
+    // save the range based on file size?
 
   }
 
@@ -74,7 +89,14 @@ export default class Downloader {
 
   }
 
-  async stop(id: string) {
+  async stop(id: string, deleteTempfile: boolean) {
     EventsEmit("stop", id)
+    const target = this.store.list[this.store.list.findIndex(el => el.id === id)]
+    target.status.icon = 'mdi-stop-circle-outline'
+    target.status.color = 'warning'
+    target.status.name = 'Canceled'
+    
+    await this.store.updateData(this.store.list)
+    if (deleteTempfile) DeleteTempfile(target)
   }
 }

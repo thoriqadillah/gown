@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { provide, ref } from 'vue';
+import { useDisplay } from 'vuetify/lib/framework.mjs';
 
-const drawer = ref(false)
+const display = useDisplay()
+const drawer = ref(display.width.value !== 815)
 provide('drawer', drawer)
 
 const reload = () => location.reload()

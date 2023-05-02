@@ -10,26 +10,19 @@ const props = defineProps<{
   id: string,
 }>()
 
-const store = useDownloads()
+const deleteTempfile = ref(true)
 const downloader = Downloader.service()
 const dialog = ref(false)
 const clicked = ref(false)
 function resumepause(id: string) {
   clicked.value = !clicked.value
-  // clicked.value ? downloader.pause(id) : downloader.resume(id)
+  clicked.value ? downloader.pause(id) : downloader.resume(id)
 }
 
 async function stop(id: string) {
-  downloader.stop(id)
   dialog.value = false
   clicked.value = !clicked.value
-  // TODO: improve this one
-  const target = store.list[store.list.findIndex(el => el.id === id)]
-  target.status.icon = 'mdi-stop-circle-outline'
-  target.status.color = 'warning'
-  target.status.name = 'Canceled'
-  
-  await store.updateData(store.list)
+  downloader.stop(id, deleteTempfile.value)
 }
 </script>
 
@@ -39,6 +32,8 @@ async function stop(id: string) {
       <!-- TODO: pause/resume implementation -->
       <v-btn @click="resumepause(props.id)" density="compact" variant="text" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
         <v-icon class="tw-text-base tw-opacity-70" :icon="props.statusname === 'Canceled' ? 'mdi-replay' : props.statusname === 'Paused' ? 'mdi-play' : 'mdi-pause'"></v-icon>    
+
+        <!-- TODO: add dialog if the download is not resumable -->
       </v-btn>
 
       <v-btn density="compact" :disabled="props.statusname === 'Canceled'"  variant="text" color="warning" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
@@ -56,6 +51,9 @@ async function stop(id: string) {
                   <v-btn variant="text" block @click="dialog = false">Cancel</v-btn>
                 </v-card-actions>
               </div>
+              <v-card-actions>
+                <v-checkbox v-model="deleteTempfile" label="Delete temporary file" color="red" hide-details/>
+              </v-card-actions>
             </div>
           </v-card>
         </v-dialog>

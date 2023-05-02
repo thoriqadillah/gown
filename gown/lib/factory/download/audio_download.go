@@ -25,7 +25,7 @@ func (v *AudioFactory) Create() Download {
 		TimeElapsed: "",
 		Size:        v.res.Size,
 		Progres:     0,
-		Progressbar: make([]float64, v.res.Totalpart),
+		Chunks:      make([]Chunk, v.res.Totalpart),
 		Date:        time.Now(),
 		Status: DownloadStatus{
 			Name:  STATUS_NAME_PROCESSING,

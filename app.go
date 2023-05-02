@@ -141,8 +141,12 @@ func (a *App) Download(toDownload *download.Download) error {
 	return nil
 }
 
-func (a *App) StopDownload(id string) {
-
+func (a *App) DeleteTempfile(toDelete download.Download) {
+	for i := 0; i < toDelete.Metadata.Totalpart; i++ {
+		if err := os.Remove(filepath.Join(a.settings.SaveLocation, toDelete.ID+"-"+strconv.Itoa(i))); err != nil {
+			log.Printf("Error deleting temp file of %s\n", toDelete.Name)
+		}
+	}
 }
 
 /*
