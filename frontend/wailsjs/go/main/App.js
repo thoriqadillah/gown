@@ -33,7 +33,3 @@ export function Theme() {
 export function UpdateData(arg1) {
   return window['go']['main']['App']['UpdateData'](arg1);
 }
-
-export function UpdateName(arg1, arg2) {
-  return window['go']['main']['App']['UpdateName'](arg1, arg2);
-}

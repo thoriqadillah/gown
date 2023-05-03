@@ -16,7 +16,7 @@ import (
 )
 
 type Chunk struct {
-	toDownload download.Download
+	toDownload *download.Download
 	wg         *sync.WaitGroup
 	index      int
 	start      int64
@@ -26,7 +26,7 @@ type Chunk struct {
 	*setting.Settings
 }
 
-func New(ctx context.Context, toDownload download.Download, index int, setting *setting.Settings, wg *sync.WaitGroup) *Chunk {
+func New(ctx context.Context, toDownload *download.Download, index int, setting *setting.Settings, wg *sync.WaitGroup) *Chunk {
 	totalpart := int64(toDownload.Metadata.Totalpart)
 	partsize := toDownload.Size / totalpart
 

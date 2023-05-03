@@ -8,10 +8,10 @@ import (
 	"changeme/gown/storage"
 	"changeme/gown/worker"
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"strconv"
 	"sync"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -60,22 +60,6 @@ func (a *App) InitData() []download.Download {
 	return a.storage.Get()
 }
 
-func (a *App) UpdateName(oldname string, newname string) error {
-	oldname = filepath.Join(a.settings.SaveLocation, oldname)
-	newname = filepath.Join(a.settings.SaveLocation, newname)
-
-	if _, err := os.Stat(oldname); err != nil {
-		return err
-	}
-
-	log.Println(oldname, newname)
-	if err := os.Rename(oldname, newname); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (a *App) Delete(name string) error {
 	return a.storage.Delete(name)
 }
@@ -103,11 +87,9 @@ func (a *App) Download(toDownload *download.Download) error {
 		return err
 	}
 
-	storage := storage.NewFile(toDownload.Metadata.Totalpart, toDownload.Size, &a.settings)
 	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)
 	for part := range chunks {
-		chunks[part] = chunk.New(a.ctx, *toDownload, part, &a.settings, &wg)
-		storage.CombineFile(toDownload.ID+"-"+strconv.Itoa(part), part)
+		chunks[part] = chunk.New(a.ctx, toDownload, part, &a.settings, &wg)
 	}
 
 	for _, job := range chunks {
@@ -129,21 +111,20 @@ func (a *App) Download(toDownload *download.Download) error {
 	// combining
 	runtime.EventsEmit(a.ctx, "downloaded", toDownload.ID, false)
 
-	if err := storage.SaveFile(toDownload.Name); err != nil {
+	if err := storage.CreateFile(toDownload, &a.settings); err != nil {
 		log.Printf("Error saving file: %v", err)
 		return err
 	}
 
 	// combined
 	runtime.EventsEmit(a.ctx, "downloaded", toDownload.ID, true)
-	runtime.EventsOff(a.ctx, "downloaded")
 
 	return nil
 }
 
 func (a *App) DeleteTempfile(toDelete download.Download) {
 	for i := 0; i < toDelete.Metadata.Totalpart; i++ {
-		if err := os.Remove(filepath.Join(a.settings.SaveLocation, toDelete.ID+"-"+strconv.Itoa(i))); err != nil {
+		if err := os.Remove(filepath.Join(a.settings.SaveLocation, fmt.Sprintf("%s-%d", toDelete.ID, i))); err != nil {
 			log.Printf("Error deleting temp file of %s\n", toDelete.Name)
 		}
 	}
