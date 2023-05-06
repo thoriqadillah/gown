@@ -9,23 +9,22 @@ const props = defineProps<{
   id: string,
 }>()
 
-const deleteTempfile = ref(true)
 const downloader = Downloader.service()
 const dialog = ref(false)
-const clicked = ref(false)
+const disableStop = ref(false)
 function start(id: string) {
-  clicked.value = !clicked.value
-
-  if (props.statusname === 'Canceled') {
-    downloader.restart(id)
+  disableStop.value = false
+  if (props.statusname === 'Paused') {
+    downloader.resume(id)
     return
   }
 
-  clicked.value ? downloader.pause(id) : downloader.resume(id)
+  downloader.pause(id)
 }
 
 async function stop(id: string) {
   dialog.value = false
+  disableStop.value = true
   downloader.stop(id)
 }
 </script>
@@ -33,13 +32,15 @@ async function stop(id: string) {
 <template>
   <div class="tw-w-20">
     <div v-if="props.active" class="tw-flex">
-      <v-btn @click="start(props.id)" density="compact" variant="text" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
-        <v-icon class="tw-text-base tw-opacity-70" :icon="props.statusname === 'Canceled' ? 'mdi-replay' : props.statusname === 'Paused' ? 'mdi-play' : 'mdi-pause'"></v-icon>    
-
+      <v-btn v-if="props.statusname == 'Canceled' || disableStop" @click="downloader.restart(props.id)" density="compact" variant="text" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
+        <v-icon class="tw-text-base tw-opacity-70" icon="mdi-replay"></v-icon>    
+      </v-btn>
+      <v-btn v-else @click="start(props.id)" density="compact" variant="text" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
+        <v-icon class="tw-text-base tw-opacity-70" :icon="props.statusname === 'Paused' ? 'mdi-play' : 'mdi-pause'"></v-icon>    
         <!-- TODO: add dialog if the download is not resumable -->
       </v-btn>
 
-      <v-btn density="compact" :disabled="props.statusname === 'Canceled'"  variant="text" color="warning" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
+      <v-btn density="compact" :disabled="props.statusname === 'Canceled' || disableStop"  variant="text" color="warning" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
         <v-icon icon="mdi-stop" class="tw-text-base tw-opacity-70"></v-icon>
 
         <v-dialog v-model="dialog" activator="parent" max-width="450px">

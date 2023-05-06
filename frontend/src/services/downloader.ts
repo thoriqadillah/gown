@@ -102,6 +102,7 @@ export default class Downloader {
   async stop(id: string) {
     EventsEmit("stop", id)
     const target = this.store.list[id]
+    
     target.status.icon = 'mdi-stop-circle-outline'
     target.status.color = 'warning'
     target.status.name = 'Canceled'

@@ -2,13 +2,12 @@
 import { computed } from 'vue';
 import { parseElapsedTime, parseSize } from '../../utils/parser';
 import { useDateFormat } from '@vueuse/shared';
-import { Store, useDownloads } from '../../store/downloads';
+import { useDownloads } from '../../store/downloads';
 import { EventsOn } from '../../../wailsjs/runtime/runtime';
-import { useAlert } from '../../store/alert';
 import Actionable from './Actionable.vue';
 import Deletable from './Deletable.vue';
+import ProgressBar from './ProgressBar.vue'
 
-const alert = useAlert()
 const store = useDownloads()
 const items = computed(() => store.filter(store.search))
 
@@ -42,7 +41,6 @@ EventsOn("downloaded", async (...data) => {
     icon: !combined ? 'mdi-file-arrow-left-right-outline' : 'mdi-check-circle-outline',
     color: !combined ? 'info' : 'success'
   }
-  alert.open(`${target.name} successfuly downloaded`, 'success')
   
   await store.updateData(store.list)
 })
@@ -100,21 +98,16 @@ EventsOn("downloaded", async (...data) => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in items" :key="item.id">
+        <tr v-for="item in items" :key="item.id" v-memo="[item.status.name === 'Processing' ,item.progress, item.timeElapsed, item.chunks, item.status]">
           <td color="primary" class="tw-rounded-sm bordered name-col">
             <div class="tw-flex tw-justify-between tw-mt-1 tw-mr-3 tw-items-center group">
               <div class="tw-overflow-x-hidden tw-w-max tw-flex">
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
-                <!-- TODO: add mark if not resumable -->
-                <span class="tw-text-sm tw-inline">{{ item.name }}</span>
+                <span class="tw-text-sm tw-inline">{{ item.name }}</span> <!-- TODO: add mark if not resumable -->
               </div>
-              <Actionable :active="item.progress != 100" :filename="item.name" :id="item.id" :statusname="item.status.name"/>
+              <actionable :active="item.progress != 100" :filename="item.name" :id="item.id" :statusname="item.status.name"/>
             </div>
-            <div v-if="item.progress != 100" class="progressWrapper tw-flex tw-justify-between tw-mt-1">
-              <div v-for="part in item.metadata.totalpart" :class="`tw-w-full ` + `basis-1/${item.metadata.totalpart}`" >
-                <div class="tw-h-0.5 tw-bg-green-500 -tw-mt-1" :style="{ width: `${item.chunks[part-1].progressbar}%` }"></div>
-              </div> 
-            </div>
+            <progress-bar v-if="item.progress != 100" :chunks="item.chunks" :totalpart="item.metadata.totalpart" />
           </td>
           <td class="tw-text-sm bordered tw-text-center">{{ item.progress.toFixed(0) + '%' }}</td>
           <td class="tw-text-sm tw-text-center bordered">
@@ -128,7 +121,7 @@ EventsOn("downloaded", async (...data) => {
           <td class="tw-text-sm tw-text-left bordered">{{ parseSize(item.size) }}</td>
           <td class="tw-text-sm tw-text-left bordered">{{ useDateFormat(item.date, 'MMMM DD, YYYY HH:mm').value }}</td>
           <td class="tw-text-sm tw-text-center bordered tw-w-10">
-            <Deletable :filename="item.name" :id="item.id"/>
+            <deletable :filename="item.name" :id="item.id"/>
           </td>
         </tr>
       </tbody>

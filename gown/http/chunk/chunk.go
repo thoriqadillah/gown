@@ -49,8 +49,6 @@ func New(ctx context.Context, toDownload *download.Download, index int, setting 
 }
 
 func (c *Chunk) download() error {
-	defer c.wg.Done()
-
 	http_ := &http.Client{}
 	part := fmt.Sprintf("bytes=%d-%d", c.start, c.end)
 
@@ -98,6 +96,9 @@ func (c *Chunk) download() error {
 	elapsed := time.Since(start)
 	log.Printf("Chunk %d downloaded in %v s\n", c.index+1, elapsed.Seconds())
 
+	if err == nil {
+		c.wg.Done()
+	}
 	return nil
 }
 
@@ -126,6 +127,8 @@ func (c *Chunk) Execute() error {
 
 // TODO: implement handle error
 func (c *Chunk) HandleError(err error) {
+	defer c.wg.Done()
+
 	if err == errCanceled {
 		log.Println("download canceled")
 		//TODO: save the downloaded data and mark the range if resumable. otherwise, delete the temp file
