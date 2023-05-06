@@ -1,97 +1,144 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { download } from "../../wailsjs/go/models";
-import { UpdateData, UpdateName, Delete } from '../../wailsjs/go/main/App'
+import { UpdateData, Delete } from '../../wailsjs/go/main/App'
+
+export type Store = {
+  [id: string]: download.Download
+}
+
+export type Entries<T> = {
+  [K in keyof T]: [K, T[K]];
+}[keyof T][];
+
+
+type DownloadType = 'image' | 'document' | 'video' | 'audio' | 'compressed'
 
 export const useDownloads = defineStore('downloads', () => {
-  const list = ref<download.Download[]>([])
-  const defaults = ref<download.Download[]>([])
+  const list = ref<Store>({})
+  const defaults = ref<Store>({})
   const search = ref('')
-  const toDownload = ref(new download.Download())
-  const ids = ref<string[]>([])
-  const names = ref<string[]>([])
 
   const ascName = ref(true)
   const ascDate = ref(true)
   const ascSize = ref(true)
   const ascTimeElapsed = ref(true)
 
-  const add = (val: download.Download) => {
-    list.value.unshift(val)
-    ids.value.unshift(val.id)
-    names.value.unshift(val.name)
-
-    defaults.value = list.value
-    toDownload.value = val
+  const filter = (query: string) => {
+    if (query.length > 0 && Object.entries(list.value).length !== Object.entries(defaults.value).length) setDefault()
+    const filtered: Store = {}
+    for (const id of Object.keys(list.value)) {
+      if (list.value[id].name.toLowerCase().includes(query.toLowerCase())) {
+        filtered[id] = list.value[id]
+      }
+    }
+    return filtered
+  }
+  const add = (id: string, val: download.Download) => {
+    list.value[id] = val
+    defaults.value[id] = val
   }
   const remove = async (id: string, fromdisk: boolean) => {
-    const index = ids.value.indexOf(id)
-    
-    const deleted = list.value.splice(index, 1)
-    ids.value.splice(index, 1)
-    names.value.splice(index, 1)
+    const target = list.value[id]
+
+    delete list.value[id]
+    delete defaults.value[id]
     
     await UpdateData(list.value)
-    if (fromdisk) Delete(deleted[0].name)
-    defaults.value = list.value
+    if (fromdisk) Delete(target.name)
   }
-  const setData = (data: download.Download[]) => {
+  const setData = (data: Store) => {
     list.value = data
     defaults.value = data
-
-    ids.value = list.value.map(el => el.id)
-    names.value = list.value.map(el => el.name)
   }
-  const updateData = async (data: download.Download[]) => {
+  const updateData = async (data: Store) => {
     list.value = data
     defaults.value = data
     await UpdateData(data)
   }
-
-  const filterByImage = () => list.value = defaults.value.filter(d => d.type.name === 'image')
-  const filterByVideo = () => list.value = defaults.value.filter(d => d.type.name === 'video')
-  const filterByDocument = () => list.value = defaults.value.filter(d => d.type.name === 'document')
-  const filterByMusic = () => list.value = defaults.value.filter(d => d.type.name === 'audio')
-  const filterByCompressed = ()  => list.value = defaults.value.filter(d => d.type.name === 'compressed')
-  const setDefault = ()  => list.value = defaults.value
-  const filter = (query: string) =>  {
-    if (query.length > 0 && list.value.length !== defaults.value.length) setData(defaults.value)
-    return list.value.filter(d => d.name.toLowerCase().includes(query.toLowerCase()))
+  
+  const filterBy = (type: DownloadType) => {
+    const filtered: Store = {}
+    for (const id of Object.keys(defaults.value)) {
+      if (defaults.value[id].type.name === type) {
+        filtered[id] = defaults.value[id]
+      }
+    }
+    list.value = filtered
+  }
+  
+  const setDefault = () => list.value = defaults.value
+  const getDefault = () => {
+    return defaults.value
   }
 
   const sortByName = () => {
     ascName.value = !ascName.value
-    list.value = ascName.value ? list.value.sort((a, b) => a.name.localeCompare(b.name)) : list.value.sort((a, b) => b.name.localeCompare(a.name))
+    if (ascName.value) {
+      Object.fromEntries(
+        Object.entries(list).sort(([k1, v1], [k2, v2]) => v1.name.localeCompare(v2.name))
+      )
+      return
+    }
+
+    Object.fromEntries(
+      Object.entries(list).sort(([k1, v1], [k2, v2]) => v2.name.localeCompare(v1.name))
+    )
   }
+
   const sortByDate = () => {
     ascDate.value = !ascDate.value
-    return ascDate.value ? list.value.sort((a, b) => a.date.localeCompare(b.date)) : list.value.sort((a, b) => a.date.localeCompare(b.date)).reverse()
+    if (ascDate.value) {
+      Object.fromEntries(
+        Object.entries(list).sort(([k1, v1], [k2, v2]) => v1.date.localeCompare(v2.date))
+      )
+      return
+    }
+  
+    Object.fromEntries(
+      Object.entries(list).sort(([k1, v1], [k2, v2]) => v2.date.localeCompare(v1.date))
+    )
   }
+  
   const sortBySize = () => {
     ascSize.value = !ascSize.value
-    return ascSize.value ? list.value.sort((a, b) => a.size - b.size) : list.value.sort((a, b) => a.size - b.size).reverse()
+    if (ascSize.value) {
+      Object.fromEntries(
+        Object.entries(list).sort(([k1, v1], [k2, v2]) => v1.size - v2.size)
+      )
+      return
+    }
+  
+    Object.fromEntries(
+      Object.entries(list).sort(([k1, v1], [k2, v2]) => v2.size - v1.size)
+    )
   }
+
   const sortByTimeElapsed = () => {
     ascTimeElapsed.value = !ascTimeElapsed.value
-    return ascTimeElapsed.value ? list.value.sort((a, b) => a.timeElapsed.localeCompare(b.timeElapsed)) : list.value.sort((a, b) => a.timeElapsed.localeCompare(b.timeElapsed)).reverse()
+    if (ascTimeElapsed.value) {
+      Object.fromEntries(
+        Object.entries(list).sort(([k1, v1], [k2, v2]) => v1.timeElapsed.localeCompare(v2.timeElapsed))
+      )
+      return
+    }
+  
+    Object.fromEntries(
+      Object.entries(list).sort(([k1, v1], [k2, v2]) => v2.timeElapsed.localeCompare(v1.timeElapsed))
+    )
   }
 
   return {
     list,
     search,
-    toDownload,
-    names,
+    filter,
     add,
     remove,
     setData,
     updateData,
-    filter,
-    filterByImage,
-    filterByVideo,
-    filterByDocument,
-    filterByMusic,
-    filterByCompressed,
+    filterBy,
     setDefault,
+    getDefault,
     sortByName,
     sortByDate,
     sortBySize,

@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { provide, ref } from 'vue';
+import { useDisplay } from 'vuetify/lib/framework.mjs';
 
-const drawer = ref(false)
+const display = useDisplay()
+const drawer = ref(display.width.value !== 815)
 provide('drawer', drawer)
+
+const reload = () => location.reload()
 
 </script>
 
@@ -13,6 +17,7 @@ provide('drawer', drawer)
         <v-list density="compact" nav class="tw-flex tw-flex-col tw-mt-12">
           <v-list-item active-color="primary" prepend-icon="mdi-brightness-4" title="Theme" value="theme"></v-list-item>
           <v-list-item active-color="primary" prepend-icon="mdi-bug-outline" title="Log" value="log"></v-list-item>
+          <v-list-item active-color="primary" prepend-icon="mdi-replay" title="Refresh" value="refresh" @click="reload()"></v-list-item>
           <v-list-item active-color="primary" prepend-icon="mdi-cog-outline" title="Settings" value="settings"></v-list-item>
           <v-list-item active-color="primary" prepend-icon="mdi-information-outline" title="About" value="about"></v-list-item>
         </v-list>

@@ -6,8 +6,12 @@ export function Delete(arg1) {
   return window['go']['main']['App']['Delete'](arg1);
 }
 
-export function Download(arg1) {
-  return window['go']['main']['App']['Download'](arg1);
+export function DeleteTempfile(arg1) {
+  return window['go']['main']['App']['DeleteTempfile'](arg1);
+}
+
+export function Download(arg1, arg2) {
+  return window['go']['main']['App']['Download'](arg1, arg2);
 }
 
 export function Fetch(arg1) {
@@ -28,8 +32,4 @@ export function Theme() {
 
 export function UpdateData(arg1) {
   return window['go']['main']['App']['UpdateData'](arg1);
-}
-
-export function UpdateName(arg1, arg2) {
-  return window['go']['main']['App']['UpdateName'](arg1, arg2);
 }

@@ -8,10 +8,10 @@ import (
 	"changeme/gown/storage"
 	"changeme/gown/worker"
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"strconv"
 	"sync"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -56,31 +56,15 @@ func (a *App) Fetch(url string) (*download.Download, error) {
 	return &data, nil
 }
 
-func (a *App) InitData() []download.Download {
+func (a *App) InitData() download.Store {
 	return a.storage.Get()
-}
-
-func (a *App) UpdateName(oldname string, newname string) error {
-	oldname = filepath.Join(a.settings.SaveLocation, oldname)
-	newname = filepath.Join(a.settings.SaveLocation, newname)
-
-	if _, err := os.Stat(oldname); err != nil {
-		return err
-	}
-
-	log.Println(oldname, newname)
-	if err := os.Rename(oldname, newname); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (a *App) Delete(name string) error {
 	return a.storage.Delete(name)
 }
 
-func (a *App) UpdateData(data []download.Download) {
+func (a *App) UpdateData(data download.Store) {
 	a.storage.Update(data)
 }
 
@@ -88,7 +72,9 @@ func (a *App) InitSetting() setting.Settings {
 	return a.settings
 }
 
-func (a *App) Download(toDownload *download.Download) error {
+func (a *App) Download(toDownload *download.Download, resumepos []int64) error {
+	canceled := false
+
 	worker, err := worker.New(toDownload.Metadata.Totalpart, a.settings.SimmultanousNum)
 	if err != nil {
 		log.Printf("Error initializing worker: %v\n", err)
@@ -97,15 +83,18 @@ func (a *App) Download(toDownload *download.Download) error {
 	var wg sync.WaitGroup
 	worker.Start()
 
-	if err := a.storage.Add(*toDownload); err != nil {
+	if err := a.storage.Add(toDownload.ID, *toDownload); err != nil {
 		return err
 	}
 
-	storage := storage.NewFile(toDownload.Metadata.Totalpart, toDownload.Size, &a.settings)
 	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)
 	for part := range chunks {
-		chunks[part] = chunk.New(a.ctx, *toDownload, part, &a.settings, &wg)
-		storage.CombineFile(toDownload.ID+"-"+strconv.Itoa(part), part)
+		chunks[part] = chunk.New(a.ctx, toDownload, part, &a.settings, &wg)
+		if len(resumepos) > 0 {
+			chunks[part].ResumeFrom(resumepos[part])
+		}
+
+		log.Println(chunks[part])
 	}
 
 	for _, job := range chunks {
@@ -113,22 +102,37 @@ func (a *App) Download(toDownload *download.Download) error {
 		worker.Add(job)
 	}
 
+	runtime.EventsOn(a.ctx, "stop", func(optionalData ...interface{}) {
+		canceled = true
+	})
+
 	wg.Wait()
 	worker.Stop()
+
+	if canceled {
+		return nil
+	}
 
 	// combining
 	runtime.EventsEmit(a.ctx, "downloaded", toDownload.ID, false)
 
-	if err := storage.SaveFile(toDownload.Name); err != nil {
+	if err := storage.CreateFile(toDownload, &a.settings); err != nil {
 		log.Printf("Error saving file: %v", err)
 		return err
 	}
 
 	// combined
 	runtime.EventsEmit(a.ctx, "downloaded", toDownload.ID, true)
-	runtime.EventsOff(a.ctx, "downloaded")
 
 	return nil
+}
+
+func (a *App) DeleteTempfile(toDelete download.Download) {
+	for i := 0; i < toDelete.Metadata.Totalpart; i++ {
+		if err := os.Remove(filepath.Join(a.settings.SaveLocation, fmt.Sprintf("%s-%d", toDelete.ID, i))); err != nil {
+			log.Printf("Error deleting temp file of %s\n", toDelete.Name)
+		}
+	}
 }
 
 /*

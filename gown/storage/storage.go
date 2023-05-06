@@ -38,37 +38,37 @@ func New(s *setting.Settings) Storage {
 	}
 }
 
-func (s *Storage) Get() []download.Download {
+func (s *Storage) Get() download.Store {
 	jsonFile, err := os.Open(s.DataFilename)
 	if err != nil {
 		log.Printf("Error opening data file: %v", err)
-		return []download.Download{}
+		return download.Store{}
 	}
 
 	value, err := io.ReadAll(jsonFile)
 	if err != nil {
 		log.Printf("Error opening data file: %v", err)
-		return []download.Download{}
+		return download.Store{}
 	}
 
-	var downloaded []download.Download
-	err = json.Unmarshal(value, &downloaded)
+	var store download.Store
+	err = json.Unmarshal(value, &store)
 	if err != nil {
 		log.Printf("Error opening data file: %v", err)
-		return []download.Download{}
+		return download.Store{}
 	}
 
-	return downloaded
+	return store
 }
 
-func (s *Storage) Add(val download.Download) error {
+func (s *Storage) Add(id string, val download.Download) error {
 	data := s.Get()
-	data = append([]download.Download{val}, data...)
+	data[id] = val
 
 	return s.Update(data)
 }
 
-func (s *Storage) Update(data []download.Download) error {
+func (s *Storage) Update(data download.Store) error {
 	dataVal, err := json.MarshalIndent(data, "", " ")
 	if err != nil {
 		log.Printf("Error marshaling the data: %v", err)

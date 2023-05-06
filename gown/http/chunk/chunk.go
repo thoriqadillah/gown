@@ -10,13 +10,12 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"sync"
 	"time"
 )
 
 type Chunk struct {
-	toDownload download.Download
+	toDownload *download.Download
 	wg         *sync.WaitGroup
 	index      int
 	start      int64
@@ -26,7 +25,7 @@ type Chunk struct {
 	*setting.Settings
 }
 
-func New(ctx context.Context, toDownload download.Download, index int, setting *setting.Settings, wg *sync.WaitGroup) *Chunk {
+func New(ctx context.Context, toDownload *download.Download, index int, setting *setting.Settings, wg *sync.WaitGroup) *Chunk {
 	totalpart := int64(toDownload.Metadata.Totalpart)
 	partsize := toDownload.Size / totalpart
 
@@ -50,15 +49,13 @@ func New(ctx context.Context, toDownload download.Download, index int, setting *
 }
 
 func (c *Chunk) download() error {
-	defer c.wg.Done()
-
 	http_ := &http.Client{}
 	part := fmt.Sprintf("bytes=%d-%d", c.start, c.end)
 
 	if c.size == -1 {
 		log.Printf("Downloading chunk %d with size unknown", c.index+1)
 	} else {
-		log.Printf("Downloading chunk %d from %d to %d (~%d MB)", c.index+1, c.start, c.end, (c.size)/(1024*1024))
+		log.Printf("Downloading chunk %d from %d to %d (~%d MB)", c.index+1, c.start, c.end, (c.end-c.start)/(1024*1024))
 	}
 
 	req, err := http.NewRequest("GET", c.toDownload.Metadata.Url, nil)
@@ -76,33 +73,38 @@ func (c *Chunk) download() error {
 	defer res.Body.Close()
 
 	// create temp file
-	tmpFilename := filepath.Join(c.SaveLocation, c.toDownload.ID+"-"+strconv.Itoa(c.index))
-	file, err := os.Create(tmpFilename)
+	tmpFilename := filepath.Join(c.SaveLocation, fmt.Sprintf("%s-%d", c.toDownload.ID, c.index))
+	file, err := os.OpenFile(tmpFilename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Printf("Error creating file: %v\n", err)
+		log.Printf("Error creating or appending file: %v\n", err)
 		return err
 	}
 	defer file.Close()
 
 	progressbar := &progressbar{
-		ctx:       c.ctx,
-		id:        c.toDownload.ID,
-		index:     c.index,
-		Reader:    res.Body,
-		partsize:  c.size,
-		totalsize: c.toDownload.Size,
-		tmp:       0,
+		ctx:        c.ctx,
+		toDownload: c.toDownload,
+		index:      c.index,
+		Reader:     res.Body,
+		partsize:   c.size,
 	}
 
 	if _, err := io.Copy(file, progressbar); err != nil {
-		// TODO: retry from the position where error happened
 		return err
 	}
 
 	elapsed := time.Since(start)
 	log.Printf("Chunk %d downloaded in %v s\n", c.index+1, elapsed.Seconds())
 
+	if err == nil {
+		c.wg.Done()
+	}
 	return nil
+}
+
+func (c *Chunk) ResumeFrom(position int64) *Chunk {
+	c.start += position
+	return c
 }
 
 func (c *Chunk) Execute() error {
@@ -113,6 +115,10 @@ func (c *Chunk) Execute() error {
 			return nil
 		}
 
+		if err == errCanceled {
+			return err
+		}
+
 		log.Printf("Error while downloading chunk %d: %v. Retrying....\n", c.index+1, err)
 	}
 
@@ -121,6 +127,14 @@ func (c *Chunk) Execute() error {
 
 // TODO: implement handle error
 func (c *Chunk) HandleError(err error) {
-	//TODO: save the downloaded data and mark the range if resumable. otherwise, delete the temp file
-	log.Printf("Error while downloading chunk %d: %v\n", c.index+1, err)
+	defer c.wg.Done()
+
+	if err == errCanceled {
+		log.Println("download canceled")
+		//TODO: save the downloaded data and mark the range if resumable. otherwise, delete the temp file
+	} else {
+		// TODO: retry from the position where error happened
+		log.Printf("Error while downloading chunk %d: %v\n", c.index+1, err)
+	}
+
 }

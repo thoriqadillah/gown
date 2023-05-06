@@ -4,8 +4,6 @@ import (
 	"changeme/gown/http"
 	"changeme/gown/lib/factory"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type DocumentFactory struct {
@@ -20,11 +18,12 @@ func documentFactory(res *http.Response) factory.Factory[Download] {
 
 func (v *DocumentFactory) Create() Download {
 	return Download{
-		ID:          uuid.New().String(),
+		ID:          factory.ID(5),
 		Name:        v.res.Filename,
 		TimeElapsed: "",
 		Size:        v.res.Size,
 		Progres:     0,
+		Chunks:      make([]Chunk, v.res.Totalpart),
 		Date:        time.Now(),
 		Status: DownloadStatus{
 			Name:  STATUS_NAME_PROCESSING,

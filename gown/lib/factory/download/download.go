@@ -49,18 +49,25 @@ const (
 )
 
 type (
+	Store map[string]Download
+
 	Download struct {
 		ID          string         `json:"id"`
 		Name        string         `json:"name"`
 		TimeElapsed string         `json:"timeElapsed"`
 		Size        int64          `json:"size"`
 		Date        time.Time      `json:"date"`
+		Chunks      []Chunk        `json:"chunks"`
 		Status      DownloadStatus `json:"status"`
-		Progres     int64          `json:"progress"`
+		Progres     float64        `json:"progress"`
 		Type        DownloadType   `json:"type"`
 		Metadata    Metadata       `json:"metadata"`
 	}
 
+	Chunk struct {
+		Downloaded  int64   `json:"downloaded"`
+		Progressbar float64 `json:"progressbar"`
+	}
 	DownloadStatus struct {
 		Name  string `json:"name"`
 		Icon  string `json:"icon"`
