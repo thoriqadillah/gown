@@ -62,7 +62,7 @@ async function execute() {
   try {
     dialog.close()
     downloader.download(result.value!)
-    store.add(result.value!)
+    store.add(result.value!.id, result.value!)
   } catch (error) {
     alert.open(error as string)
   }

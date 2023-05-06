@@ -11,10 +11,10 @@ export function Download(arg1:any,arg2:Array<number>):Promise<void>;
 
 export function Fetch(arg1:string):Promise<any>;
 
-export function InitData():Promise<Array<download.Download>>;
+export function InitData():Promise<download.Store>;
 
 export function InitSetting():Promise<setting.Settings>;
 
 export function Theme():Promise<setting.Theme>;
 
-export function UpdateData(arg1:Array<download.Download>):Promise<void>;
+export function UpdateData(arg1:download.Store):Promise<void>;

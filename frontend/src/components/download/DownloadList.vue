@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { parseElapsedTime, parseSize } from '../../utils/parser';
 import { useDateFormat } from '@vueuse/shared';
-import { useDownloads } from '../../store/downloads';
+import { Store, useDownloads } from '../../store/downloads';
 import { EventsOn } from '../../../wailsjs/runtime/runtime';
 import { useAlert } from '../../store/alert';
 import Actionable from './Actionable.vue';
@@ -15,7 +15,7 @@ const items = computed(() => store.filter(store.search))
 EventsOn("transfered", async (...data) => {
   const [id, index, transfered, progress] = data
 
-  const target = store.list[store.list.findIndex(el => el.id === id)]
+  const target = store.list[id]
   target.timeElapsed = parseElapsedTime(target.date)
 
   target.chunks[index].progressbar = transfered
@@ -26,7 +26,7 @@ EventsOn("transfered", async (...data) => {
 EventsOn("total-bytes", async (...data) => {
   const [id, index, downloaded] = data
   
-  const target = store.list[store.list.findIndex(el => el.id === id)]
+  const target = store.list[id]
   target.chunks[index].downloaded = downloaded
   
   await store.updateData(store.list)
@@ -35,7 +35,7 @@ EventsOn("total-bytes", async (...data) => {
 EventsOn("downloaded", async (...data) => {
   const [id, combined] = data
   
-  const target = store.list[store.list.findIndex(el => el.id === id)]
+  const target = store.list[id]
   target.progress = 100
   target.status = {
     name: !combined ? 'Combining' : 'Success',
@@ -52,11 +52,11 @@ EventsOn("downloaded", async (...data) => {
   <div class="tw-px-5 xl:tw-px-0 xl:tw-pl-5">
     <div class="tw-flex tw-gap-2 md:tw-gap-4 tw-mb-2">
       <v-btn variant="outlined" @click="store.setDefault()" prepend-icon="mdi-select-all">ALL</v-btn>
-      <v-btn variant="outlined" @click="store.filterByImage()" prepend-icon="mdi-image" color="red-accent-2">IMAGE</v-btn>
-      <v-btn variant="outlined" @click="store.filterByVideo()" prepend-icon="mdi-video" color="deep-orange-accent-2">VIDEO</v-btn>
-      <v-btn variant="outlined" @click="store.filterByDocument()" prepend-icon="mdi-file-document" color="blue-accent-2">DOCUMENT</v-btn>
-      <v-btn variant="outlined" @click="store.filterByCompressed()" prepend-icon="mdi-zip-box" color="yellow-accent-4">COMPRESSED</v-btn>
-      <v-btn variant="outlined" @click="store.filterByMusic()" prepend-icon="mdi-music-box" color="purple-accent-2">MUSIC</v-btn>
+      <v-btn variant="outlined" @click="store.filterBy('image')" prepend-icon="mdi-image" color="red-accent-2">IMAGE</v-btn>
+      <v-btn variant="outlined" @click="store.filterBy('video')" prepend-icon="mdi-video" color="deep-orange-accent-2">VIDEO</v-btn>
+      <v-btn variant="outlined" @click="store.filterBy('document')" prepend-icon="mdi-file-document" color="blue-accent-2">DOCUMENT</v-btn>
+      <v-btn variant="outlined" @click="store.filterBy('compressed')" prepend-icon="mdi-zip-box" color="yellow-accent-4">COMPRESSED</v-btn>
+      <v-btn variant="outlined" @click="store.filterBy('audio')" prepend-icon="mdi-music-box" color="purple-accent-2">MUSIC</v-btn>
     </div>
     
     <v-table density="compact">
@@ -100,7 +100,7 @@ EventsOn("downloaded", async (...data) => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in items" :key="item.name">
+        <tr v-for="item in items" :key="item.id">
           <td color="primary" class="tw-rounded-sm bordered name-col">
             <div class="tw-flex tw-justify-between tw-mt-1 tw-mr-3 tw-items-center group">
               <div class="tw-overflow-x-hidden tw-w-max tw-flex">

@@ -56,7 +56,7 @@ func (a *App) Fetch(url string) (*download.Download, error) {
 	return &data, nil
 }
 
-func (a *App) InitData() []download.Download {
+func (a *App) InitData() download.Store {
 	return a.storage.Get()
 }
 
@@ -64,7 +64,7 @@ func (a *App) Delete(name string) error {
 	return a.storage.Delete(name)
 }
 
-func (a *App) UpdateData(data []download.Download) {
+func (a *App) UpdateData(data download.Store) {
 	a.storage.Update(data)
 }
 
@@ -83,7 +83,7 @@ func (a *App) Download(toDownload *download.Download, resumepos []int64) error {
 	var wg sync.WaitGroup
 	worker.Start()
 
-	if err := a.storage.Add(*toDownload); err != nil {
+	if err := a.storage.Add(toDownload.ID, *toDownload); err != nil {
 		return err
 	}
 
