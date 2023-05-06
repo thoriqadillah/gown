@@ -26,18 +26,16 @@ export const useDownloads = defineStore('downloads', () => {
 
   const filter = (query: string) => {
     if (query.length > 0 && Object.entries(list.value).length !== Object.entries(defaults.value).length) setDefault()
-    const filtered: Store = {}
-    for (const id of Object.keys(list.value)) {
-      if (list.value[id].name.toLowerCase().includes(query.toLowerCase())) {
-        filtered[id] = list.value[id]
-      }
-    }
-    return filtered
+
+    return Object.fromEntries(
+      Object.entries(list.value).filter(([_, el]) => el.name.toLowerCase().includes(query.toLowerCase()))
+    )
   }
   const add = (id: string, val: download.Download) => {
     list.value[id] = val
     defaults.value[id] = val
   }
+
   const remove = async (id: string, fromdisk: boolean) => {
     const target = list.value[id]
 
@@ -47,10 +45,12 @@ export const useDownloads = defineStore('downloads', () => {
     await UpdateData(list.value)
     if (fromdisk) Delete(target.name)
   }
+
   const setData = (data: Store) => {
     list.value = data
     defaults.value = data
   }
+
   const updateData = async (data: Store) => {
     list.value = data
     defaults.value = data
@@ -58,73 +58,54 @@ export const useDownloads = defineStore('downloads', () => {
   }
   
   const filterBy = (type: DownloadType) => {
-    const filtered: Store = {}
-    for (const id of Object.keys(defaults.value)) {
-      if (defaults.value[id].type.name === type) {
-        filtered[id] = defaults.value[id]
-      }
-    }
-    list.value = filtered
+    list.value = Object.fromEntries(
+      Object.entries(defaults.value).filter(([_, el]) => el.type.name === type)
+    )
   }
   
   const setDefault = () => list.value = defaults.value
-  const getDefault = () => {
-    return defaults.value
-  }
 
   const sortByName = () => {
     ascName.value = !ascName.value
-    if (ascName.value) {
-      Object.fromEntries(
-        Object.entries(list).sort(([k1, v1], [k2, v2]) => v1.name.localeCompare(v2.name))
-      )
-      return
-    }
-
-    Object.fromEntries(
-      Object.entries(list).sort(([k1, v1], [k2, v2]) => v2.name.localeCompare(v1.name))
+    list.value = Object.fromEntries(
+      Object.entries(list.value).sort(([, v1], [, v2]) => {
+        return ascName.value 
+          ? v1.name.localeCompare(v2.name)
+          : v2.name.localeCompare(v1.name)
+      })
     )
   }
 
   const sortByDate = () => {
     ascDate.value = !ascDate.value
-    if (ascDate.value) {
-      Object.fromEntries(
-        Object.entries(list).sort(([k1, v1], [k2, v2]) => v1.date.localeCompare(v2.date))
-      )
-      return
-    }
-  
-    Object.fromEntries(
-      Object.entries(list).sort(([k1, v1], [k2, v2]) => v2.date.localeCompare(v1.date))
+    list.value = Object.fromEntries(
+      Object.entries(list.value).sort(([, v1], [, v2]) => {
+        return ascDate.value 
+          ? v1.date.localeCompare(v2.date)
+          : v2.date.localeCompare(v1.date)
+      })
     )
   }
   
   const sortBySize = () => {
     ascSize.value = !ascSize.value
-    if (ascSize.value) {
-      Object.fromEntries(
-        Object.entries(list).sort(([k1, v1], [k2, v2]) => v1.size - v2.size)
-      )
-      return
-    }
-  
-    Object.fromEntries(
-      Object.entries(list).sort(([k1, v1], [k2, v2]) => v2.size - v1.size)
+    list.value = Object.fromEntries(
+      Object.entries(list.value).sort(([, v1], [, v2]) => {
+        return ascSize.value 
+          ? v1.size - v2.size 
+          : v2.size - v1.size
+      })
     )
   }
 
   const sortByTimeElapsed = () => {
     ascTimeElapsed.value = !ascTimeElapsed.value
-    if (ascTimeElapsed.value) {
-      Object.fromEntries(
-        Object.entries(list).sort(([k1, v1], [k2, v2]) => v1.timeElapsed.localeCompare(v2.timeElapsed))
-      )
-      return
-    }
-  
-    Object.fromEntries(
-      Object.entries(list).sort(([k1, v1], [k2, v2]) => v2.timeElapsed.localeCompare(v1.timeElapsed))
+    list.value = Object.fromEntries(
+      Object.entries(list.value).sort(([, v1], [, v2]) => {
+        return ascTimeElapsed.value 
+          ? v1.timeElapsed.localeCompare(v2.timeElapsed)
+          : v2.timeElapsed.localeCompare(v1.timeElapsed)
+      })
     )
   }
 
@@ -138,7 +119,6 @@ export const useDownloads = defineStore('downloads', () => {
     updateData,
     filterBy,
     setDefault,
-    getDefault,
     sortByName,
     sortByDate,
     sortBySize,
