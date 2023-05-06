@@ -4,8 +4,6 @@ import (
 	"changeme/gown/http"
 	"changeme/gown/lib/factory"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type VideoFactory struct {
@@ -20,7 +18,7 @@ func videoFactory(res *http.Response) factory.Factory[Download] {
 
 func (v *VideoFactory) Create() Download {
 	return Download{
-		ID:          uuid.New().String(),
+		ID:          factory.ID(5),
 		Name:        v.res.Filename,
 		TimeElapsed: "",
 		Size:        v.res.Size,
