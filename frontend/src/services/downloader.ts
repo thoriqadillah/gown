@@ -59,37 +59,45 @@ export default class Downloader {
 
     return res
   }
+  
+  async restart(id: string): Promise<void> {
+    const target = this.store.list[this.store.list.findIndex(el => el.id === id)]
+    target.date = new Date()
+    target.chunks = target.chunks.map(() => new download.Chunk())
+    target.progress = 0
+    target.status.icon = 'mdi-progress-helper'
+    target.status.color = ''
+    target.status.name = 'Processing'
+
+    await Download(target, [])
+  }
 
   async download(toDownload: download.Download): Promise<void> {
     toDownload.date = new Date() // set the start date when we click download
-    await Download(toDownload)
+    await Download(toDownload, [])
   }
   
   // TODO: implement resume download
   async pause(id: string) {
     EventsEmit("stop", id)
     const target = this.store.list[this.store.list.findIndex(el => el.id === id)]
-    
-    EventsOn("total-bytes", async (...data) => {
-      const [index, downloaded] = data
-      target.chunks[index].downloaded = downloaded
 
-      target.status.icon = 'mdi-pause-circle-outline'
-      target.status.color = ''
-      target.status.name = 'Paused'
-      
-      await this.store.updateData(this.store.list)
-    })
-    console.log(target);
-    // save the range based on file size?
-
+    target.status.icon = 'mdi-pause-circle-outline'
+    target.status.color = ''
+    target.status.name = 'Paused'
   }
 
   async resume(id: string) {
+    const target = this.store.list[this.store.list.findIndex(el => el.id === id)]
 
+    target.status.icon = 'mdi-progress-helper'
+    target.status.color = ''
+    target.status.name = 'Processing'
+
+    await Download(target, target.chunks.map(el => el.downloaded + 12))
   }
 
-  async stop(id: string, deleteTempfile: boolean) {
+  async stop(id: string) {
     EventsEmit("stop", id)
     const target = this.store.list[this.store.list.findIndex(el => el.id === id)]
     target.status.icon = 'mdi-stop-circle-outline'
@@ -97,6 +105,6 @@ export default class Downloader {
     target.status.name = 'Canceled'
     
     await this.store.updateData(this.store.list)
-    if (deleteTempfile) DeleteTempfile(target)
+    DeleteTempfile(target)
   }
 }

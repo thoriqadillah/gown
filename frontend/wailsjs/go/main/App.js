@@ -10,8 +10,8 @@ export function DeleteTempfile(arg1) {
   return window['go']['main']['App']['DeleteTempfile'](arg1);
 }
 
-export function Download(arg1) {
-  return window['go']['main']['App']['Download'](arg1);
+export function Download(arg1, arg2) {
+  return window['go']['main']['App']['Download'](arg1, arg2);
 }
 
 export function Fetch(arg1) {

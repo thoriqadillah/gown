@@ -9,10 +9,10 @@ import Alert from './components/Alert.vue';
 import Main from './components/Main.vue';
 
 const theme = useTheme()
-const downloads = useDownloads()
+const store = useDownloads()
 const settings = useSettings()
 
-InitData().then(data => downloads.setData(data))
+InitData().then(data => store.setData(data))
 InitSetting().then(setting => settings.init(setting))
 </script>
 

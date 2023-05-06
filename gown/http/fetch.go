@@ -99,13 +99,13 @@ func contentType(filename string) string {
 	return "other"
 }
 
+// dampening the total partition based on digit figures
 func dynamicPartition(size int64, defaultParitionSize int64) int {
 	num := math.Log10(float64(size / (1024 * 1024)))
 	partsize := defaultParitionSize
 
-	// dampening the total partition
 	for i := 0; i < int(num); i++ {
-		partsize *= int64(num)
+		partsize *= int64(num) + 1
 	}
 
 	return int(size / partsize)

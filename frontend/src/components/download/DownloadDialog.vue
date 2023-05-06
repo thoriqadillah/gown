@@ -55,7 +55,6 @@ async function fetch() {
     input.value.blur()
     dialog.done()
     urlError.value = error as string
-    // TODO: add alert to error message
   }
 }
 

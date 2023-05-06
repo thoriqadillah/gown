@@ -72,7 +72,7 @@ func (a *App) InitSetting() setting.Settings {
 	return a.settings
 }
 
-func (a *App) Download(toDownload *download.Download) error {
+func (a *App) Download(toDownload *download.Download, resumepos []int64) error {
 	canceled := false
 
 	worker, err := worker.New(toDownload.Metadata.Totalpart, a.settings.SimmultanousNum)
@@ -90,6 +90,11 @@ func (a *App) Download(toDownload *download.Download) error {
 	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)
 	for part := range chunks {
 		chunks[part] = chunk.New(a.ctx, toDownload, part, &a.settings, &wg)
+		if len(resumepos) > 0 {
+			chunks[part].ResumeFrom(resumepos[part])
+		}
+
+		log.Println(chunks[part])
 	}
 
 	for _, job := range chunks {

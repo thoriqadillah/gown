@@ -1,6 +1,7 @@
 package chunk
 
 import (
+	"changeme/gown/lib/factory/download"
 	"context"
 	"fmt"
 	"io"
@@ -11,11 +12,9 @@ import (
 type progressbar struct {
 	Reader     io.Reader
 	ctx        context.Context
-	id         string
 	index      int
 	partsize   int64
-	totalsize  int64
-	transfered int64
+	toDownload *download.Download
 	tmp        int
 	err        error
 }
@@ -28,16 +27,16 @@ func (r *progressbar) Read(payload []byte) (n int, err error) {
 		return n, err
 	}
 
-	r.transfered += int64(n)
+	r.toDownload.Chunks[r.index].Downloaded += int64(n)
 	r.tmp += n
 
 	// emit event every 300kb downloaded because the default 32kb is too fast and the frontend cannot handle it
 	if r.tmp > 300*1024 {
 		runtime.EventsEmit(r.ctx, "transfered",
-			r.id,
+			r.toDownload.ID,
 			r.index,
-			float64(r.transfered)/float64(r.partsize)*100,
-			float64(100*r.tmp)/float64(r.totalsize),
+			float64(r.toDownload.Chunks[r.index].Downloaded)/float64(r.partsize)*100, // actual progress bar
+			float64(100*r.tmp)/float64(r.toDownload.Size),                            // progress in percentage
 		)
 
 		r.tmp = 0
@@ -48,7 +47,7 @@ func (r *progressbar) Read(payload []byte) (n int, err error) {
 	})
 
 	if r.err != nil {
-		runtime.EventsEmit(r.ctx, "total-bytes", r.index, r.transfered)
+		runtime.EventsEmit(r.ctx, "total-bytes", r.toDownload.ID, r.index, r.toDownload.Chunks[r.index].Downloaded)
 		return n, r.err
 	}
 

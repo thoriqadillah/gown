@@ -17,8 +17,19 @@ EventsOn("transfered", async (...data) => {
 
   const target = store.list[store.list.findIndex(el => el.id === id)]
   target.timeElapsed = parseElapsedTime(target.date)
-  target.progress += progress
+
   target.chunks[index].progressbar = transfered
+  target.progress += progress
+})
+
+// save the range based on file size
+EventsOn("total-bytes", async (...data) => {
+  const [id, index, downloaded] = data
+  
+  const target = store.list[store.list.findIndex(el => el.id === id)]
+  target.chunks[index].downloaded = downloaded
+  
+  await store.updateData(store.list)
 })
 
 EventsOn("downloaded", async (...data) => {

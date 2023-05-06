@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useDownloads } from '../../store/downloads';
 import Downloader from '../../services/downloader';
 import { ref } from 'vue';
 
@@ -14,23 +13,27 @@ const deleteTempfile = ref(true)
 const downloader = Downloader.service()
 const dialog = ref(false)
 const clicked = ref(false)
-function resumepause(id: string) {
+function start(id: string) {
   clicked.value = !clicked.value
+
+  if (props.statusname === 'Canceled') {
+    downloader.restart(id)
+    return
+  }
+
   clicked.value ? downloader.pause(id) : downloader.resume(id)
 }
 
 async function stop(id: string) {
   dialog.value = false
-  clicked.value = !clicked.value
-  downloader.stop(id, deleteTempfile.value)
+  downloader.stop(id)
 }
 </script>
 
 <template>
   <div class="tw-w-20">
     <div v-if="props.active" class="tw-flex">
-      <!-- TODO: pause/resume implementation -->
-      <v-btn @click="resumepause(props.id)" density="compact" variant="text" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
+      <v-btn @click="start(props.id)" density="compact" variant="text" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
         <v-icon class="tw-text-base tw-opacity-70" :icon="props.statusname === 'Canceled' ? 'mdi-replay' : props.statusname === 'Paused' ? 'mdi-play' : 'mdi-pause'"></v-icon>    
 
         <!-- TODO: add dialog if the download is not resumable -->
@@ -42,17 +45,12 @@ async function stop(id: string) {
         <v-dialog v-model="dialog" activator="parent" max-width="450px">
           <v-card>
             <v-card-text>Are you sure you want to stop downloading {{ props.filename }}?</v-card-text>
-            <div class="tw-flex tw-justify-between tw-flex-row-reverse">
-              <div class="tw-flex tw-flex-row-reverse">
-                <v-card-actions>
-                  <v-btn color="warning" block @click="stop(props.id)">Stop</v-btn>
-                </v-card-actions>
-                <v-card-actions>
-                  <v-btn variant="text" block @click="dialog = false">Cancel</v-btn>
-                </v-card-actions>
-              </div>
+            <div class="tw-flex tw-flex-row-reverse">
               <v-card-actions>
-                <v-checkbox v-model="deleteTempfile" label="Delete temporary file" color="red" hide-details/>
+                <v-btn color="warning" block @click="stop(props.id)">Stop</v-btn>
+              </v-card-actions>
+              <v-card-actions>
+                <v-btn variant="text" block @click="dialog = false">Cancel</v-btn>
               </v-card-actions>
             </div>
           </v-card>
