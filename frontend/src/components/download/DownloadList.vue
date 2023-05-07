@@ -102,7 +102,7 @@ EventsOn("downloaded", async (...data) => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in items" :key="item.id" v-memo="[item.status.name === 'Processing' ,item.progress, item.timeElapsed, item.chunks, item.status]">
+        <tr v-for="item in items" :key="item.id" v-memo="[item.progress, item.timeElapsed, item.chunks, item.status.name, item.status.icon, item.status.color]">
           <td color="primary" class="tw-rounded-sm bordered name-col">
             <div class="tw-flex tw-justify-between tw-mt-1 tw-mr-3 tw-items-center group">
               <div class="tw-overflow-x-hidden tw-w-max tw-flex">

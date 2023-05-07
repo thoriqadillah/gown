@@ -12,7 +12,6 @@ const props = defineProps<{
   <div class="progressWrapper tw-flex tw-justify-between tw-mt-1">
     <div v-for="part in props.totalpart" :class="`tw-w-full ` + `basis-1/${props.totalpart}`" >
       <div class="tw-h-0.5 tw-bg-green-500 -tw-mt-1" :style="{ width: `${props.chunks[part-1].progressbar}%` }"></div>
-      <p class="tw-text-xs">{{ chunks[part-1].downloaded }}</p>
     </div> 
   </div>
 </template>

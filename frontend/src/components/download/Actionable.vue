@@ -11,21 +11,10 @@ const props = defineProps<{
 
 const downloader = Downloader.service()
 const dialog = ref(false)
-const disableStop = ref(false)
-function start(id: string) {
-  disableStop.value = false
-  if (props.statusname === 'Paused') {
-    downloader.resume(id)
-    disableStop.value = false
-    return
-  }
-
-  downloader.pause(id)
-}
+const disableStop = ref(props.statusname === 'Canceled')
 
 async function stop(id: string) {
   dialog.value = false
-  disableStop.value = true
   downloader.stop(id)
 }
 </script>
@@ -33,15 +22,18 @@ async function stop(id: string) {
 <template>
   <div class="tw-w-20">
     <div v-if="props.active" class="tw-flex">
-      <v-btn v-if="props.statusname == 'Canceled' || disableStop" @click="downloader.restart(props.id)" density="compact" variant="text" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
+      <v-btn v-if="props.statusname == 'Canceled'" @click="downloader.restart(props.id)" density="compact" variant="text" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
         <v-icon class="tw-text-base tw-opacity-70" icon="mdi-replay"></v-icon>    
       </v-btn>
-      <v-btn v-else @click="start(props.id)" density="compact" variant="text" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
-        <v-icon class="tw-text-base tw-opacity-70" :icon="props.statusname === 'Paused' ? 'mdi-play' : 'mdi-pause'"></v-icon>    
+      <v-btn v-else-if="props.statusname == 'Paused'" @click="downloader.resume(props.id)" density="compact" variant="text" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
+        <v-icon class="tw-text-base tw-opacity-70" icon="mdi-play"></v-icon>    
+      </v-btn>
+      <v-btn v-else @click="downloader.pause(props.id)" density="compact" variant="text" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
+        <v-icon class="tw-text-base tw-opacity-70" icon="mdi-pause"></v-icon>    
         <!-- TODO: add dialog if the download is not resumable -->
       </v-btn>
 
-      <v-btn density="compact" :disabled="props.statusname === 'Canceled' || disableStop"  variant="text" color="warning" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
+      <v-btn density="compact" :disabled="props.statusname === 'Canceled' || disableStop"  :variant="props.statusname === 'Canceled' || disableStop ? 'plain' : 'text'" color="warning" icon class="icon-name tw-opacity-0 tw-ml-5 -tw-mr-3">
         <v-icon icon="mdi-stop" class="tw-text-base tw-opacity-70"></v-icon>
 
         <v-dialog v-model="dialog" activator="parent" max-width="450px">
