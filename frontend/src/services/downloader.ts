@@ -71,12 +71,12 @@ export default class Downloader {
     target.status.color = ''
     target.status.name = 'Processing'
 
-    await Download(target, [])
+    await Download(target, false)
   }
 
   async download(toDownload: download.Download): Promise<void> {
     toDownload.date = new Date() // set the start date when we click download
-    await Download(toDownload, [])
+    await Download(toDownload, false)
   }
   
   // TODO: implement resume download
@@ -96,7 +96,7 @@ export default class Downloader {
     target.status.color = ''
     target.status.name = 'Processing'
 
-    await Download(target, target.chunks.map(el => el.downloaded+1))
+    await Download(target, true)
   }
 
   async stop(id: string) {

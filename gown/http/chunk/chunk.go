@@ -103,7 +103,6 @@ func (c *Chunk) download() error {
 }
 
 func (c *Chunk) ResumeFrom(position int64) *Chunk {
-	log.Printf("Resuming from %d with original position %d of %d bytes downloaded", c.start+position, c.start, c.toDownload.Chunks[c.index].Downloaded)
 	c.start += position
 	return c
 }

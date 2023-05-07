@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -50,7 +49,6 @@ func (r *progressbar) Read(payload []byte) (n int, err error) {
 	})
 
 	if r.err != nil {
-		log.Printf("Chunk %d downloaded %d bytes (~%d MB)", r.index, r.toDownload.Chunks[r.index].Downloaded, r.toDownload.Chunks[r.index].Downloaded/(1024*1024))
 		runtime.EventsEmit(r.ctx, "total-bytes",
 			r.toDownload.ID,
 			r.index,
