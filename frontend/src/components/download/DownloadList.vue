@@ -22,6 +22,8 @@ EventsOn("transfered", async (...data) => {
 })
 
 // save the range based on file size
+// back and forth between backend and frontend is needed because we send the data every 300kb downloaded
+// so, only update the data from the frontend when the puase button is pressed is inacurate
 EventsOn("total-bytes", async (...data) => {
   const [id, index, downloaded] = data
   

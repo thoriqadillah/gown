@@ -47,8 +47,10 @@ export const useDownloads = defineStore('downloads', () => {
   }
 
   const setData = (data: Store) => {
-    list.value = data
-    defaults.value = data
+    list.value = Object.fromEntries(
+      Object.entries(data).sort(([,v1], [,v2]) => v1.date.localeCompare(v2.date))
+    )
+    defaults.value = list.value
   }
 
   const updateData = async (data: Store) => {
