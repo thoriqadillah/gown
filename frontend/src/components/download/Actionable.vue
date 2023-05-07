@@ -16,6 +16,7 @@ function start(id: string) {
   disableStop.value = false
   if (props.statusname === 'Paused') {
     downloader.resume(id)
+    disableStop.value = false
     return
   }
 

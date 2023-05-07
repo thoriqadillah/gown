@@ -27,6 +27,7 @@ EventsOn("total-bytes", async (...data) => {
   
   const target = store.list[id]
   target.chunks[index].downloaded = downloaded
+  console.log(target.chunks);
   
   await store.updateData(store.list)
 })

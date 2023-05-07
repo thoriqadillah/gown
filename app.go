@@ -22,15 +22,21 @@ type App struct {
 	ctx      context.Context
 	settings setting.Settings
 	storage  storage.Storage
+	pool     worker.Pool
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
 	s := setting.New()
+	worker, err := worker.New(s.Concurrency, s.SimmultanousNum)
+	if err != nil {
+		log.Fatalf("Error while creating initial worker: %v", err)
+	}
 
 	return &App{
 		settings: s,
 		storage:  storage.New(&s),
+		pool:     worker,
 	}
 }
 
@@ -38,6 +44,11 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	a.pool.Start()
+}
+
+func (a *App) shutdown(ctx context.Context) {
+	a.pool.Stop()
 }
 
 func (a *App) Theme() setting.Theme {
@@ -75,13 +86,7 @@ func (a *App) InitSetting() setting.Settings {
 func (a *App) Download(toDownload *download.Download, resumepos []int64) error {
 	canceled := false
 
-	worker, err := worker.New(toDownload.Metadata.Totalpart, a.settings.SimmultanousNum)
-	if err != nil {
-		log.Printf("Error initializing worker: %v\n", err)
-	}
-
 	var wg sync.WaitGroup
-	worker.Start()
 
 	if err := a.storage.Add(toDownload.ID, *toDownload); err != nil {
 		return err
@@ -93,13 +98,11 @@ func (a *App) Download(toDownload *download.Download, resumepos []int64) error {
 		if len(resumepos) > 0 {
 			chunks[part].ResumeFrom(resumepos[part])
 		}
-
-		log.Println(chunks[part])
 	}
 
 	for _, job := range chunks {
 		wg.Add(1)
-		worker.Add(job)
+		a.pool.Add(job)
 	}
 
 	runtime.EventsOn(a.ctx, "stop", func(optionalData ...interface{}) {
@@ -107,7 +110,6 @@ func (a *App) Download(toDownload *download.Download, resumepos []int64) error {
 	})
 
 	wg.Wait()
-	worker.Stop()
 
 	if canceled {
 		return nil
