@@ -3,39 +3,32 @@ package storage
 import (
 	"changeme/gown/lib/factory/download"
 	"changeme/gown/setting"
-	"encoding/json"
-	"io"
-	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
+
+	"github.com/goccy/go-json"
 )
+
+var instance *Storage
+var mutex = &sync.Mutex{}
 
 type Storage struct {
 	*setting.Settings
 }
 
-func New(s *setting.Settings) Storage {
-	if _, err := os.Stat(s.SaveLocation); err != nil {
-		if err := os.MkdirAll(s.SaveLocation, os.ModePerm); err != nil {
-			log.Fatalf("Cannot creating the save location folder: %v", err)
+func New(s *setting.Settings) *Storage {
+	if instance == nil {
+		mutex.Lock()
+		defer mutex.Unlock()
+
+		instance = &Storage{
+			Settings: s,
 		}
 	}
 
-	if _, err := os.Stat(s.DataLocation); err != nil {
-		err := os.MkdirAll(s.DataLocation, os.ModePerm)
-		if err != nil {
-			log.Fatalf("Cannot creating the folder: %v", err)
-		}
-	}
-
-	if _, err := os.OpenFile(s.DataFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644); err != nil {
-		log.Fatalf("Cannot creating the file: %v", err)
-	}
-
-	return Storage{
-		Settings: s,
-	}
+	return instance
 }
 
 func (s *Storage) Get() download.Store {
@@ -45,16 +38,8 @@ func (s *Storage) Get() download.Store {
 		return download.Store{}
 	}
 
-	value, err := io.ReadAll(jsonFile)
-	if err != nil {
-		log.Printf("Error opening data file: %v", err)
-		return download.Store{}
-	}
-
 	var store download.Store
-	err = json.Unmarshal(value, &store)
-	if err != nil {
-		log.Printf("Error opening data file: %v", err)
+	if err := json.NewDecoder(jsonFile).Decode(&store); err != nil {
 		return download.Store{}
 	}
 
@@ -69,19 +54,13 @@ func (s *Storage) Add(id string, val download.Download) error {
 }
 
 func (s *Storage) Update(data download.Store) error {
-	dataVal, err := json.MarshalIndent(data, "", " ")
+	jsonFile, err := os.OpenFile(s.DataFilename, os.O_WRONLY, 0644)
 	if err != nil {
-		log.Printf("Error marshaling the data: %v", err)
+		log.Printf("Error opening data file: %v", err)
 		return err
 	}
 
-	err = os.WriteFile(s.DataFilename, dataVal, fs.ModePerm)
-	if err != nil {
-		log.Printf("Error writing the data into file: %v", err)
-		return err
-	}
-
-	return nil
+	return json.NewEncoder(jsonFile).Encode(data)
 }
 
 func (s *Storage) Delete(name string) error {

@@ -21,7 +21,7 @@ import (
 type App struct {
 	ctx      context.Context
 	settings setting.Settings
-	storage  storage.Storage
+	storage  *storage.Storage
 	pool     worker.Pool
 }
 
@@ -43,6 +43,23 @@ func NewApp() *App {
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
+	if _, err := os.Stat(a.settings.SaveLocation); err != nil {
+		if err := os.MkdirAll(a.settings.SaveLocation, os.ModePerm); err != nil {
+			log.Fatalf("Cannot creating the save location folder: %v", err)
+		}
+	}
+
+	if _, err := os.Stat(a.settings.DataLocation); err != nil {
+		err := os.MkdirAll(a.settings.DataLocation, os.ModePerm)
+		if err != nil {
+			log.Fatalf("Cannot creating the folder: %v", err)
+		}
+	}
+
+	if _, err := os.OpenFile(a.settings.DataFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644); err != nil {
+		log.Fatalf("Cannot creating the file: %v", err)
+	}
+
 	a.ctx = ctx
 	a.pool.Start()
 }
