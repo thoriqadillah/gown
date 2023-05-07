@@ -7,7 +7,7 @@ export function Delete(arg1:string):Promise<void>;
 
 export function DeleteTempfile(arg1:download.Download):Promise<void>;
 
-export function Download(arg1:any,arg2:Array<number>):Promise<void>;
+export function Download(arg1:any,arg2:boolean):Promise<void>;
 
 export function Fetch(arg1:string):Promise<any>;
 

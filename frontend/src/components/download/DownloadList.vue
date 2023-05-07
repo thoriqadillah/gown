@@ -12,12 +12,13 @@ const store = useDownloads()
 const items = computed(() => store.filter(store.search))
 
 EventsOn("transfered", async (...data) => {
-  const [id, index, transfered, progress] = data
+  const [id, index, downloaded, progressbar, progress] = data
 
   const target = store.list[id]
   target.timeElapsed = parseElapsedTime(target.date)
 
-  target.chunks[index].progressbar = transfered
+  target.chunks[index].downloaded = downloaded
+  target.chunks[index].progressbar = progressbar
   target.progress += progress
 })
 
@@ -25,10 +26,11 @@ EventsOn("transfered", async (...data) => {
 // back and forth between backend and frontend is needed because we send the data every 300kb downloaded
 // so, only update the data from the frontend when the puase button is pressed is inacurate
 EventsOn("total-bytes", async (...data) => {
-  const [id, index, downloaded] = data
+  const [id, index, downloaded, progressbar] = data
   
   const target = store.list[id]
   target.chunks[index].downloaded = downloaded
+  target.chunks[index].progressbar = progressbar
   
   await store.updateData(store.list)
 })
@@ -100,14 +102,14 @@ EventsOn("downloaded", async (...data) => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in items" :key="item.id" v-memo="[item.status.name === 'Processing' ,item.progress, item.timeElapsed, item.chunks, item.status]">
+        <tr v-for="item in items" :key="item.id" v-memo="[item.progress, item.timeElapsed, item.chunks, item.status.name, item.status.icon, item.status.color]">
           <td color="primary" class="tw-rounded-sm bordered name-col">
             <div class="tw-flex tw-justify-between tw-mt-1 tw-mr-3 tw-items-center group">
               <div class="tw-overflow-x-hidden tw-w-max tw-flex">
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
                 <span class="tw-text-sm tw-inline">{{ item.name }}</span> <!-- TODO: add mark if not resumable -->
               </div>
-              <actionable :active="item.progress != 100" :filename="item.name" :id="item.id" :statusname="item.status.name"/>
+              <actionable class="tw-w-20" v-if="item.progress != 100" :filename="item.name" :id="item.id" :statusname="item.status.name"/>
             </div>
             <progress-bar v-if="item.progress != 100" :chunks="item.chunks" :totalpart="item.metadata.totalpart" />
           </td>

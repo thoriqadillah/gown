@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -29,6 +28,7 @@ func (r *progressbar) Read(payload []byte) (n int, err error) {
 	}
 
 	r.toDownload.Chunks[r.index].Downloaded += int64(n)
+	r.toDownload.Chunks[r.index].Progressbar = float64(r.toDownload.Chunks[r.index].Downloaded) / float64(r.partsize) * 100
 	r.tmp += n
 
 	// emit event every 300kb downloaded because the default 32kb is too fast and the frontend cannot handle it
@@ -36,8 +36,9 @@ func (r *progressbar) Read(payload []byte) (n int, err error) {
 		runtime.EventsEmit(r.ctx, "transfered",
 			r.toDownload.ID,
 			r.index,
-			float64(r.toDownload.Chunks[r.index].Downloaded)/float64(r.partsize)*100, // actual progress bar
-			float64(100*r.tmp)/float64(r.toDownload.Size),                            // progress in percentage
+			r.toDownload.Chunks[r.index].Downloaded,
+			r.toDownload.Chunks[r.index].Progressbar,      // actual progress bar
+			float64(100*r.tmp)/float64(r.toDownload.Size), // progress in percentage
 		)
 
 		r.tmp = 0
@@ -48,8 +49,12 @@ func (r *progressbar) Read(payload []byte) (n int, err error) {
 	})
 
 	if r.err != nil {
-		log.Printf("Chunk %d downloaded %d bytes (~%d MB)", r.index, r.toDownload.Chunks[r.index].Downloaded, r.toDownload.Chunks[r.index].Downloaded/(1024*1024))
-		runtime.EventsEmit(r.ctx, "total-bytes", r.toDownload.ID, r.index, r.toDownload.Chunks[r.index].Downloaded)
+		runtime.EventsEmit(r.ctx, "total-bytes",
+			r.toDownload.ID,
+			r.index,
+			r.toDownload.Chunks[r.index].Downloaded,  //update the latest downloaded
+			r.toDownload.Chunks[r.index].Progressbar, // update the progress bar
+		)
 		return n, r.err
 	}
 

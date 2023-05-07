@@ -22,7 +22,7 @@ type App struct {
 	ctx      context.Context
 	settings setting.Settings
 	storage  *storage.Storage
-	pool     worker.Pool
+	worker   worker.Pool
 }
 
 // NewApp creates a new App application struct
@@ -30,13 +30,13 @@ func NewApp() *App {
 	s := setting.New()
 	worker, err := worker.New(s.Concurrency, s.SimmultanousNum)
 	if err != nil {
-		log.Fatalf("Error while creating initial worker: %v", err)
+		log.Printf("Error creating worker: %v", err)
 	}
 
 	return &App{
 		settings: s,
 		storage:  storage.New(&s),
-		pool:     worker,
+		worker:   worker,
 	}
 }
 
@@ -61,11 +61,11 @@ func (a *App) startup(ctx context.Context) {
 	}
 
 	a.ctx = ctx
-	a.pool.Start()
+	a.worker.Start()
 }
 
 func (a *App) shutdown(ctx context.Context) {
-	a.pool.Stop()
+	a.worker.Stop()
 }
 
 func (a *App) Theme() setting.Theme {
@@ -100,7 +100,7 @@ func (a *App) InitSetting() setting.Settings {
 	return a.settings
 }
 
-func (a *App) Download(toDownload *download.Download, resumepos []int64) error {
+func (a *App) Download(toDownload *download.Download, resume bool) error {
 	canceled := false
 
 	var wg sync.WaitGroup
@@ -112,14 +112,14 @@ func (a *App) Download(toDownload *download.Download, resumepos []int64) error {
 	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)
 	for part := range chunks {
 		chunks[part] = chunk.New(a.ctx, toDownload, part, &a.settings, &wg)
-		if len(resumepos) > 0 {
-			chunks[part].ResumeFrom(resumepos[part])
+		if resume {
+			chunks[part].ResumeFrom(toDownload.Chunks[part].Downloaded)
 		}
 	}
 
 	for _, job := range chunks {
 		wg.Add(1)
-		a.pool.Add(job)
+		a.worker.Add(job)
 	}
 
 	runtime.EventsOn(a.ctx, "stop", func(optionalData ...interface{}) {
