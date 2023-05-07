@@ -103,6 +103,7 @@ func (c *Chunk) download() error {
 }
 
 func (c *Chunk) ResumeFrom(position int64) *Chunk {
+	log.Printf("Resuming from %d with original position %d of %d bytes downloaded", c.start+position, c.start, c.toDownload.Chunks[c.index].Downloaded)
 	c.start += position
 	return c
 }
@@ -130,8 +131,8 @@ func (c *Chunk) HandleError(err error) {
 	defer c.wg.Done()
 
 	if err == errCanceled {
-		log.Println("download canceled")
 		//TODO: save the downloaded data and mark the range if resumable. otherwise, delete the temp file
+		log.Printf("Chunk %d downloaded %d bytes ~(%d MB)", c.index+1, c.toDownload.Chunks[c.index].Downloaded, c.toDownload.Chunks[c.index].Downloaded/(1024*1024))
 	} else {
 		// TODO: retry from the position where error happened
 		log.Printf("Error while downloading chunk %d: %v\n", c.index+1, err)

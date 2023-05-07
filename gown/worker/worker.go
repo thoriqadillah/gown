@@ -54,7 +54,6 @@ func (w *Worker) Start() {
 						}
 
 						if err := job.Execute(); err != nil {
-							log.Printf("Worker %d failed to execute job: %s\n", id, err)
 							job.HandleError(err)
 						}
 					}

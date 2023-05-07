@@ -12,12 +12,13 @@ const store = useDownloads()
 const items = computed(() => store.filter(store.search))
 
 EventsOn("transfered", async (...data) => {
-  const [id, index, transfered, progress] = data
+  const [id, index, downloaded, progressbar, progress] = data
 
   const target = store.list[id]
   target.timeElapsed = parseElapsedTime(target.date)
 
-  target.chunks[index].progressbar = transfered
+  target.chunks[index].downloaded = downloaded
+  target.chunks[index].progressbar = progressbar
   target.progress += progress
 })
 
@@ -25,10 +26,11 @@ EventsOn("transfered", async (...data) => {
 // back and forth between backend and frontend is needed because we send the data every 300kb downloaded
 // so, only update the data from the frontend when the puase button is pressed is inacurate
 EventsOn("total-bytes", async (...data) => {
-  const [id, index, downloaded] = data
+  const [id, index, downloaded, progressbar] = data
   
   const target = store.list[id]
   target.chunks[index].downloaded = downloaded
+  target.chunks[index].progressbar = progressbar
   
   await store.updateData(store.list)
 })

@@ -22,21 +22,15 @@ type App struct {
 	ctx      context.Context
 	settings setting.Settings
 	storage  *storage.Storage
-	pool     worker.Pool
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
 	s := setting.New()
-	worker, err := worker.New(s.Concurrency, s.SimmultanousNum)
-	if err != nil {
-		log.Fatalf("Error while creating initial worker: %v", err)
-	}
 
 	return &App{
 		settings: s,
 		storage:  storage.New(&s),
-		pool:     worker,
 	}
 }
 
@@ -61,11 +55,10 @@ func (a *App) startup(ctx context.Context) {
 	}
 
 	a.ctx = ctx
-	a.pool.Start()
 }
 
 func (a *App) shutdown(ctx context.Context) {
-	a.pool.Stop()
+
 }
 
 func (a *App) Theme() setting.Theme {
@@ -103,6 +96,13 @@ func (a *App) InitSetting() setting.Settings {
 func (a *App) Download(toDownload *download.Download, resumepos []int64) error {
 	canceled := false
 
+	worker, err := worker.New(toDownload.Metadata.Totalpart, 1)
+	if err != nil {
+		log.Printf("Error creating worker: %v", err)
+		return err
+	}
+
+	worker.Start()
 	var wg sync.WaitGroup
 
 	if err := a.storage.Add(toDownload.ID, *toDownload); err != nil {
@@ -119,7 +119,7 @@ func (a *App) Download(toDownload *download.Download, resumepos []int64) error {
 
 	for _, job := range chunks {
 		wg.Add(1)
-		a.pool.Add(job)
+		worker.Add(job)
 	}
 
 	runtime.EventsOn(a.ctx, "stop", func(optionalData ...interface{}) {
@@ -127,6 +127,7 @@ func (a *App) Download(toDownload *download.Download, resumepos []int64) error {
 	})
 
 	wg.Wait()
+	worker.Stop()
 
 	if canceled {
 		return nil

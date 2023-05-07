@@ -96,7 +96,7 @@ export default class Downloader {
     target.status.color = ''
     target.status.name = 'Processing'
 
-    await Download(target, target.chunks.map(el => el.downloaded))
+    await Download(target, target.chunks.map(el => el.downloaded+1))
   }
 
   async stop(id: string) {
