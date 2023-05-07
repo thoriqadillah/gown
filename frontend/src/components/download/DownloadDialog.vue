@@ -75,8 +75,8 @@ async function execute() {
       <v-text-field v-if="onURL || !loaded" :error-messages="urlError" :rules="[validate.required]" v-model="url" :loading="loading" :autofocus="activator" color="primary" type="input" hint="Click enter to fetch the file data from the URL you want to download" class="tw-p-3" density="compact" variant="outlined" label="URL" append-inner-icon="mdi-link" append-icon="mdi-magnify" @click:append="fetch()" single-line v-on:keyup.enter="fetch()" ref="input"/>
       <div v-else-if="onFile || !loaded" class="tw-flex tw-items-center">
         <div class="tw-basis-9/12">
-          <v-text-field color="primary" :rules="[validate.required, validate.max]" v-model="result!.name" label="File name" append-inner-icon="mdi-file-document-edit" type="input" hint="File name" class="tw-px-3 tw-pt-3 -tw-mb-2" single-line density="compact" variant="outlined" />
-          <v-text-field color="primary" :rules="[validate.required]" :model-value="settings.saveLocation" label="Save location" append-inner-icon="mdi-folder" type="input" hint="Save location" class="tw-p-3" single-line density="compact" variant="outlined" />
+          <v-text-field color="primary" :rules="[validate.required, validate.max]" v-model="result!.name" label="File name" append-inner-icon="mdi-file-document-edit" type="input" hint="File name" class="tw-px-3 tw-pt-3 -tw-mb-2" single-line density="compact" variant="outlined" v-on:keyup.enter="execute()" />
+          <v-text-field color="primary" :rules="[validate.required]" :model-value="settings.saveLocation" label="Save location" append-inner-icon="mdi-folder" type="input" hint="Save location" class="tw-p-3" single-line density="compact" variant="outlined" v-on:keyup.enter="execute()" />
         </div>
         <div class="tw-basis-3/12 tw-text-center tw-pr-2 -tw-mt-5">
           <v-icon :icon="result!.type.icon" :color="result!.type.color"></v-icon>
@@ -95,7 +95,7 @@ async function execute() {
         </div>
         <div class="tw-flex tw-flex-row-reverse">
           <v-card-actions>
-            <v-btn color="primary" block @click="execute()" :disabled="(onURL || !loaded) || urlHasError || filenameHasError || savelocationHasError">Download</v-btn>
+            <v-btn color="primary" class="btn" block @click="execute()" :disabled="(onURL || !loaded) || urlHasError || filenameHasError || savelocationHasError">Download</v-btn>
           </v-card-actions>
           <v-card-actions>
             <v-btn variant="text" block @click="dialog.close()">Cancel</v-btn>
