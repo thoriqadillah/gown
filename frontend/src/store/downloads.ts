@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { download } from "../../wailsjs/go/models";
-import { UpdateData, Delete } from '../../wailsjs/go/main/App'
+import { Set, DeleteData, DeleteFile } from '../../wailsjs/go/main/App'
 
 export type Store = {
   [id: string]: download.Download
@@ -31,32 +31,35 @@ export const useDownloads = defineStore('downloads', () => {
       Object.entries(list.value).filter(([_, el]) => el.name.toLowerCase().includes(query.toLowerCase()))
     )
   }
-  const add = (id: string, val: download.Download) => {
-    list.value[id] = val
-    defaults.value[id] = val
+  const set = async (id: string, val: download.Download) => {
+    try {
+      list.value[id] = val
+      defaults.value[id] = val
+      await Set(id, val)
+    } catch (error) {
+      console.log("Could not upsert the data", error);
+    }
   }
 
   const remove = async (id: string, fromdisk: boolean) => {
-    const target = list.value[id]
-
-    delete list.value[id]
-    delete defaults.value[id]
-    
-    await UpdateData(list.value)
-    if (fromdisk) Delete(target.name)
+    try {
+      const target = list.value[id]
+  
+      delete list.value[id]
+      delete defaults.value[id]
+      
+      await DeleteData(id)
+      if (fromdisk) await DeleteFile(target.name)
+    } catch (error) {
+      console.log("Could not delete the data", error);
+    }
   }
 
-  const setData = (data: Store) => {
+  const init = (data: Store) => {
     list.value = Object.fromEntries(
       Object.entries(data).sort(([,v1], [,v2]) => v1.date.localeCompare(v2.date))
     )
     defaults.value = list.value
-  }
-
-  const updateData = async (data: Store) => {
-    list.value = data
-    defaults.value = data
-    await UpdateData(data)
   }
   
   const filterBy = (type: DownloadType) => {
@@ -115,10 +118,9 @@ export const useDownloads = defineStore('downloads', () => {
     list,
     search,
     filter,
-    add,
+    set,
     remove,
-    setData,
-    updateData,
+    init,
     filterBy,
     setDefault,
     sortByName,

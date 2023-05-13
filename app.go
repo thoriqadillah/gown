@@ -27,15 +27,21 @@ type App struct {
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-	s := setting.New()
+	storage, err := storage.New()
+	if err != nil {
+		log.Fatalf("Error opening storage: %v", err)
+	}
+
+	s := storage.CreateSetting()
+
 	worker, err := worker.New(s.Concurrency, s.SimmultanousNum)
 	if err != nil {
-		log.Printf("Error creating worker: %v", err)
+		log.Fatalf("Error creating worker: %v", err)
 	}
 
 	return &App{
 		settings: s,
-		storage:  storage.New(&s),
+		storage:  storage,
 		worker:   worker,
 	}
 }
@@ -43,17 +49,12 @@ func NewApp() *App {
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
-	if _, err := os.Stat(a.settings.SaveLocation); err != nil {
-		if err := os.MkdirAll(a.settings.SaveLocation, os.ModePerm); err != nil {
-			log.Fatalf("Cannot creating the save location folder: %v", err)
-		}
+	if err := os.MkdirAll(a.settings.SaveLocation, os.ModePerm); err != nil {
+		log.Fatalf("Cannot creating the save location folder: %v", err)
 	}
 
-	if _, err := os.Stat(a.settings.DataLocation); err != nil {
-		err := os.MkdirAll(a.settings.DataLocation, os.ModePerm)
-		if err != nil {
-			log.Fatalf("Cannot creating the folder: %v", err)
-		}
+	if err := os.MkdirAll(a.settings.DataLocation, os.ModePerm); err != nil {
+		log.Fatalf("Cannot creating the folder: %v", err)
 	}
 
 	if _, err := os.OpenFile(a.settings.DataFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644); err != nil {
@@ -85,15 +86,20 @@ func (a *App) Fetch(url string) (*download.Download, error) {
 }
 
 func (a *App) InitData() download.Store {
-	return a.storage.Get()
+	return a.storage.GetAll()
 }
 
-func (a *App) Delete(name string) error {
-	return a.storage.Delete(name)
+func (a *App) DeleteFile(name string) error {
+	filename := filepath.Join(a.settings.SaveLocation, name)
+	return a.storage.DeleteFile(filename)
 }
 
-func (a *App) UpdateData(data download.Store) {
-	a.storage.Update(data)
+func (a *App) DeleteData(id string) error {
+	return a.storage.Delete(id)
+}
+
+func (a *App) Set(id string, data download.Download) {
+	a.storage.Set(id, data)
 }
 
 func (a *App) InitSetting() setting.Settings {
@@ -105,7 +111,7 @@ func (a *App) Download(toDownload *download.Download, resume bool) error {
 
 	var wg sync.WaitGroup
 
-	if err := a.storage.Add(toDownload.ID, *toDownload); err != nil {
+	if err := a.storage.Set(toDownload.ID, *toDownload); err != nil {
 		return err
 	}
 

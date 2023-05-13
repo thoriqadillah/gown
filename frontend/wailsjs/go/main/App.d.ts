@@ -3,7 +3,9 @@
 import {download} from '../models';
 import {setting} from '../models';
 
-export function Delete(arg1:string):Promise<void>;
+export function DeleteData(arg1:string):Promise<void>;
+
+export function DeleteFile(arg1:string):Promise<void>;
 
 export function DeleteTempfile(arg1:download.Download):Promise<void>;
 
@@ -15,6 +17,6 @@ export function InitData():Promise<download.Store>;
 
 export function InitSetting():Promise<setting.Settings>;
 
-export function Theme():Promise<setting.Theme>;
+export function Set(arg1:string,arg2:download.Download):Promise<void>;
 
-export function UpdateData(arg1:download.Store):Promise<void>;
+export function Theme():Promise<setting.Theme>;

@@ -107,7 +107,7 @@ export default class Downloader {
     target.status.color = 'warning'
     target.status.name = 'Canceled'
     
-    await this.store.updateData(this.store.list)
+    await this.store.set(id, target)
     DeleteTempfile(target)
   }
 }

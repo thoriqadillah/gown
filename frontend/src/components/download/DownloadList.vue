@@ -32,7 +32,7 @@ EventsOn("total-bytes", async (...data) => {
   target.chunks[index].downloaded = downloaded
   target.chunks[index].progressbar = progressbar
   
-  await store.updateData(store.list)
+  await store.set(id, target)
 })
 
 EventsOn("downloaded", async (...data) => {
@@ -46,7 +46,7 @@ EventsOn("downloaded", async (...data) => {
     color: !combined ? 'info' : 'success'
   }
   
-  await store.updateData(store.list)
+  await store.set(id, target)
 })
 </script>
 

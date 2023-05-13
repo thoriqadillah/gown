@@ -3,82 +3,127 @@ package storage
 import (
 	"changeme/gown/lib/factory/download"
 	"changeme/gown/setting"
+	"fmt"
 	"log"
 	"os"
-	"path/filepath"
-	"sync"
+	"time"
 
+	"github.com/boltdb/bolt"
 	"github.com/goccy/go-json"
 )
 
-var instance *Storage
-var mutex = &sync.Mutex{}
+var settingBucket = []byte("settings")
+var downloadBucket = []byte("downloads")
+var themeBucket = []byte("themes")
 
 type Storage struct {
-	*setting.Settings
+	db *bolt.DB
 }
 
-func New(s *setting.Settings) *Storage {
-	if instance == nil {
-		mutex.Lock()
-		defer mutex.Unlock()
+func New() (*Storage, error) {
+	datapath := fmt.Sprintf("%s/.gown/store.db", os.Getenv("HOME"))
 
-		instance = &Storage{
-			Settings: s,
+	db, err := bolt.Open(datapath, 0600, &bolt.Options{Timeout: 1 * time.Second})
+	if err != nil {
+		return nil, fmt.Errorf("error opening database: %v", err)
+	}
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		if _, err := tx.CreateBucketIfNotExists(downloadBucket); err != nil {
+			return fmt.Errorf("could not create downloads bucket: %v", err)
 		}
-	}
 
-	return instance
-}
+		if _, err := tx.CreateBucketIfNotExists(settingBucket); err != nil {
+			return fmt.Errorf("could not create settings bucket: %v", err)
+		}
 
-func (s *Storage) Get() download.Store {
-	jsonFile, err := os.Open(s.DataFilename)
+		if _, err := tx.CreateBucketIfNotExists(themeBucket); err != nil {
+			return fmt.Errorf("could not create themes bucket: %v", err)
+		}
+
+		return nil
+	})
+
 	if err != nil {
-		log.Printf("Error opening data file: %v", err)
-		return download.Store{}
+		return nil, fmt.Errorf("could not setup bucket: %v", err)
 	}
 
-	var store download.Store
-	if err := json.NewDecoder(jsonFile).Decode(&store); err != nil {
-		return download.Store{}
+	return &Storage{
+		db: db,
+	}, nil
+}
+
+func (s *Storage) CreateSetting() (stg setting.Settings) {
+	err := s.db.View(func(tx *bolt.Tx) error {
+		val := tx.Bucket(settingBucket).Get([]byte("setting"))
+
+		if err := json.Unmarshal(val, &stg); err != nil {
+			return fmt.Errorf("could not unmarshal setting: %v", err)
+		}
+
+		return nil
+	})
+
+	if err == nil {
+		return stg
 	}
 
-	return store
+	setting := setting.Default()
+	s.db.Update(func(tx *bolt.Tx) error {
+		val, err := json.Marshal(setting)
+		if err != nil {
+			return fmt.Errorf("could not marshaling setting: %v", err)
+		}
+
+		if err := tx.Bucket(settingBucket).Put([]byte("setting"), val); err != nil {
+			return fmt.Errorf("could not store initial setting: %v", err)
+		}
+
+		return nil
+	})
+
+	return setting
 }
 
-func (s *Storage) Add(id string, val download.Download) error {
-	data := s.Get()
-	data[id] = val
+func (s *Storage) Set(id string, data download.Download) error {
+	return s.db.Update(func(tx *bolt.Tx) error {
+		val, err := json.Marshal(data)
+		if err != nil {
+			return fmt.Errorf("could not store the download: %v", err)
+		}
 
-	return s.Update(data)
+		return tx.Bucket(downloadBucket).Put([]byte(id), val)
+	})
 }
 
-func (s *Storage) Update(data download.Store) error {
-	jsonFile, err := os.OpenFile(s.DataFilename, os.O_WRONLY, 0644)
+func (s *Storage) Delete(id string) error {
+	return s.db.Update(func(tx *bolt.Tx) error {
+		return tx.Bucket(downloadBucket).Delete([]byte(id))
+	})
+}
+
+func (s *Storage) GetAll() download.Store {
+	all := download.Store{}
+	err := s.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(downloadBucket)
+		c := bucket.Cursor()
+
+		var download download.Download
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			if err := json.Unmarshal(v, &download); err != nil {
+				return fmt.Errorf("could not marshal the data: %v", err)
+			}
+
+			all[download.ID] = download
+		}
+
+		return nil
+	})
+
 	if err != nil {
-		log.Printf("Error opening data file: %v", err)
-		return err
+		log.Println("no data found", err)
+		return nil
 	}
 
-	return json.NewEncoder(jsonFile).Encode(data)
+	return all
 }
-
-func (s *Storage) Delete(name string) error {
-	filename := filepath.Join(s.SaveLocation, name)
-	if err := os.Remove(filename); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// TODO: implement storing data into persistent file
-// The data will be stored in a JSON file
-// The file will be stored in the data directory
-// The data will be :
-// - list of downloaded file
-// - list of queued download
-// - list of failed download
-// - selected theme
-// - theme configuration
-// - TBD
