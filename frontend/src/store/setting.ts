@@ -11,6 +11,8 @@ export const useSettings = defineStore('settings', () => {
   const dataLocation = ref('')
   const dataFilename = ref('')
 
+  const defaults = ref(new setting.Settings())
+
   const init = (s: setting.Settings) => {
     partsize.value = s.partsize
     concurrency.value = s.concurrency
@@ -19,6 +21,8 @@ export const useSettings = defineStore('settings', () => {
     saveLocation.value = s.saveLocation
     dataLocation.value = s.dataLocation
     dataFilename.value = s.dataFilename
+
+    defaults.value = s
   }
   
   return {
