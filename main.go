@@ -1,6 +1,8 @@
 package main
 
 import (
+	downloadstore "changeme/gown/modules/download/store"
+	settingstore "changeme/gown/modules/setting/store"
 	"embed"
 
 	"github.com/wailsapp/wails/v2"
@@ -13,7 +15,12 @@ var assets embed.FS
 
 func main() {
 	// Create an instance of the app structure
-	app := NewApp()
+	setting := settingstore.NewFileStore()
+	s := setting.GetSetting()
+
+	app := NewApp(s)
+
+	download := downloadstore.NewFileStore(s)
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -29,6 +36,8 @@ func main() {
 		OnShutdown: app.shutdown,
 		Bind: []interface{}{
 			app,
+			setting,
+			download,
 		},
 	})
 

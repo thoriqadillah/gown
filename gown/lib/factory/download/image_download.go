@@ -1,41 +1,41 @@
 package download
 
 import (
-	"changeme/gown/http"
 	"changeme/gown/lib/factory"
+	"changeme/gown/modules/download"
 	"time"
 )
 
 type ImageFactory struct {
-	res *http.Response
+	res *download.Response
 }
 
-func imageFactory(res *http.Response) factory.Factory[Download] {
+func imageFactory(res *download.Response) factory.Factory[download.Download] {
 	return &ImageFactory{
 		res: res,
 	}
 }
 
-func (v *ImageFactory) Create() Download {
-	return Download{
+func (v *ImageFactory) Create() download.Download {
+	return download.Download{
 		ID:          factory.ID(5),
 		Name:        v.res.Filename,
 		TimeElapsed: "",
 		Size:        v.res.Size,
 		Progres:     0,
-		Chunks:      make([]Chunk, v.res.Totalpart),
+		Chunks:      make([]download.Chunk, v.res.Totalpart),
 		Date:        time.Now(),
-		Status: DownloadStatus{
-			Name:  STATUS_NAME_PROCESSING,
-			Icon:  STATUS_ICON_PROCESSING,
-			Color: STATUS_COLOR_PROCESSING,
+		Status: download.DownloadStatus{
+			Name:  download.STATUS_NAME_PROCESSING,
+			Icon:  download.STATUS_ICON_PROCESSING,
+			Color: download.STATUS_COLOR_PROCESSING,
 		},
-		Type: DownloadType{
-			Name:  TYPE_NAME_IMAGE,
-			Icon:  TYPE_ICON_IMAGE,
-			Color: TYPE_COLOR_IMAGE,
+		Type: download.DownloadType{
+			Name:  download.TYPE_NAME_IMAGE,
+			Icon:  download.TYPE_ICON_IMAGE,
+			Color: download.TYPE_COLOR_IMAGE,
 		},
-		Metadata: Metadata{
+		Metadata: download.Metadata{
 			Url:       v.res.Url,
 			Cansplit:  v.res.Cansplit,
 			Totalpart: v.res.Totalpart,

@@ -1,8 +1,8 @@
-package storage
+package fs
 
 import (
-	"changeme/gown/lib/factory/download"
-	"changeme/gown/setting"
+	"changeme/gown/modules/download"
+	"changeme/gown/modules/setting"
 	"fmt"
 	"io"
 	"os"
@@ -29,6 +29,14 @@ func CreateFile(toSave *download.Download, setting *setting.Settings) error {
 		if err := os.Remove(filename); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func Delete(filename string) error {
+	if err := os.Remove(filename); err != nil {
+		return err
 	}
 
 	return nil

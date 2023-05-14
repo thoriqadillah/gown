@@ -1,7 +1,7 @@
-package http
+package download
 
 import (
-	"changeme/gown/setting"
+	"changeme/gown/modules/setting"
 	"log"
 	"math"
 	"mime"

@@ -1,8 +1,8 @@
 package chunk
 
 import (
-	"changeme/gown/lib/factory/download"
-	"changeme/gown/setting"
+	"changeme/gown/modules/download"
+	"changeme/gown/modules/setting"
 	"context"
 	"fmt"
 	"io"
@@ -132,9 +132,9 @@ func (c *Chunk) HandleError(err error) {
 	if err == errCanceled {
 		//TODO: save the downloaded data and mark the range if resumable. otherwise, delete the temp file
 		log.Printf("Chunk %d downloaded %d bytes ~(%d MB)", c.index+1, c.toDownload.Chunks[c.index].Downloaded, c.toDownload.Chunks[c.index].Downloaded/(1024*1024))
-	} else {
-		// TODO: retry from the position where error happened
-		log.Printf("Error while downloading chunk %d: %v\n", c.index+1, err)
+		return
 	}
 
+	log.Printf("Error while downloading chunk %d: %v\n", c.index+1, err)
+	//TODO: emit event to change the color of progress bar to red if error
 }

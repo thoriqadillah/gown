@@ -1,41 +1,41 @@
 package download
 
 import (
-	"changeme/gown/http"
 	"changeme/gown/lib/factory"
+	"changeme/gown/modules/download"
 	"time"
 )
 
 type CompressedFactory struct {
-	res *http.Response
+	res *download.Response
 }
 
-func compressedFactory(res *http.Response) factory.Factory[Download] {
+func compressedFactory(res *download.Response) factory.Factory[download.Download] {
 	return &CompressedFactory{
 		res: res,
 	}
 }
 
-func (v *CompressedFactory) Create() Download {
-	return Download{
+func (v *CompressedFactory) Create() download.Download {
+	return download.Download{
 		ID:          factory.ID(5),
 		Name:        v.res.Filename,
 		TimeElapsed: "",
 		Size:        v.res.Size,
 		Progres:     0,
-		Chunks:      make([]Chunk, v.res.Totalpart),
+		Chunks:      make([]download.Chunk, v.res.Totalpart),
 		Date:        time.Now(),
-		Status: DownloadStatus{
-			Name:  STATUS_NAME_PROCESSING,
-			Icon:  STATUS_ICON_PROCESSING,
-			Color: STATUS_COLOR_PROCESSING,
+		Status: download.DownloadStatus{
+			Name:  download.STATUS_NAME_PROCESSING,
+			Icon:  download.STATUS_ICON_PROCESSING,
+			Color: download.STATUS_COLOR_PROCESSING,
 		},
-		Type: DownloadType{
-			Name:  TYPE_NAME_COMPRESSED,
-			Icon:  TYPE_ICON_COMPRESSED,
-			Color: TYPE_COLOR_COMPRESSED,
+		Type: download.DownloadType{
+			Name:  download.TYPE_NAME_COMPRESSED,
+			Icon:  download.TYPE_ICON_COMPRESSED,
+			Color: download.TYPE_COLOR_COMPRESSED,
 		},
-		Metadata: Metadata{
+		Metadata: download.Metadata{
 			Url:       v.res.Url,
 			Cansplit:  v.res.Cansplit,
 			Totalpart: v.res.Totalpart,

@@ -22,8 +22,8 @@ type Settings struct {
 	DataFilename    string `json:"dataFilename"`
 }
 
-func New() Settings {
-	return Settings{
+func Default() *Settings {
+	return &Settings{
 		Themes:          Themes(),
 		Partsize:        DEFAULT_PART_SIZE,
 		Concurrency:     DEFAULT_CONCURRENCY,

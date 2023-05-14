@@ -1,41 +1,41 @@
 package download
 
 import (
-	"changeme/gown/http"
 	"changeme/gown/lib/factory"
+	"changeme/gown/modules/download"
 	"time"
 )
 
 type AudioFactory struct {
-	res *http.Response
+	res *download.Response
 }
 
-func audioFactory(res *http.Response) factory.Factory[Download] {
+func audioFactory(res *download.Response) factory.Factory[download.Download] {
 	return &AudioFactory{
 		res: res,
 	}
 }
 
-func (v *AudioFactory) Create() Download {
-	return Download{
+func (v *AudioFactory) Create() download.Download {
+	return download.Download{
 		ID:          factory.ID(5),
 		Name:        v.res.Filename,
 		TimeElapsed: "",
 		Size:        v.res.Size,
 		Progres:     0,
-		Chunks:      make([]Chunk, v.res.Totalpart),
+		Chunks:      make([]download.Chunk, v.res.Totalpart),
 		Date:        time.Now(),
-		Status: DownloadStatus{
-			Name:  STATUS_NAME_PROCESSING,
-			Icon:  STATUS_ICON_PROCESSING,
-			Color: STATUS_COLOR_PROCESSING,
+		Status: download.DownloadStatus{
+			Name:  download.STATUS_NAME_PROCESSING,
+			Icon:  download.STATUS_ICON_PROCESSING,
+			Color: download.STATUS_COLOR_PROCESSING,
 		},
-		Type: DownloadType{
-			Name:  TYPE_NAME_AUDIO,
-			Icon:  TYPE_ICON_AUDIO,
-			Color: TYPE_COLOR_AUDIO,
+		Type: download.DownloadType{
+			Name:  download.TYPE_NAME_AUDIO,
+			Icon:  download.TYPE_ICON_AUDIO,
+			Color: download.TYPE_COLOR_AUDIO,
 		},
-		Metadata: Metadata{
+		Metadata: download.Metadata{
 			Url:       v.res.Url,
 			Cansplit:  v.res.Cansplit,
 			Totalpart: v.res.Totalpart,

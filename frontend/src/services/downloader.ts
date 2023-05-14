@@ -1,5 +1,6 @@
 import { download } from "../../wailsjs/go/models";
-import { DeleteTempfile, Fetch } from "../../wailsjs/go/main/App";
+import { Fetch } from "../../wailsjs/go/main/App";
+import { DeleteTempfile } from "../../wailsjs/go/store/fileStore";
 import { Download } from "../../wailsjs/go/main/App";
 import { useDownloads } from "../store/downloads";
 import { EventsEmit } from "../../wailsjs/runtime/runtime";

@@ -1,16 +1,11 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { download } from "../../wailsjs/go/models";
-import { UpdateData, Delete } from '../../wailsjs/go/main/App'
+import { UpdateAllData, DeleteFile } from '../../wailsjs/go/store/fileStore'
 
 export type Store = {
   [id: string]: download.Download
 }
-
-export type Entries<T> = {
-  [K in keyof T]: [K, T[K]];
-}[keyof T][];
-
 
 type DownloadType = 'image' | 'document' | 'video' | 'audio' | 'compressed'
 
@@ -34,7 +29,7 @@ export const useDownloads = defineStore('downloads', () => {
   const add = async (id: string, val: download.Download) => {
     list.value[id] = val
     defaults.value[id] = val
-    await UpdateData(list.value)
+    await UpdateAllData(list.value)
   }
 
   const remove = async (id: string, fromdisk: boolean) => {
@@ -43,8 +38,8 @@ export const useDownloads = defineStore('downloads', () => {
     delete list.value[id]
     delete defaults.value[id]
     
-    await UpdateData(list.value)
-    if (fromdisk) Delete(target.name)
+    await UpdateAllData(list.value)
+    if (fromdisk) DeleteFile(target)
   }
 
   const setData = (data: Store) => {
@@ -57,7 +52,7 @@ export const useDownloads = defineStore('downloads', () => {
   const updateData = async (data: Store) => {
     list.value = data
     defaults.value = data
-    await UpdateData(data)
+    await UpdateAllData(data)
   }
   
   const filterBy = (type: DownloadType) => {
