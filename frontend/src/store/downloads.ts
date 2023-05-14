@@ -31,9 +31,10 @@ export const useDownloads = defineStore('downloads', () => {
       Object.entries(list.value).filter(([_, el]) => el.name.toLowerCase().includes(query.toLowerCase()))
     )
   }
-  const add = (id: string, val: download.Download) => {
+  const add = async (id: string, val: download.Download) => {
     list.value[id] = val
     defaults.value[id] = val
+    await UpdateData(list.value)
   }
 
   const remove = async (id: string, fromdisk: boolean) => {

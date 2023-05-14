@@ -105,10 +105,6 @@ func (a *App) Download(toDownload *download.Download, resume bool) error {
 
 	var wg sync.WaitGroup
 
-	if err := a.storage.Add(toDownload.ID, *toDownload); err != nil {
-		return err
-	}
-
 	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)
 	for part := range chunks {
 		chunks[part] = chunk.New(a.ctx, toDownload, part, &a.settings, &wg)

@@ -46,13 +46,6 @@ func (s *Storage) Get() download.Store {
 	return store
 }
 
-func (s *Storage) Add(id string, val download.Download) error {
-	data := s.Get()
-	data[id] = val
-
-	return s.Update(data)
-}
-
 func (s *Storage) Update(data download.Store) error {
 	jsonFile, err := os.OpenFile(s.DataFilename, os.O_WRONLY, 0644)
 	if err != nil {
