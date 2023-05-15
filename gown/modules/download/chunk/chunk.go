@@ -119,6 +119,7 @@ func (c *Chunk) Execute() error {
 			return err
 		}
 
+		//TODO: emit event to change the color of progress bar to red if error
 		log.Printf("Error while downloading chunk %d: %v. Retrying....\n", c.index+1, err)
 	}
 
@@ -136,5 +137,5 @@ func (c *Chunk) HandleError(err error) {
 	}
 
 	log.Printf("Error while downloading chunk %d: %v\n", c.index+1, err)
-	//TODO: emit event to change the color of progress bar to red if error
+	//TODO: emit event to change tell user if downladed part is brokern
 }

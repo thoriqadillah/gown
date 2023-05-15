@@ -40,3 +40,7 @@ func (s *fileStore) UpdateSetting(data *setting.Settings) error {
 
 	return json.NewEncoder(file).Encode(data)
 }
+
+func (s *fileStore) DefaultSetting() *setting.Settings {
+	return setting.Default()
+}

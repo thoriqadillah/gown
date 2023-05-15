@@ -8,8 +8,10 @@ import (
 	"changeme/gown/modules/download/chunk"
 	"changeme/gown/modules/setting"
 	"context"
+	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -79,8 +81,16 @@ func (a *App) Download(toDownload *download.Download, resume bool) error {
 	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)
 	for part := range chunks {
 		chunks[part] = chunk.New(a.ctx, toDownload, part, a.settings, &wg)
+
 		if resume {
-			chunks[part].ResumeFrom(toDownload.Chunks[part].Downloaded)
+			//TODO: recheck if the resumed url is broken or not by comparing the size of the original download and newly fetched data
+			tempFile := filepath.Join(a.settings.SaveLocation, fmt.Sprintf("%s-%d", toDownload.ID, part))
+			f, err := os.Stat(tempFile)
+			if err != nil {
+				return err
+			}
+
+			chunks[part].ResumeFrom(f.Size())
 		}
 	}
 

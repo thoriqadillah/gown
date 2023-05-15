@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import { download } from "../../wailsjs/go/models";
 import { UpdateAllData, DeleteFile } from '../../wailsjs/go/store/fileStore'
+import { useAlert } from "./alert";
 
 export type Store = {
   [id: string]: download.Download
@@ -19,6 +20,8 @@ export const useDownloads = defineStore('downloads', () => {
   const ascSize = ref(true)
   const ascTimeElapsed = ref(true)
 
+  const alert = useAlert()
+
   const filter = (query: string) => {
     if (query.length > 0 && Object.entries(list.value).length !== Object.entries(defaults.value).length) setDefault()
 
@@ -27,19 +30,37 @@ export const useDownloads = defineStore('downloads', () => {
     )
   }
   const add = async (id: string, val: download.Download) => {
-    list.value[id] = val
-    defaults.value[id] = val
-    await UpdateAllData(list.value)
+    try {
+      list.value[id] = val
+      defaults.value[id] = val
+      await UpdateAllData(list.value)
+    } catch (error) {
+      alert.open(error as string, 'danger')
+    }
   }
 
   const remove = async (id: string, fromdisk: boolean) => {
-    const target = list.value[id]
+    try {
+      const target = list.value[id]
+  
+      delete list.value[id]
+      delete defaults.value[id]
+      
+      await UpdateAllData(list.value)
+      if (fromdisk) DeleteFile(target)
+    } catch (error) {
+      alert.open(error as string, 'danger')
+    }
+  }
 
-    delete list.value[id]
-    delete defaults.value[id]
-    
-    await UpdateAllData(list.value)
-    if (fromdisk) DeleteFile(target)
+  const updateData = async (data: Store) => {
+    try {
+      list.value = data
+      defaults.value = data
+      await UpdateAllData(data)
+    } catch (error) {
+      alert.open(error as string, 'danger')
+    }
   }
 
   const setData = (data: Store) => {
@@ -47,12 +68,6 @@ export const useDownloads = defineStore('downloads', () => {
       Object.entries(data).sort(([,v1], [,v2]) => v1.date.localeCompare(v2.date))
     )
     defaults.value = list.value
-  }
-
-  const updateData = async (data: Store) => {
-    list.value = data
-    defaults.value = data
-    await UpdateAllData(data)
   }
   
   const filterBy = (type: DownloadType) => {
