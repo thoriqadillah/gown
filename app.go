@@ -1,11 +1,11 @@
 package main
 
 import (
-	factory "changeme/gown/lib/factory/download"
 	"changeme/gown/lib/fs"
 	"changeme/gown/lib/worker"
 	"changeme/gown/modules/download"
 	"changeme/gown/modules/download/chunk"
+	"changeme/gown/modules/download/factory"
 	"changeme/gown/modules/setting"
 	"context"
 	"fmt"
@@ -60,7 +60,7 @@ func (a *App) Fetch(url string, setting *setting.Settings) (*download.Download, 
 		return nil, err
 	}
 
-	factory := factory.NewFactory(res)
+	factory := factory.NewDownloadFactory(res)
 	data := factory.Create()
 
 	return &data, nil

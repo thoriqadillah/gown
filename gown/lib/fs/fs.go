@@ -33,11 +33,3 @@ func CreateFile(toSave *download.Download, setting *setting.Settings) error {
 
 	return nil
 }
-
-func Delete(filename string) error {
-	if err := os.Remove(filename); err != nil {
-		return err
-	}
-
-	return nil
-}

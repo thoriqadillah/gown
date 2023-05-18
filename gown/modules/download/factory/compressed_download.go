@@ -1,4 +1,4 @@
-package download
+package factory
 
 import (
 	"changeme/gown/lib/factory"

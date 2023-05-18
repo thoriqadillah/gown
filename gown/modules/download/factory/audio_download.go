@@ -1,4 +1,4 @@
-package download
+package factory
 
 import (
 	"changeme/gown/lib/factory"
@@ -6,17 +6,17 @@ import (
 	"time"
 )
 
-type OtherFactory struct {
+type AudioFactory struct {
 	res *download.Response
 }
 
-func otherFactory(res *download.Response) factory.Factory[download.Download] {
-	return &OtherFactory{
+func audioFactory(res *download.Response) factory.Factory[download.Download] {
+	return &AudioFactory{
 		res: res,
 	}
 }
 
-func (v *OtherFactory) Create() download.Download {
+func (v *AudioFactory) Create() download.Download {
 	return download.Download{
 		ID:          factory.ID(5),
 		Name:        v.res.Filename,
@@ -31,9 +31,9 @@ func (v *OtherFactory) Create() download.Download {
 			Color: download.STATUS_COLOR_PROCESSING,
 		},
 		Type: download.DownloadType{
-			Name:  download.TYPE_NAME_OTHER,
-			Icon:  download.TYPE_ICON_OTHER,
-			Color: download.TYPE_COLOR_OTHER,
+			Name:  download.TYPE_NAME_AUDIO,
+			Icon:  download.TYPE_ICON_AUDIO,
+			Color: download.TYPE_COLOR_AUDIO,
 		},
 		Metadata: download.Metadata{
 			Url:       v.res.Url,
@@ -44,5 +44,5 @@ func (v *OtherFactory) Create() download.Download {
 }
 
 func init() {
-	register("other", otherFactory)
+	register("audio", audioFactory)
 }

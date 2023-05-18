@@ -1,4 +1,4 @@
-package download
+package factory
 
 import (
 	"changeme/gown/lib/factory"
@@ -11,7 +11,7 @@ type FactoryImpl func(res *download.Response) factory.Factory[download.Download]
 var start sync.Once
 var factories map[string]FactoryImpl
 
-func NewFactory(res *download.Response) factory.Factory[download.Download] {
+func NewDownloadFactory(res *download.Response) factory.Factory[download.Download] {
 	factory := factories[res.ContentType]
 
 	return factory(res)
