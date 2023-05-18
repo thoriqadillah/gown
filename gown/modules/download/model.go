@@ -1,9 +1,6 @@
 package download
 
 import (
-	"changeme/gown/http"
-	"changeme/gown/lib/factory"
-	"sync"
 	"time"
 )
 
@@ -85,36 +82,4 @@ type (
 		Icon  string `json:"icon"`
 		Color string `json:"color"`
 	}
-
-	DownloadData struct {
-		Response *http.Response `json:"response"`
-		Data     Download       `json:"data"`
-	}
 )
-
-func SetStatusSuccess() DownloadStatus {
-	return DownloadStatus{
-		Name:  STATUS_NAME_SUCCESS,
-		Icon:  STATUS_ICON_SUCCESS,
-		Color: STATUS_COLOR_SUCCESS,
-	}
-}
-
-type FactoryImpl func(res *http.Response) factory.Factory[Download]
-
-var start sync.Once
-var factories map[string]FactoryImpl
-
-func NewFactory(res *http.Response) factory.Factory[Download] {
-	factory := factories[res.ContentType]
-
-	return factory(res)
-}
-
-func register(name string, factory FactoryImpl) {
-	start.Do(func() {
-		factories = make(map[string]FactoryImpl)
-	})
-
-	factories[name] = factory
-}

@@ -1,13 +1,16 @@
-import { download } from "../../wailsjs/go/models";
-import { DeleteTempfile, Fetch } from "../../wailsjs/go/main/App";
+import { download, setting } from "../../wailsjs/go/models";
+import { Fetch } from "../../wailsjs/go/main/App";
+import { DeleteTempfile } from "../../wailsjs/go/store/fileStore";
 import { Download } from "../../wailsjs/go/main/App";
 import { useDownloads } from "../store/downloads";
 import { EventsEmit } from "../../wailsjs/runtime/runtime";
+import { useSettings } from "../store/setting";
 
 export default class Downloader {
 
   private static instance: Downloader
   private store = useDownloads()
+  private setting = useSettings()
 
   public static service(): Downloader {
     if (!Downloader.instance) {
@@ -55,7 +58,7 @@ export default class Downloader {
   }
  
   async fetch(url: string): Promise<download.Download | undefined> {
-    const res =  await Fetch(url) 
+    const res =  await Fetch(url, this.setting) 
     res.name = res.name.replaceAll('/', '-') // parse the / to not consider it with folder
     res.name = this.handleDuplication(res.name) // handle duplication
 
@@ -71,12 +74,13 @@ export default class Downloader {
     target.status.color = ''
     target.status.name = 'Processing'
 
-    await Download(target, false)
+    await Download(target, this.setting, false)
   }
 
   async download(toDownload: download.Download): Promise<void> {
     toDownload.date = new Date() // set the start date when we click download
-    await Download(toDownload, false)
+    this.store.add(toDownload.id, toDownload)
+    await Download(toDownload, this.setting, false)
   }
   
   // TODO: implement resume download
@@ -96,7 +100,7 @@ export default class Downloader {
     target.status.color = ''
     target.status.name = 'Processing'
 
-    await Download(target, true)
+    await Download(target, this.setting, true)
   }
 
   async stop(id: string) {
@@ -107,7 +111,7 @@ export default class Downloader {
     target.status.color = 'warning'
     target.status.name = 'Canceled'
     
-    await this.store.set(id, target)
+    await this.store.updateData(this.store.list)
     DeleteTempfile(target)
   }
 }

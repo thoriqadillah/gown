@@ -22,10 +22,11 @@ type Settings struct {
 	SaveLocation    string `json:"saveLocation"`
 	DataLocation    string `json:"dataLocation"`
 	DataFilename    string `json:"dataFilename"`
+	SettingFilename string `json:"settingFilename"`
 }
 
-func Default() Settings {
-	return Settings{
+func Default() *Settings {
+	return &Settings{
 		Themes:          Themes(),
 		Partsize:        DEFAULT_PART_SIZE,
 		Concurrency:     DEFAULT_CONCURRENCY,
@@ -34,6 +35,7 @@ func Default() Settings {
 		SaveLocation:    fmt.Sprintf("%s/Downloads/", os.Getenv("HOME")),
 		DataLocation:    fmt.Sprintf("%s/.gown/", os.Getenv("HOME")),
 		DataFilename:    fmt.Sprintf("%s/.gown/data.json", os.Getenv("HOME")),
+		SettingFilename: fmt.Sprintf("%s/.gown/setting.json", os.Getenv("HOME")),
 	}
 }
 

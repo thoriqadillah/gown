@@ -133,7 +133,8 @@ export namespace setting {
 	    }
 	}
 	export class Settings {
-	    themes: Theme;
+	    // Go type: Theme
+	    themes: any;
 	    partsize: number;
 	    concurrency: number;
 	    maxtries: number;
@@ -141,6 +142,7 @@ export namespace setting {
 	    saveLocation: string;
 	    dataLocation: string;
 	    dataFilename: string;
+	    settingFilename: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Settings(source);
@@ -148,7 +150,7 @@ export namespace setting {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.themes = this.convertValues(source["themes"], Theme);
+	        this.themes = this.convertValues(source["themes"], null);
 	        this.partsize = source["partsize"];
 	        this.concurrency = source["concurrency"];
 	        this.maxtries = source["maxtries"];
@@ -156,6 +158,7 @@ export namespace setting {
 	        this.saveLocation = source["saveLocation"];
 	        this.dataLocation = source["dataLocation"];
 	        this.dataFilename = source["dataFilename"];
+	        this.settingFilename = source["settingFilename"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

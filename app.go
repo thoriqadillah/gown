@@ -1,12 +1,12 @@
 package main
 
 import (
-	"changeme/gown/http"
-	"changeme/gown/http/chunk"
-	"changeme/gown/lib/factory/download"
-	"changeme/gown/setting"
-	"changeme/gown/storage"
-	"changeme/gown/worker"
+	"changeme/gown/lib/fs"
+	"changeme/gown/lib/worker"
+	"changeme/gown/modules/download"
+	"changeme/gown/modules/download/chunk"
+	"changeme/gown/modules/download/factory"
+	"changeme/gown/modules/setting"
 	"context"
 	"fmt"
 	"log"
@@ -19,48 +19,33 @@ import (
 
 // App struct
 type App struct {
-	ctx      context.Context
-	settings setting.Settings
-	storage  *storage.Storage
-	worker   worker.Pool
+	ctx    context.Context
+	worker worker.Pool
 }
 
 // NewApp creates a new App application struct
-func NewApp() *App {
-	storage, err := storage.New()
-	if err != nil {
-		log.Fatalf("Error opening storage: %v", err)
-	}
-
-	s := storage.CreateSetting()
-
+func NewApp(s *setting.Settings) *App {
 	worker, err := worker.New(s.Concurrency, s.SimmultanousNum)
 	if err != nil {
-		log.Fatalf("Error creating worker: %v", err)
+		log.Printf("Error creating worker: %v", err)
+	}
+
+	if err := os.MkdirAll(s.SaveLocation, os.ModePerm); err != nil {
+		log.Fatalf("Cannot creating the save location folder: %v", err)
+	}
+
+	if err := os.MkdirAll(s.DataLocation, os.ModePerm); err != nil {
+		log.Fatalf("Cannot creating the folder: %v", err)
 	}
 
 	return &App{
-		settings: s,
-		storage:  storage,
-		worker:   worker,
+		worker: worker,
 	}
 }
 
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
-	if err := os.MkdirAll(a.settings.SaveLocation, os.ModePerm); err != nil {
-		log.Fatalf("Cannot creating the save location folder: %v", err)
-	}
-
-	if err := os.MkdirAll(a.settings.DataLocation, os.ModePerm); err != nil {
-		log.Fatalf("Cannot creating the folder: %v", err)
-	}
-
-	if _, err := os.OpenFile(a.settings.DataFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644); err != nil {
-		log.Fatalf("Cannot creating the file: %v", err)
-	}
-
 	a.ctx = ctx
 	a.worker.Start()
 }
@@ -69,57 +54,36 @@ func (a *App) shutdown(ctx context.Context) {
 	a.worker.Stop()
 }
 
-func (a *App) Theme() setting.Theme {
-	return a.settings.Themes
-}
-
-func (a *App) Fetch(url string) (*download.Download, error) {
-	res, err := http.Fetch(url, &a.settings)
+func (a *App) Fetch(url string, setting *setting.Settings) (*download.Download, error) {
+	res, err := download.Fetch(url, setting)
 	if err != nil {
 		return nil, err
 	}
 
-	factory := download.NewFactory(res)
+	factory := factory.NewDownloadFactory(res)
 	data := factory.Create()
 
 	return &data, nil
 }
 
-func (a *App) InitData() download.Store {
-	return a.storage.GetAll()
-}
-
-func (a *App) DeleteFile(name string) error {
-	filename := filepath.Join(a.settings.SaveLocation, name)
-	return a.storage.DeleteFile(filename)
-}
-
-func (a *App) DeleteData(id string) error {
-	return a.storage.Delete(id)
-}
-
-func (a *App) Set(id string, data download.Download) {
-	a.storage.Set(id, data)
-}
-
-func (a *App) InitSetting() setting.Settings {
-	return a.settings
-}
-
-func (a *App) Download(toDownload *download.Download, resume bool) error {
+func (a *App) Download(toDownload *download.Download, setting *setting.Settings, resume bool) error {
 	canceled := false
 
 	var wg sync.WaitGroup
 
-	if err := a.storage.Set(toDownload.ID, *toDownload); err != nil {
-		return err
-	}
-
 	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)
 	for part := range chunks {
-		chunks[part] = chunk.New(a.ctx, toDownload, part, &a.settings, &wg)
+		chunks[part] = chunk.New(a.ctx, toDownload, part, setting, &wg)
+
 		if resume {
-			chunks[part].ResumeFrom(toDownload.Chunks[part].Downloaded)
+			//TODO: recheck if the resumed url is broken or not by comparing the size of the original download and newly fetched data
+			tempFile := filepath.Join(setting.SaveLocation, fmt.Sprintf("%s-%d", toDownload.ID, part))
+			f, err := os.Stat(tempFile)
+			if err != nil {
+				return err
+			}
+
+			chunks[part].ResumeFrom(f.Size())
 		}
 	}
 
@@ -141,7 +105,7 @@ func (a *App) Download(toDownload *download.Download, resume bool) error {
 	// combining
 	runtime.EventsEmit(a.ctx, "downloaded", toDownload.ID, false)
 
-	if err := storage.CreateFile(toDownload, &a.settings); err != nil {
+	if err := fs.CreateFile(toDownload, setting); err != nil {
 		log.Printf("Error saving file: %v", err)
 		return err
 	}
@@ -150,14 +114,6 @@ func (a *App) Download(toDownload *download.Download, resume bool) error {
 	runtime.EventsEmit(a.ctx, "downloaded", toDownload.ID, true)
 
 	return nil
-}
-
-func (a *App) DeleteTempfile(toDelete download.Download) {
-	for i := 0; i < toDelete.Metadata.Totalpart; i++ {
-		if err := os.Remove(filepath.Join(a.settings.SaveLocation, fmt.Sprintf("%s-%d", toDelete.ID, i))); err != nil {
-			log.Printf("Error deleting temp file of %s\n", toDelete.Name)
-		}
-	}
 }
 
 /*

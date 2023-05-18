@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { InitData, InitSetting } from '../wailsjs/go/main/App';
+import { GetAllData, GetSetting } from '../wailsjs/go/store/fileStore';
 import { useDownloads } from './store/downloads'
 import { useSettings } from './store/setting';
 import { useTheme } from 'vuetify/lib/framework.mjs';
@@ -12,8 +12,8 @@ const theme = useTheme()
 const store = useDownloads()
 const settings = useSettings()
 
-InitData().then(res => store.init(res))
-InitSetting().then(setting => settings.init(setting))
+GetAllData().then(res => store.setData(res))
+GetSetting().then(setting => settings.init(setting))
 </script>
 
 <template>

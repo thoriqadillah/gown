@@ -1,7 +1,7 @@
 package chunk
 
 import (
-	"changeme/gown/lib/factory/download"
+	"changeme/gown/modules/download"
 	"context"
 	"fmt"
 	"io"

@@ -32,7 +32,7 @@ EventsOn("total-bytes", async (...data) => {
   target.chunks[index].downloaded = downloaded
   target.chunks[index].progressbar = progressbar
   
-  await store.set(id, target)
+  await store.updateData(store.list)
 })
 
 EventsOn("downloaded", async (...data) => {
@@ -46,7 +46,7 @@ EventsOn("downloaded", async (...data) => {
     color: !combined ? 'info' : 'success'
   }
   
-  await store.set(id, target)
+  await store.updateData(store.list)
 })
 </script>
 
@@ -109,7 +109,7 @@ EventsOn("downloaded", async (...data) => {
                 <v-icon :icon="item.type.icon" :color="item.type.color" class="tw-opacity-70 tw-mr-2"></v-icon>
                 <span class="tw-text-sm tw-inline">{{ item.name }}</span> <!-- TODO: add mark if not resumable -->
               </div>
-              <actionable class="tw-w-20" v-if="item.progress != 100" :filename="item.name" :id="item.id" :statusname="item.status.name"/>
+              <actionable class="tw-w-20" :active="item.progress != 100" :filename="item.name" :id="item.id" :statusname="item.status.name"/>
             </div>
             <progress-bar v-if="item.progress != 100" :chunks="item.chunks" :totalpart="item.metadata.totalpart" />
           </td>

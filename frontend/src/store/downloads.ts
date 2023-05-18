@@ -1,16 +1,12 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { download } from "../../wailsjs/go/models";
-import { Set, DeleteData, DeleteFile } from '../../wailsjs/go/main/App'
+import { UpdateAllData, DeleteFile } from '../../wailsjs/go/store/fileStore'
+import { useAlert } from "./alert";
 
 export type Store = {
   [id: string]: download.Download
 }
-
-export type Entries<T> = {
-  [K in keyof T]: [K, T[K]];
-}[keyof T][];
-
 
 type DownloadType = 'image' | 'document' | 'video' | 'audio' | 'compressed'
 
@@ -24,6 +20,8 @@ export const useDownloads = defineStore('downloads', () => {
   const ascSize = ref(true)
   const ascTimeElapsed = ref(true)
 
+  const alert = useAlert()
+
   const filter = (query: string) => {
     if (query.length > 0 && Object.entries(list.value).length !== Object.entries(defaults.value).length) setDefault()
 
@@ -31,13 +29,13 @@ export const useDownloads = defineStore('downloads', () => {
       Object.entries(list.value).filter(([_, el]) => el.name.toLowerCase().includes(query.toLowerCase()))
     )
   }
-  const set = async (id: string, val: download.Download) => {
+  const add = async (id: string, val: download.Download) => {
     try {
       list.value[id] = val
       defaults.value[id] = val
-      await Set(id, val)
+      await UpdateAllData(list.value)
     } catch (error) {
-      console.log("Could not upsert the data", error);
+      alert.open(error as string, 'danger')
     }
   }
 
@@ -48,14 +46,24 @@ export const useDownloads = defineStore('downloads', () => {
       delete list.value[id]
       delete defaults.value[id]
       
-      await DeleteData(id)
-      if (fromdisk) await DeleteFile(target.name)
+      await UpdateAllData(list.value)
+      if (fromdisk) DeleteFile(target)
     } catch (error) {
-      console.log("Could not delete the data", error);
+      alert.open(error as string, 'danger')
     }
   }
 
-  const init = (data: Store) => {
+  const updateData = async (data: Store) => {
+    try {
+      list.value = data
+      defaults.value = data
+      await UpdateAllData(data)
+    } catch (error) {
+      alert.open(error as string, 'danger')
+    }
+  }
+
+  const setData = (data: Store) => {
     list.value = Object.fromEntries(
       Object.entries(data).sort(([,v1], [,v2]) => v1.date.localeCompare(v2.date))
     )
@@ -118,9 +126,10 @@ export const useDownloads = defineStore('downloads', () => {
     list,
     search,
     filter,
-    set,
+    add,
     remove,
-    init,
+    setData,
+    updateData,
     filterBy,
     setDefault,
     sortByName,
