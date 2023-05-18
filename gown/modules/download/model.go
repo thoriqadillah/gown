@@ -47,7 +47,7 @@ const (
 )
 
 type (
-	Lists map[string]Download
+	Store map[string]Download
 
 	Download struct {
 		ID          string         `json:"id"`

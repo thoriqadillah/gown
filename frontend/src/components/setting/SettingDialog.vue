@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useSettings } from '../../store/setting';
-import { DefaultSetting } from "../../../wailsjs/go/store/fileStore";
 
 const setting = useSettings()
 const activator = ref(false)
@@ -10,10 +9,6 @@ watch(activator, (val) => emit('dialog', val))
 const emit = defineEmits<{
   (emit: 'dialog', val: boolean): void
 }>()
-
-const saveLocation = ref(setting.saveLocation)
-const workers = ref(setting.concurrency)
-const maxtries = ref(setting.maxtries)
 
 </script>
 
@@ -26,7 +21,7 @@ const maxtries = ref(setting.maxtries)
 
       <div class="tw-mx-5 tw-mt-5 tw-mb-3">
         <p class="text-body-2 tw-mb-1">Download location</p>
-        <v-text-field  v-model="setting.saveLocation" color="primary" type="input" hint="Make sure it's a valid folder" density="compact" variant="outlined" label="Save location" single-line/>  
+        <v-text-field  v-model="setting.instance.saveLocation" color="primary" type="input" hint="Make sure it's a valid folder" density="compact" variant="outlined" label="Save location" single-line/>  
       </div>
       
       <div class="tw-mx-5 tw-flex">
@@ -35,7 +30,7 @@ const maxtries = ref(setting.maxtries)
           <p class="text-body-2 tw-opacity-70">Amount of workers to perform concurrent download</p>
         </div>
         <div class="tw-basis-1/4 tw-mt-1">
-          <v-text-field  v-model="setting.concurrency" color="primary" type="number" variant="outlined" label="Workers" single-line/>  
+          <v-text-field  v-model="setting.instance.concurrency" @update:model-value="val => setting.instance.concurrency = Number(val)" color="primary" type="number" variant="outlined" label="Workers" single-line/>  
         </div>
       </div>
 
@@ -45,7 +40,7 @@ const maxtries = ref(setting.maxtries)
           <p class="text-body-2 tw-opacity-70">Amount of retries when error happens while downloading</p>
         </div>
         <div class="tw-basis-1/4 tw-mt-1">
-          <v-text-field  v-model="setting.maxtries" color="primary" type="number" variant="outlined" label="Workers" single-line/>  
+          <v-text-field  v-model="setting.instance.maxtries" @update:model-value="val => setting.instance.maxtries = Number(val)" color="primary" type="number" variant="outlined" label="Workers" single-line/>  
         </div>
       </div>
 

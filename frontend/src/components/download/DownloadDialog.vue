@@ -7,9 +7,11 @@ import { download } from '../../../wailsjs/go/models';
 import Downloader from '../../services/downloader'
 import Dialog from '../../services/download-dialog'
 import { useAlert } from '../../store/alert';
+import { storeToRefs } from 'pinia';
 
 const store = useDownloads()
-const settings = useSettings()
+const setting = useSettings()
+const { saveLocation } = storeToRefs(setting)
 const alert = useAlert()
 
 const result = ref<download.Download>()
@@ -32,10 +34,10 @@ const validate = ref({
   max: (v: string) => v.trim().length < 256 || "File name must be below 256 characters"
 })
 
-watch([url, () => result.value?.name, settings], () => {
+watch([url, () => result.value?.name, saveLocation], () => {
   urlHasError.value = url.value.trim().length === 0
   urlError.value = urlHasError.value ? urlError.value : ''
-  savelocationHasError.value = settings.saveLocation.trim().length === 0
+  savelocationHasError.value = saveLocation.value.trim().length === 0
   filenameHasError.value = result.value!.name.trim().length === 0 || result.value!.name.trim().length > 256
 })
 
@@ -76,7 +78,7 @@ async function execute() {
       <div v-else-if="onFile || !loaded" class="tw-flex tw-items-center">
         <div class="tw-basis-9/12">
           <v-text-field color="primary" :rules="[validate.required, validate.max]" v-model="result!.name" label="File name" append-inner-icon="mdi-file-document-edit" type="input" hint="File name" class="tw-px-3 tw-pt-3 -tw-mb-2" single-line density="compact" variant="outlined" v-on:keyup.enter="execute()" />
-          <v-text-field color="primary" :rules="[validate.required]" :model-value="settings.saveLocation" label="Save location" append-inner-icon="mdi-folder" type="input" hint="Save location" class="tw-p-3" single-line density="compact" variant="outlined" v-on:keyup.enter="execute()" />
+          <v-text-field color="primary" :rules="[validate.required]" v-model="saveLocation" @update:model-value="val => setting.instance.saveLocation = val" label="Save location" append-inner-icon="mdi-folder" type="input" hint="Save location" class="tw-p-3" single-line density="compact" variant="outlined" v-on:keyup.enter="execute()" />
         </div>
         <div class="tw-basis-3/12 tw-text-center tw-pr-2 -tw-mt-5">
           <v-icon :icon="result!.type.icon" :color="result!.type.color"></v-icon>

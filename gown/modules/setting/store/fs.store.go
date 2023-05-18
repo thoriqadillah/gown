@@ -19,7 +19,7 @@ func (s *fileStore) GetSetting() *setting.Settings {
 	init := setting.Default()
 
 	filename := fmt.Sprintf("%s/setting.json", init.DataLocation)
-	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Printf("Could not create or open the setting file: %v", err)
 	}
@@ -33,7 +33,7 @@ func (s *fileStore) GetSetting() *setting.Settings {
 
 func (s *fileStore) UpdateSetting(data *setting.Settings) error {
 	filename := fmt.Sprintf("%s/setting.json", data.DataLocation)
-	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("could not open the setting file: %v", err)
 	}

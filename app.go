@@ -19,9 +19,8 @@ import (
 
 // App struct
 type App struct {
-	ctx      context.Context
-	settings *setting.Settings
-	worker   worker.Pool
+	ctx    context.Context
+	worker worker.Pool
 }
 
 // NewApp creates a new App application struct
@@ -31,28 +30,22 @@ func NewApp(s *setting.Settings) *App {
 		log.Printf("Error creating worker: %v", err)
 	}
 
+	if err := os.MkdirAll(s.SaveLocation, os.ModePerm); err != nil {
+		log.Fatalf("Cannot creating the save location folder: %v", err)
+	}
+
+	if err := os.MkdirAll(s.DataLocation, os.ModePerm); err != nil {
+		log.Fatalf("Cannot creating the folder: %v", err)
+	}
+
 	return &App{
-		settings: s,
-		worker:   worker,
+		worker: worker,
 	}
 }
 
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
-	if _, err := os.Stat(a.settings.SaveLocation); err != nil {
-		if err := os.MkdirAll(a.settings.SaveLocation, os.ModePerm); err != nil {
-			log.Fatalf("Cannot creating the save location folder: %v", err)
-		}
-	}
-
-	if _, err := os.Stat(a.settings.DataLocation); err != nil {
-		err := os.MkdirAll(a.settings.DataLocation, os.ModePerm)
-		if err != nil {
-			log.Fatalf("Cannot creating the folder: %v", err)
-		}
-	}
-
 	a.ctx = ctx
 	a.worker.Start()
 }
@@ -61,8 +54,8 @@ func (a *App) shutdown(ctx context.Context) {
 	a.worker.Stop()
 }
 
-func (a *App) Fetch(url string) (*download.Download, error) {
-	res, err := download.Fetch(url, a.settings)
+func (a *App) Fetch(url string, setting *setting.Settings) (*download.Download, error) {
+	res, err := download.Fetch(url, setting)
 	if err != nil {
 		return nil, err
 	}
@@ -73,18 +66,18 @@ func (a *App) Fetch(url string) (*download.Download, error) {
 	return &data, nil
 }
 
-func (a *App) Download(toDownload *download.Download, resume bool) error {
+func (a *App) Download(toDownload *download.Download, setting *setting.Settings, resume bool) error {
 	canceled := false
 
 	var wg sync.WaitGroup
 
 	chunks := make([]*chunk.Chunk, toDownload.Metadata.Totalpart)
 	for part := range chunks {
-		chunks[part] = chunk.New(a.ctx, toDownload, part, a.settings, &wg)
+		chunks[part] = chunk.New(a.ctx, toDownload, part, setting, &wg)
 
 		if resume {
 			//TODO: recheck if the resumed url is broken or not by comparing the size of the original download and newly fetched data
-			tempFile := filepath.Join(a.settings.SaveLocation, fmt.Sprintf("%s-%d", toDownload.ID, part))
+			tempFile := filepath.Join(setting.SaveLocation, fmt.Sprintf("%s-%d", toDownload.ID, part))
 			f, err := os.Stat(tempFile)
 			if err != nil {
 				return err
@@ -112,7 +105,7 @@ func (a *App) Download(toDownload *download.Download, resume bool) error {
 	// combining
 	runtime.EventsEmit(a.ctx, "downloaded", toDownload.ID, false)
 
-	if err := fs.CreateFile(toDownload, a.settings); err != nil {
+	if err := fs.CreateFile(toDownload, setting); err != nil {
 		log.Printf("Error saving file: %v", err)
 		return err
 	}

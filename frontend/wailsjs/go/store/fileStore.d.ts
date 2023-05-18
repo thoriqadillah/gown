@@ -8,10 +8,10 @@ export function DeleteFile(arg1:download.Download):Promise<void>;
 
 export function DeleteTempfile(arg1:download.Download):Promise<void>;
 
-export function GetAllData():Promise<download.Lists>;
+export function GetAllData():Promise<download.Store>;
 
 export function GetSetting():Promise<any>;
 
-export function UpdateAllData(arg1:download.Lists):Promise<void>;
+export function UpdateAllData(arg1:download.Store):Promise<void>;
 
 export function UpdateSetting(arg1:any):Promise<void>;

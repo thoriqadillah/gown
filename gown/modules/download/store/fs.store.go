@@ -25,22 +25,21 @@ func NewFileStore(s *setting.Settings) Store {
 	}
 }
 
-func (s *fileStore) GetAllData() (list download.Lists) {
+func (s *fileStore) GetAllData() (store download.Store) {
 	jsonFile, err := os.Open(s.s.DataFilename)
 	if err != nil {
 		log.Printf("Error opening data file: %v", err)
-		return download.Lists{}
+		return download.Store{}
 	}
 
-	var lists download.Lists
-	if err := json.NewDecoder(jsonFile).Decode(&lists); err != nil {
-		return download.Lists{}
+	if err := json.NewDecoder(jsonFile).Decode(&store); err != nil {
+		return download.Store{}
 	}
 
-	return lists
+	return store
 }
 
-func (s *fileStore) UpdateAllData(data download.Lists) error {
+func (s *fileStore) UpdateAllData(data download.Store) error {
 	jsonFile, err := os.OpenFile(s.s.DataFilename, os.O_WRONLY, 0644)
 	if err != nil {
 		log.Printf("Error opening data file: %v", err)
