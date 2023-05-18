@@ -9,7 +9,6 @@ import Dialog from '../../services/download-dialog'
 import { useAlert } from '../../store/alert';
 import { storeToRefs } from 'pinia';
 
-const store = useDownloads()
 const setting = useSettings()
 const { saveLocation } = storeToRefs(setting)
 const alert = useAlert()
@@ -64,7 +63,6 @@ async function execute() {
   try {
     dialog.close()
     downloader.download(result.value!)
-    store.add(result.value!.id, result.value!)
   } catch (error) {
     alert.open(error as string)
   }
