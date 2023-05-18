@@ -142,6 +142,7 @@ export namespace setting {
 	    saveLocation: string;
 	    dataLocation: string;
 	    dataFilename: string;
+	    settingFilename: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Settings(source);
@@ -157,6 +158,7 @@ export namespace setting {
 	        this.saveLocation = source["saveLocation"];
 	        this.dataLocation = source["dataLocation"];
 	        this.dataFilename = source["dataFilename"];
+	        this.settingFilename = source["settingFilename"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

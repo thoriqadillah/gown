@@ -16,19 +16,18 @@ func NewFileStore() Store {
 }
 
 func (s *fileStore) GetSetting() *setting.Settings {
-	init := setting.Default()
+	setting := setting.Default()
 
-	filename := fmt.Sprintf("%s/setting.json", init.DataLocation)
-	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(setting.SettingFilename, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Printf("Could not create or open the setting file: %v", err)
 	}
 
-	if err := json.NewDecoder(file).Decode(&init); err != nil {
+	if err := json.NewDecoder(file).Decode(&setting); err != nil {
 		log.Printf("Could not decode setting file: %v", err)
 	}
 
-	return init
+	return setting
 }
 
 func (s *fileStore) UpdateSetting(data *setting.Settings) error {

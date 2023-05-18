@@ -1,7 +1,6 @@
 package download
 
 import (
-	"net/http"
 	"time"
 )
 
@@ -82,10 +81,5 @@ type (
 		Name  string `json:"name"`
 		Icon  string `json:"icon"`
 		Color string `json:"color"`
-	}
-
-	DownloadData struct {
-		Response *http.Response `json:"response"`
-		Data     Download       `json:"data"`
 	}
 )
